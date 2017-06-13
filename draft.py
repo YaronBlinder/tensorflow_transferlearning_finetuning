@@ -8,8 +8,10 @@ import argparse
 import tensorflow as tf
 import numpy as np
 
-
 N_classes = 5
+batch_size = 32
+N_layers_to_finetune = 33
+N_epochs = 50
 
 # def choose_net(network):
 #     MAP = {
@@ -36,81 +38,108 @@ N_classes = 5
 #     # return MAP[network](input_image), input_image
 
 
+def count_files(directory):
+    """Get number of files by searching directory recursively"""
+    if not os.path.exists(directory):
+        return 0
+    cnt = 0
+    for r, dirs, files in os.walk(directory):
+        for dr in dirs:
+            cnt += len(glob.glob(os.path.join(r, dr + "/*")))
+        return cnt
+
+
+def get_callbacks():
+    """
+    :return: A list of `keras.callbacks.Callback` instances to apply during training.
+
+    """
+    return [
+        callbacks.ModelCheckpoint(
+            model_checkpoint, monitor='val_acc', verbose=1, save_best_only=True),
+        callbacks.EarlyStopping(monitor='val_loss', patience=12, verbose=1),
+        callbacks.ReduceLROnPlateau(
+            monitor='val_loss', factor=0.6, patience=2, verbose=1),
+        # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+        callbacks.TensorBoard(log_dir='/.logs', histogram_freq=4,
+                              write_graph=True, write_images=True)
+    ]
+
+
 def generate_bn_features(train_path, test_path):
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
-    batch_size = 16
+    model = ResNet50(weights='imagenet', include_top=False,
+                     input_tensor=Input(shape=(224, 224, 3)))
+    batch_size = batch_size
+
     datagen = ImageDataGenerator(
-     rescale=1./255,
-     )
+        rescale=1. / 255,
+        horizontal_flip=True,
+    )
+
     train_generator = datagen.flow_from_directory(
-            train_path,
-            target_size=(224, 224),
-            batch_size=batch_size,
-            class_mode='sparse',
-            shuffle=True)
-    bottleneck_features_train = model.predict_generator(train_generator, 1)
-    # save the output as a Numpy array
+        directory=train_path,
+        target_size=(224, 224),
+        batch_size=batch_size,
+        class_mode='sparse',
+        shuffle=True)
+    bottleneck_features_train = model.predict_generator(
+        train_generator, steps=2, verbose=1)
     np.save('weights/bottleneck_features_train', bottleneck_features_train)
     np.save('weights/train_classes', train_generator.classes)
 
     test_generator = datagen.flow_from_directory(
-            test_path,
-            target_size=(224, 224),
-            batch_size=batch_size,
-            class_mode='sparse',  # this means our generator will only yield batches of data, no labels
-            shuffle=True)
-    bottleneck_features_validation = model.predict_generator(test_generator, 1)
-    np.save('weights/bottleneck_features_validation', bottleneck_features_validation)
+        directory=test_path,
+        target_size=(224, 224),
+        batch_size=batch_size,
+        class_mode='sparse',
+        shuffle=True)
+    bottleneck_features_test = model.predict_generator(
+        test_generator, steps=2, verbose=1)
+    np.save('weights/bottleneck_features_test', bottleneck_features_test)
     np.save('weights/test_classes', test_generator.classes)
 
+
 def train_top_only(model, weights_path, train_path):
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
+    # model = ResNet50(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
     train_data = np.load('weights/bottleneck_features_train.npy')
-    # the features were saved in order, so recreating the labels is easy
-    train_labels = np.array([0] * 1000 + [1] * 1000) #Make sure this matches
-    validation_data = np.load('weights/bottleneck_features_validation.npy')
-    validation_labels = np.array([0] * 400 + [1] * 400)
+    train_labels = np.load('weights/train_classes.npy')
+    test_data = np.load('weights/bottleneck_features_test.npy')
+    test_labels = np.load('weights/test_classes.npy')
+
     top_model = Sequential()
     top_model.add(Flatten(input_shape=model.output_shape[1:]))
     top_model.add(Dense(256, activation='relu', name='fcc_0'))
     top_model.add(Dropout(0.5))
-    # top_model.add(Dense(1, activation='sigmoid'))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
-
     print('Model bottom loaded.')
 
-    model.compile(optimizer='SGD',
+    top_model.compile(
+        optimizer='SGD',
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
-    model.fit(train_data, train_labels,
+    top_model.fit(
+        x=train_data,
+        y=train_labels,
         epochs=50,
         batch_size=batch_size,
-        validation_data=(validation_data, validation_labels))
+        validation_data=(test_data, test_labels),
+        callbacks=get_callbacks(),
+        verbose=1)
 
-    model.save_weights('weights/bottleneck_fc_model.h5')
+    top_model.save_weights(weights_path)
     print('Model top trained.')
 
-
-    # train_datagen = ImageDataGenerator(
-    #     zoom_range=0.1,
-    #     horizontal_flip=True)
-    #
-    # train_generator = train_datagen.flow_from_directory(
-    #     train_path,
-    #     target_size=(224, 224))
-    #
-    # model.fit_generator(
-    #     train_generator,
-    #     epochs=50,
-    #     batch_size=batch_size,
-    #     validation_data=(validation_data, validation_labels))
-
-    return(model)
+    # return(model)
 
 
-def fine_tune(model, weights_path, train_path):
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
+def fine_tune(model, weights_path, train_path, test_path):
+
+    N_train_samples = count_files(train_path)
+    N_test_samples = count_files(test_path)
+
+    model = ResNet50(weights='imagenet', include_top=False,
+                     input_tensor=Input(shape=(224, 224, 3)))
     print('Model bottom loaded.')
     top_model = Sequential()
     top_model.add(Flatten(input_shape=model.output_shape[1:]))
@@ -120,51 +149,102 @@ def fine_tune(model, weights_path, train_path):
     top_model.load_weights(weights_path)
     model.add(top_model)
 
-    #TODO: Decide how many layers to freeze/unfreeze and retrain
-    # return(model)
-    return
+    for layer in model.layers[-N_layers_to_finetune:]:
+        layer.trainable = False
+
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+                  metrics=['accuracy'])
+
+    datagen = ImageDataGenerator(
+        rescale=1. / 255,
+        horizontal_flip=True,
+    )
+
+    train_generator = datagen.flow_from_directory(
+        train_path,
+        target_size=(224, 224),
+        batch_size=batch_size,
+        class_mode='sparse',
+        shuffle=True)
+
+    test_generator = datagen.flow_from_directory(
+        test_path,
+        target_size=(224, 224),
+        batch_size=batch_size,
+        class_mode='sparse',
+        shuffle=True)
+
+    # fine-tune the model
+    model.fit_generator(
+        generator=train_generator,
+        samples_per_epoch=N_train_samples,
+        epochs=N_epochs,
+        validation_data=test_generator,
+        nb_val_samples=N_test_samples,
+        verbose=1,
+        callbacks=get_callbacks()
+    )
+
+    # (generator=train_generator,
+    #                     steps_per_epoch=math.ceil(len(generator.index) / batch_size),
+    #                     epochs=nb_epoch,
+    #                     verbose=1,
+    #                     callbacks=get_callbacks(),
+    #                     validation_data=valid_generator,
+    #                     validation_steps=math.ceil(len(generator.valid_index) / batch_size),
+    #                     class_weight=class_weights,
+    #                     workers=4,
+    #                     pickle_safe=True)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
-    parser.add_argument('--group', default='F_Adult', help='The network eg. resnet50')
-    # parser.add_argument('--train_path', default='train', help='Path to training set')
-    # parser.add_argument('--test_path', default='test', help='Path to test set')
-    parser.add_argument('--generate_bn_features', action='store_true',  help='Flag to generate bottleneck features')
-    parser.add_argument('--train_top_only', action='store_true',  help='Flag to retrain')
-    parser.add_argument('--finetune', action='store_true', help='Flag to fine tune')
-    parser.add_argument('--weights', default='weights/bottleneck_fc_model.h5', help='Path for top layer weights')
+    parser.add_argument('--model', default='resnet50',
+                        help='The network eg. resnet50')
+    parser.add_argument('--group', default='F_Adult', help='Demographic group')
+    parser.add_argument('--generate_bn_features', action='store_true',
+                        help='Flag to generate bottleneck features')
+    parser.add_argument('--train_top_only',
+                        action='store_true',  help='Flag to retrain')
+    parser.add_argument('--finetune', action='store_true',
+                        help='Flag to fine tune')
+    parser.add_argument(
+        '--weights', default='weights/bottleneck_fc_model.h5', help='Path for top layer weights')
 
+    # Some commented potential arguments
     # parser.add_argument('--img_path', default='misc/sample.jpg',  help='Path to input image')
-    # parser.add_argument('--evaluate', default=False,  help='Flag to evaluate over full validation set')
-    # parser.add_argument('--img_list',  help='Path to the validation image list')
-    # parser.add_argument('--gt_labels', help='Path to the ground truth validation labels')
+    # parser.add_argument('--evaluate', default=False,  help='Flag to evaluate over full test set')
+    # parser.add_argument('--img_list',  help='Path to the test image list')
+    # parser.add_argument('--gt_labels', help='Path to the ground truth test labels')
 
     args = parser.parse_args()
+
     # valid = validate_arguments(args)
     # net, inp_im  = choose_net(args.network)
 
-    train_path = 'data/'+args.group+'/train/'
-    test_path = 'data/'+args.group+'/test/'
+    train_path = 'data/' + args.group + '/train/'
+    test_path = 'data/' + args.group + '/test/'
     if args.generate_bn_features:
         generate_bn_features(train_path, test_path)
 
     if args.train_top_only:
-        #TODO: check if weights file exists
         train_top_only(args.model, args.weights, train_path)
 
     elif args.finetune:
-        #TODO: check if weights file exists
-        print('Fine tuning:')
-        fine_tune(args.model, args.weights, train_path)
+        if not os.path.exists(args.weights):
+            print('Weights file not found! Train top first.')
+        else:
+            print('Fine tuning:')
+            fine_tune(args.model, args.weights, train_path, test_path)
     else:
-        print('No retraining selected.') #TODO: include in validation step
+        print('No retraining selected.')
 
     # if args.evaluate:
     #     evaluate(net, args.img_list, inp_im, args.gt_labels, args.network)
     # else:
     #     predict(net, args.img_path, inp_im, args.network)
+
 
 if __name__ == '__main__':
     main()
