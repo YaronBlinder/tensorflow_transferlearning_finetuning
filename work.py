@@ -38,10 +38,12 @@ N_epochs = 50
 #
 #     # return MAP[network](input_image), input_image
 
+
 def one_hot_labels(labels):
     one_hot = np.zeros((labels.size, N_classes))
-    one_hot[np.arange(labels.size),labels] = 1
+    one_hot[np.arange(labels.size), labels] = 1
     return one_hot
+
 
 def count_files(directory):
     """Get number of files by searching directory recursively"""
@@ -66,7 +68,7 @@ def get_callbacks():
         callbacks.ReduceLROnPlateau(
             monitor='val_loss', factor=0.6, patience=2, verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-        callbacks.TensorBoard(log_dir='/.logs', histogram_freq=4,
+        callbacks.TensorBoard(log_dir='/TBlog', histogram_freq=4,
                               write_graph=True, write_images=True)
     ]
 
@@ -76,8 +78,8 @@ def generate_bn_features(train_path, test_path):
                      input_tensor=Input(shape=(224, 224, 3)))
     batch_size = Batch_size
     # n_steps = 1
-    n_steps_train = np.ceil(count_files(train_path)/batch_size)
-    n_steps_test = np.ceil(count_files(test_path)/batch_size)
+    n_steps_train = np.ceil(count_files(train_path) / batch_size)
+    n_steps_test = np.ceil(count_files(test_path) / batch_size)
 
     datagen = ImageDataGenerator(
         rescale=1. / 255,
@@ -108,7 +110,8 @@ def generate_bn_features(train_path, test_path):
 
 
 def train_top_only(model, weights_path, train_path):
-    model = ResNet50(weights='imagenet', include_top=False, input_tensor=Input(shape=(224,224,3)))
+    model = ResNet50(weights='imagenet', include_top=False,
+                     input_tensor=Input(shape=(224, 224, 3)))
     train_data = np.load('weights/bottleneck_features_train.npy')
     train_labels = one_hot_labels(np.load('weights/train_classes.npy'))
     test_data = np.load('weights/bottleneck_features_test.npy')
