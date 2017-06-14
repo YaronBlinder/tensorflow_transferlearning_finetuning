@@ -74,8 +74,8 @@ def generate_bn_features(train_path, test_path):
     model = ResNet50(weights='imagenet', include_top=False,
                      input_tensor=Input(shape=(224, 224, 3)))
     batch_size = Batch_size
-    n_steps = 1
-    # n_steps = count_files(train_path)/batch_size
+    # n_steps = 1
+    n_steps = count_files(train_path)/batch_size
 
     datagen = ImageDataGenerator(
         rescale=1. / 255,
