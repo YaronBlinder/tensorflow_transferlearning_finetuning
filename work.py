@@ -92,7 +92,7 @@ def generate_bn_features(train_path, test_path):
         target_size=(224, 224),
         batch_size=Batch_size,
         class_mode='categorical',
-        shuffle=True)
+        shuffle=False)
     bottleneck_features_train = model.predict_generator(
         train_generator, steps=n_steps_train, verbose=1)
     np.save('weights/bottleneck_features_train', bottleneck_features_train)
@@ -103,7 +103,7 @@ def generate_bn_features(train_path, test_path):
         target_size=(224, 224),
         batch_size=Batch_size,
         class_mode='categorical',
-        shuffle=True)
+        shuffle=False)
     bottleneck_features_test = model.predict_generator(
         test_generator, steps=n_steps_test, verbose=1)
     np.save('weights/bottleneck_features_test', bottleneck_features_test)
@@ -159,7 +159,6 @@ def fine_tune(model, weights_path, train_path, test_path):
     top_model.add(Dropout(0.5))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
     top_model.load_weights(weights_path)
-    # model.add(top_model)
     model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
     for layer in model.layers[-N_layers_to_finetune:]:
@@ -173,7 +172,6 @@ def fine_tune(model, weights_path, train_path, test_path):
 
     datagen = ImageDataGenerator(
         rescale=1. / 255,
-        horizontal_flip=True,
     )
 
     train_generator = datagen.flow_from_directory(
@@ -191,16 +189,6 @@ def fine_tune(model, weights_path, train_path, test_path):
         shuffle=True)
 
     # fine-tune the model
-    # model.fit_generator(
-    #     generator=train_generator,
-    #     samples_per_epoch=N_train_samples,
-    #     epochs=N_epochs,
-    #     validation_data=test_generator,
-    #     nb_val_samples=N_test_samples,
-    #     verbose=1,
-    #     callbacks=get_callbacks()
-    # )
-
     model.fit_generator(
         generator=train_generator,
         steps_per_epoch=np.ceil(N_train_samples/Batch_size),
@@ -211,7 +199,7 @@ def fine_tune(model, weights_path, train_path, test_path):
         validation_steps=np.ceil(N_test_samples/Batch_size),
         class_weight=None,
         max_q_size=10,
-        workers=1,
+        workers=4,
         pickle_safe=False,
         initial_epoch=0)
 
