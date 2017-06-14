@@ -68,7 +68,7 @@ def get_callbacks():
         callbacks.ReduceLROnPlateau(
             monitor='val_loss', factor=0.6, patience=2, verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-        callbacks.TensorBoard(log_dir='/TBlog', histogram_freq=4,
+        callbacks.TensorBoard(log_dir='TBlog/', histogram_freq=4,
                               write_graph=True, write_images=True)
     ]
 
