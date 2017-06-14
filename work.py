@@ -4,6 +4,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers, callbacks
 from keras.models import Sequential
 from keras.layers import Input, Dropout, Flatten, Dense
+from keras.models import Model
 import argparse
 import tensorflow as tf
 import numpy as np
@@ -149,16 +150,17 @@ def fine_tune(model, weights_path, train_path, test_path):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
-    model = ResNet50(weights='imagenet', include_top=False,
+    base_model = ResNet50(weights='imagenet', include_top=False,
                      input_tensor=Input(shape=(224, 224, 3)))
     print('Model bottom loaded.')
     top_model = Sequential()
-    top_model.add(Flatten(input_shape=model.output_shape[1:]))
+    top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
     top_model.add(Dense(256, activation='relu', name='fcc_0'))
     top_model.add(Dropout(0.5))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
     top_model.load_weights(weights_path)
-    model.add(top_model)
+    # model.add(top_model)
+    model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
 
     for layer in model.layers[-N_layers_to_finetune:]:
         layer.trainable = False
@@ -189,15 +191,30 @@ def fine_tune(model, weights_path, train_path, test_path):
         shuffle=True)
 
     # fine-tune the model
+    # model.fit_generator(
+    #     generator=train_generator,
+    #     samples_per_epoch=N_train_samples,
+    #     epochs=N_epochs,
+    #     validation_data=test_generator,
+    #     nb_val_samples=N_test_samples,
+    #     verbose=1,
+    #     callbacks=get_callbacks()
+    # )
+
     model.fit_generator(
         generator=train_generator,
-        samples_per_epoch=N_train_samples,
+        steps_per_epoch=np.ceil(N_train_samples/Batch_size),
         epochs=N_epochs,
-        validation_data=test_generator,
-        nb_val_samples=N_test_samples,
         verbose=1,
-        callbacks=get_callbacks()
-    )
+        callbacks=get_callbacks(),
+        validation_data=test_generator,
+        validation_steps=np.ceil(N_test_samples/Batch_size),
+        class_weight=None,
+        max_q_size=10,
+        workers=1,
+        pickle_safe=False,
+        initial_epoch=0)
+
 
     # (generator=train_generator,
     #                     steps_per_epoch=math.ceil(len(generator.index) / batch_size),
