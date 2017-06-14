@@ -154,14 +154,16 @@ def fine_tune(model, weights_path, train_path, test_path):
     print('Model bottom loaded.')
     top_model = Sequential()
     top_model.add(Flatten(input_shape=model.output_shape[1:]))
-    top_model.add(Dense(256, activation='relu'))
+    top_model.add(Dense(256, activation='relu', name='fcc_0'))
     top_model.add(Dropout(0.5))
-    top_model.add(Dense(1, activation='sigmoid'))
+    top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
     top_model.load_weights(weights_path)
     model.add(top_model)
 
     for layer in model.layers[-N_layers_to_finetune:]:
         layer.trainable = False
+    for layer in model.layers[:-N_layers_to_finetune]:
+        layer.trainable = True
 
     model.compile(loss='categorical_crossentropy',
                   optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
