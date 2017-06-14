@@ -88,10 +88,8 @@ def generate_bn_features(train_path, test_path):
         batch_size=Batch_size,
         class_mode='categorical',
         shuffle=True)
-    # bottleneck_features_train = model.predict_generator(
-    #     train_generator, steps=n_steps, verbose=1)
     bottleneck_features_train = model.predict_generator(
-        train_generator, verbose=1)
+        train_generator, steps=n_steps, verbose=1)
     np.save('weights/bottleneck_features_train', bottleneck_features_train)
     np.save('weights/train_classes', train_generator.classes[:n_steps*Batch_size])
 
@@ -101,10 +99,8 @@ def generate_bn_features(train_path, test_path):
         batch_size=Batch_size,
         class_mode='categorical',
         shuffle=True)
-    # bottleneck_features_test = model.predict_generator(
-    #     test_generator, steps=n_steps, verbose=1)
     bottleneck_features_test = model.predict_generator(
-        test_generator, verbose=1)
+        test_generator, steps=n_steps, verbose=1)
     np.save('weights/bottleneck_features_test', bottleneck_features_test)
     np.save('weights/test_classes', test_generator.classes[:n_steps*Batch_size])
 
