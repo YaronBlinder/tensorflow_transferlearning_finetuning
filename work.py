@@ -78,13 +78,11 @@ def generate_bn_features(train_path, test_path):
     model = ResNet50(weights='imagenet', include_top=False,
                      input_tensor=Input(shape=(224, 224, 3)))
     batch_size = Batch_size
-    # n_steps = 1
     n_steps_train = np.ceil(count_files(train_path) / batch_size)
     n_steps_test = np.ceil(count_files(test_path) / batch_size)
 
     datagen = ImageDataGenerator(
         rescale=1. / 255,
-        # horizontal_flip=True,
     )
 
     train_generator = datagen.flow_from_directory(
@@ -94,7 +92,10 @@ def generate_bn_features(train_path, test_path):
         class_mode='categorical',
         shuffle=False)
     bottleneck_features_train = model.predict_generator(
-        train_generator, steps=n_steps_train, verbose=1)
+        generator=train_generator,
+        steps=n_steps_train,
+        workers=4,
+        verbose=1)
     np.save('weights/bottleneck_features_train', bottleneck_features_train)
     np.save('weights/train_classes', train_generator.classes)
 
@@ -105,7 +106,10 @@ def generate_bn_features(train_path, test_path):
         class_mode='categorical',
         shuffle=False)
     bottleneck_features_test = model.predict_generator(
-        test_generator, steps=n_steps_test, verbose=1)
+        generator=test_generator,
+        steps=n_steps_test,
+        workers=4,
+        verbose=1)
     np.save('weights/bottleneck_features_test', bottleneck_features_test)
     np.save('weights/test_classes', test_generator.classes)
 
@@ -142,7 +146,9 @@ def train_top_only(model, weights_path, train_path):
     top_model.save_weights(weights_path)
     print('Model top trained.')
 
-    # return(model)
+
+# def train_top_from_scratch(model, weights_path, train_path):
+    
 
 
 def fine_tune(model, weights_path, train_path, test_path):
