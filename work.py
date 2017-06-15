@@ -16,6 +16,29 @@ def get_base_model(model):
     if model == 'resnet50':
         base_model = ResNet50(weights='imagenet', include_top=False,
          input_tensor=Input(shape=(224, 224, 3)))
+    # elif model == 'vgg16':
+    #     base_model = applications.vgg16.VGG16(
+    #         weights='imagenet',
+    #         include_top=False,
+    #         input_tensor=input_tensor)
+
+
+    # elif model == 'vgg19':
+    #     base_model = applications.vgg19.VGG19(
+    #         weights='imagenet',
+    #         include_top=False,
+    #         input_tensor=input_tensor)
+    # elif model == 'inception_v3':
+    #     base_model = applications.inception_v3.InceptionV3(
+    #         weights='imagenet',
+    #         include_top=False,
+    #         input_tensor=input_tensor)
+    # elif model == 'xception':
+    #     base_model = applications.xception.Xception(
+    #         weights='imagenet',
+    #         include_top=False,
+    #         input_tensor=input_tensor)
+
     else:
         assert False, '{} is not an implemented model!'.format(model)
 
@@ -37,35 +60,44 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks():
+def get_callbacks(model, group):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
+    path = 'models/' + group + '/' + model + '/'
     return [
-        # callbacks.ModelCheckpoint(
-        #     model_checkpoint, monitor='val_acc', verbose=1, save_best_only=True),
-        callbacks.EarlyStopping(monitor='val_loss', patience=12, verbose=1),
+        callbacks.ModelCheckpoint(
+            filepath=path+'weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+            monitor='val_acc',
+            verbose=1,
+            save_best_only=True),
+        callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=12,
+            verbose=1),
         callbacks.ReduceLROnPlateau(
-            monitor='val_loss', factor=0.6, patience=2, verbose=1),
+            monitor='val_loss',
+            factor=0.6,
+            patience=2,
+            verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-        callbacks.TensorBoard(log_dir='TBlog/', histogram_freq=4,
-                              write_graph=True, write_images=True)
+        callbacks.TensorBoard(
+            log_dir='TBlog/',
+            histogram_freq=4,
+            write_graph=True,
+            write_images=True)
     ]
 
 
 def generate_bn_features(model, group):
-
     model = get_base_model(model)
     train_path = 'data/train_224x224/' + group + '/train/'
     test_path = 'data/train_224x224/' + group + '/test/'
     batch_size = Batch_size
     n_steps_train = np.ceil(count_files(train_path) / batch_size)
     n_steps_test = np.ceil(count_files(test_path) / batch_size)
-
-    datagen = ImageDataGenerator(
-        rescale=1. / 255,
-    )
+    datagen = ImageDataGenerator(rescale=1./255)
 
     train_generator = datagen.flow_from_directory(
         directory=train_path,
@@ -99,7 +131,6 @@ def generate_bn_features(model, group):
 
 
 def train_top_only(model, group):
-
     base_model = get_base_model(model)
     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
     train_data = np.load('models/' + group + '/bottleneck_features_train.npy')
@@ -196,7 +227,7 @@ def fine_tune(model, group):
         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_epochs,
         verbose=1,
-        callbacks=get_callbacks(),
+        callbacks=get_callbacks(model, group),
         validation_data=test_generator,
         validation_steps=np.ceil(N_test_samples / Batch_size),
         class_weight=None,
