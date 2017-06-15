@@ -11,9 +11,13 @@ import numpy as np
 import glob
 
 N_classes = 5
-Batch_size = 128
-N_layers_to_finetune = 33
-N_epochs = 50
+
+def get_base_model(model):
+    if model == 'resnet50':
+        base_model = ResNet50(weights='imagenet', include_top=False,
+         input_tensor=Input(shape=(224, 224, 3)))
+    else:
+        assert False, '{} is not an implemented model!'.format(model)
 
 
 def one_hot_labels(labels):
@@ -52,12 +56,9 @@ def get_callbacks():
 
 def generate_bn_features(model, group):
 
-    if model == 'resnet50':
-        model = ResNet50(weights='imagenet', include_top=False,
-                         input_tensor=Input(shape=(224, 224, 3)))
-        train_path = 'data/train_224x224/' + group + '/train/'
-        test_path = 'data/train_224x224/' + group + '/test/'
-
+    model = get_base_model(model)
+    train_path = 'data/train_224x224/' + group + '/train/'
+    test_path = 'data/train_224x224/' + group + '/test/'
     batch_size = Batch_size
     n_steps_train = np.ceil(count_files(train_path) / batch_size)
     n_steps_test = np.ceil(count_files(test_path) / batch_size)
@@ -98,10 +99,8 @@ def generate_bn_features(model, group):
 
 
 def train_top_only(model, group):
-    if model == 'resnet50':
-        model = ResNet50(weights='imagenet', include_top=False,
-         input_tensor=Input(shape=(224, 224, 3)))
 
+    base_model = get_base_model(model)
     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
     train_data = np.load('models/' + group + '/bottleneck_features_train.npy')
     train_labels = one_hot_labels(
@@ -111,7 +110,7 @@ def train_top_only(model, group):
         np.load('models/' + group + '/test_classes.npy'))
 
     top_model = Sequential()
-    top_model.add(Flatten(input_shape=model.output_shape[1:]))
+    top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
     top_model.add(Dense(256, activation='relu', name='fcc_0'))
     top_model.add(Dropout(0.5))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
@@ -122,10 +121,14 @@ def train_top_only(model, group):
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
+    print('Please input top training parameters: \n')
+    Batch_size = input('Batch size: ')
+    N_Epochs = input('Epochs:')
+
     top_model.fit(
         x=train_data,
         y=train_labels,
-        epochs=50,
+        epochs=N_Epochs,
         batch_size=Batch_size,
         validation_data=(test_data, test_labels),
         callbacks=get_callbacks(),
@@ -144,8 +147,7 @@ def fine_tune(model, group):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
-    base_model = ResNet50(weights='imagenet', include_top=False,
-                          input_tensor=Input(shape=(224, 224, 3)))
+    base_model = get_base_model(model)
     print('Model bottom loaded.')
     top_model = Sequential()
     top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
@@ -153,15 +155,20 @@ def fine_tune(model, group):
     top_model.add(Dropout(0.5))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
     top_model.load_weights(weights_path)
-    model = Model(inputs=base_model.input,
+    full_model = Model(inputs=base_model.input,
                   outputs=top_model(base_model.output))
 
-    for layer in model.layers[-N_layers_to_finetune:]:
+    print('Please input fine-tuning parameters: \n')
+    Batch_size = input('Batch size: ')
+    N_Epochs = input('Epochs:')
+    N_layers_to_finetune = input('# of last layers to finetune:')
+
+    for layer in full_model.layers[-N_layers_to_finetune:]:
         layer.trainable = False
-    for layer in model.layers[:-N_layers_to_finetune]:
+    for layer in full_model.layers[:-N_layers_to_finetune]:
         layer.trainable = True
 
-    model.compile(loss='categorical_crossentropy',
+    full_model.compile(loss='categorical_crossentropy',
                   optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
                   metrics=['accuracy'])
 
@@ -184,7 +191,7 @@ def fine_tune(model, group):
         shuffle=True)
 
     # fine-tune the model
-    model.fit_generator(
+    full_model.fit_generator(
         generator=train_generator,
         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_epochs,
