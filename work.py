@@ -11,33 +11,9 @@ import numpy as np
 import glob
 
 N_classes = 5
-Batch_size = 32
+Batch_size = 128
 N_layers_to_finetune = 33
 N_epochs = 50
-
-# def choose_net(network):
-#     MAP = {
-#         # 'vggf'     : vggf,
-#         # 'caffenet' : caffenet,
-#         # 'vgg16'    : vgg16,
-#         # 'vgg19'    : vgg19,
-#         # 'googlenet': googlenet,
-#         'resnet50' : resnet50,
-#         # 'resnet152': resnet152,
-#         # 'inceptionv3': inceptionv3,
-#     }
-#
-#     if network == 'caffenet':
-#         size = 227
-#     elif network == 'inceptionv3':
-#         size = 299
-#     else:
-#         size = 224
-#
-#     #placeholder to pass image
-#     input_image = tf.placeholder(shape=[None, size, size, 3],dtype='float32', name='input_image')
-#
-#     # return MAP[network](input_image), input_image
 
 
 def one_hot_labels(labels):
@@ -148,7 +124,6 @@ def train_top_only(model, weights_path, train_path):
 
 
 # def train_top_from_scratch(model, weights_path, train_path):
-    
 
 
 def fine_tune(model, weights_path, train_path, test_path):
@@ -157,7 +132,7 @@ def fine_tune(model, weights_path, train_path, test_path):
     N_test_samples = count_files(test_path)
 
     base_model = ResNet50(weights='imagenet', include_top=False,
-                     input_tensor=Input(shape=(224, 224, 3)))
+                          input_tensor=Input(shape=(224, 224, 3)))
     print('Model bottom loaded.')
     top_model = Sequential()
     top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
@@ -165,7 +140,8 @@ def fine_tune(model, weights_path, train_path, test_path):
     top_model.add(Dropout(0.5))
     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
     top_model.load_weights(weights_path)
-    model = Model(inputs=base_model.input, outputs=top_model(base_model.output))
+    model = Model(inputs=base_model.input,
+                  outputs=top_model(base_model.output))
 
     for layer in model.layers[-N_layers_to_finetune:]:
         layer.trainable = False
@@ -197,29 +173,17 @@ def fine_tune(model, weights_path, train_path, test_path):
     # fine-tune the model
     model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples/Batch_size),
+        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_epochs,
         verbose=1,
         callbacks=get_callbacks(),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples/Batch_size),
+        validation_steps=np.ceil(N_test_samples / Batch_size),
         class_weight=None,
         max_q_size=10,
         workers=4,
         pickle_safe=False,
         initial_epoch=0)
-
-
-    # (generator=train_generator,
-    #                     steps_per_epoch=math.ceil(len(generator.index) / batch_size),
-    #                     epochs=nb_epoch,
-    #                     verbose=1,
-    #                     callbacks=get_callbacks(),
-    #                     validation_data=valid_generator,
-    #                     validation_steps=math.ceil(len(generator.valid_index) / batch_size),
-    #                     class_weight=class_weights,
-    #                     workers=4,
-    #                     pickle_safe=True)
 
 
 def main():
@@ -236,16 +200,7 @@ def main():
     parser.add_argument(
         '--weights', default='weights/bottleneck_fc_model.h5', help='Path for top layer weights')
 
-    # Some commented potential arguments
-    # parser.add_argument('--img_path', default='misc/sample.jpg',  help='Path to input image')
-    # parser.add_argument('--evaluate', default=False,  help='Flag to evaluate over full test set')
-    # parser.add_argument('--img_list',  help='Path to the test image list')
-    # parser.add_argument('--gt_labels', help='Path to the ground truth test labels')
-
     args = parser.parse_args()
-
-    # valid = validate_arguments(args)
-    # net, inp_im  = choose_net(args.network)
 
     train_path = 'data/train_224x224/' + args.group + '/train/'
     test_path = 'data/train_224x224/' + args.group + '/test/'
@@ -266,11 +221,6 @@ def main():
             fine_tune(args.model, args.weights, train_path, test_path)
     else:
         print('No retraining selected.')
-
-    # if args.evaluate:
-    #     evaluate(net, args.img_list, inp_im, args.gt_labels, args.network)
-    # else:
-    #     predict(net, args.img_path, inp_im, args.network)
 
 
 if __name__ == '__main__':
