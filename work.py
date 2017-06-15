@@ -50,9 +50,14 @@ def get_callbacks():
     ]
 
 
-def generate_bn_features(train_path, test_path):
-    model = ResNet50(weights='imagenet', include_top=False,
-                     input_tensor=Input(shape=(224, 224, 3)))
+def generate_bn_features(model, group):
+
+    if model == 'resnet50':
+        model = ResNet50(weights='imagenet', include_top=False,
+                         input_tensor=Input(shape=(224, 224, 3)))
+        train_path = 'data/train_224x224/' + group + '/train/'
+        test_path = 'data/train_224x224/' + group + '/test/'
+
     batch_size = Batch_size
     n_steps_train = np.ceil(count_files(train_path) / batch_size)
     n_steps_test = np.ceil(count_files(test_path) / batch_size)
@@ -72,8 +77,9 @@ def generate_bn_features(train_path, test_path):
         steps=n_steps_train,
         workers=4,
         verbose=1)
-    np.save('weights/bottleneck_features_train', bottleneck_features_train)
-    np.save('weights/train_classes', train_generator.classes)
+    np.save('models/' + group + '/bottleneck_features_train',
+            bottleneck_features_train)
+    np.save('models/' + group + '/train_classes', train_generator.classes)
 
     test_generator = datagen.flow_from_directory(
         directory=test_path,
@@ -86,17 +92,23 @@ def generate_bn_features(train_path, test_path):
         steps=n_steps_test,
         workers=4,
         verbose=1)
-    np.save('weights/bottleneck_features_test', bottleneck_features_test)
-    np.save('weights/test_classes', test_generator.classes)
+    np.save('models/' + group + '/bottleneck_features_test',
+            bottleneck_features_test)
+    np.save('models/' + group + '/test_classes', test_generator.classes)
 
 
-def train_top_only(model, weights_path, train_path):
-    model = ResNet50(weights='imagenet', include_top=False,
-                     input_tensor=Input(shape=(224, 224, 3)))
-    train_data = np.load('weights/bottleneck_features_train.npy')
-    train_labels = one_hot_labels(np.load('weights/train_classes.npy'))
-    test_data = np.load('weights/bottleneck_features_test.npy')
-    test_labels = one_hot_labels(np.load('weights/test_classes.npy'))
+def train_top_only(model, group):
+    if model == 'resnet50':
+        model = ResNet50(weights='imagenet', include_top=False,
+         input_tensor=Input(shape=(224, 224, 3)))
+
+    weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
+    train_data = np.load('models/' + group + '/bottleneck_features_train.npy')
+    train_labels = one_hot_labels(
+        np.load('models/' + group + '/train_classes.npy'))
+    test_data = np.load('models/' + group + '/bottleneck_features_test.npy')
+    test_labels = one_hot_labels(
+        np.load('models/' + group + '/test_classes.npy'))
 
     top_model = Sequential()
     top_model.add(Flatten(input_shape=model.output_shape[1:]))
@@ -123,10 +135,11 @@ def train_top_only(model, weights_path, train_path):
     print('Model top trained.')
 
 
-# def train_top_from_scratch(model, weights_path, train_path):
+def fine_tune(model, group):
 
-
-def fine_tune(model, weights_path, train_path, test_path):
+    weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
+    train_path = 'data/train_224x224/' + group + '/train/'
+    test_path = 'data/train_224x224/' + group + '/test/'
 
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
@@ -197,29 +210,30 @@ def main():
                         action='store_true',  help='Flag to retrain')
     parser.add_argument('--finetune', action='store_true',
                         help='Flag to fine tune')
-    parser.add_argument(
-        '--weights', default='weights/bottleneck_fc_model.h5', help='Path for top layer weights')
 
     args = parser.parse_args()
+    group, model = args.group, args.model
+    model_path = 'models/' + group + '/' + model + '/'
+    bn_features_path = model_path + 'bottleneck_features_train.npy'
+    weights_path = model_path + 'bottleneck_fc_model.h5'
 
-    train_path = 'data/train_224x224/' + args.group + '/train/'
-    test_path = 'data/train_224x224/' + args.group + '/test/'
     if args.generate_bn_features:
-        generate_bn_features(train_path, test_path)
+        generate_bn_features(model, group)
 
     if args.train_top_only:
-        if not os.path.exists('weights/bottleneck_features_train.npy'):
+        if not os.path.exists(bn_features_path):
             print('Bottleneck features file not found! Generate first.')
         else:
-            train_top_only(args.model, args.weights, train_path)
+            train_top_only(model, group)
 
-    elif args.finetune:
-        if not os.path.exists(args.weights):
+    if args.finetune:
+        if not os.path.exists(weights_path):
             print('Weights file not found! Train top first.')
         else:
             print('Fine tuning:')
-            fine_tune(args.model, args.weights, train_path, test_path)
-    else:
+            fine_tune(model, group)
+
+    if not args.train_top_only and not args.fine_tune:
         print('No retraining selected.')
 
 
