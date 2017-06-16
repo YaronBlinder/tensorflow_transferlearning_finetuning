@@ -282,15 +282,15 @@ def train_top(model, group):
 
     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
     full_model.save_weights(weights_path)
-        print('Model top trained.')
+    print('Model top trained.')
 
-    def fine_tune(model, group, weights_path):
-    # at this point, the top layers are well trained and we can start fine-tuning
-    # convolutional layers from inception V3. We will freeze the bottom N layers
-    # and train the remaining top layers.
+def fine_tune(model, group, weights_path):
+# at this point, the top layers are well trained and we can start fine-tuning
+# convolutional layers from inception V3. We will freeze the bottom N layers
+# and train the remaining top layers.
 
-    # let's visualize layer names and layer indices to see how many layers
-    # we should freeze:
+# let's visualize layer names and layer indices to see how many layers
+# we should freeze:
     train_path = 'data/train_224x224/' + group + '/train/'
     test_path = 'data/train_224x224/' + group + '/test/'
     N_train_samples = count_files(train_path)
