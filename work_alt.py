@@ -255,7 +255,8 @@ def train(model, group, N_layers_to_finetune):
     print('Training top...')
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+        # steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+        steps=np.ceil(N_train_samples / Batch_size),
         epochs=N_Epochs,
         verbose=1,
         callbacks=get_callbacks(model, group),
@@ -298,7 +299,8 @@ def train(model, group, N_layers_to_finetune):
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+        # steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+        steps=np.ceil(N_train_samples / Batch_size),
         epochs=N_Epochs,
         verbose=1,
         callbacks=get_callbacks(model, group),
