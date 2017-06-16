@@ -313,13 +313,13 @@ def fine_tune(model, group, weights_path):
     full_model.load_weights(weights_path)
     print('model weights loaded.')
 
-    for i, layer in enumerate(base_model.layers):
+    for i, layer in enumerate(full_model.layers):
         print(i, layer.name)
 
         # we chose to train the top 2 inception blocks, i.e. we will freeze
         # the first 249 layers and unfreeze the rest:
 
-    N_layers_to_finetune = input('# of last layers to finetune:')
+    N_layers_to_finetune = int(input('# of last layers to finetune:'))
     for layer in full_model.layers[-N_layers_to_finetune:]:
        layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
