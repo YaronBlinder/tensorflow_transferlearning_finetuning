@@ -202,7 +202,9 @@ def train(model, group, N_layers_to_finetune):
     base_model = get_base_model(model)
     # add a global spatial average pooling layer
     x = base_model.output
-    x = GlobalAveragePooling2D(data_format='channels_last')(x)
+    # New version (uncomment once cuda 8, keras 2, tf 1.2 installed:
+    # x = GlobalAveragePooling2D(data_format='channels_last')(x)
+    x = GlobalAveragePooling2D()(x)
     # let's add a fully-connected layer
     x = Dense(1024, activation='relu', name='fcc_0')(x)
     # x = Dropout(0.5)(x)
