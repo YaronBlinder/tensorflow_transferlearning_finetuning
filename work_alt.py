@@ -253,18 +253,30 @@ def train(model, group, N_layers_to_finetune):
 
     # train the model on the new data for a few epochs
     print('Training top...')
+    # full_model.fit_generator(
+    #     generator=train_generator,
+    #     steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+    #     epochs=N_Epochs,
+    #     verbose=1,
+    #     callbacks=get_callbacks(model, group),
+    #     validation_data=test_generator,
+    #     validation_steps=np.ceil(N_test_samples / Batch_size),
+    #     class_weight=None,
+    #     max_q_size=10,
+    #     workers=4,
+    #     pickle_safe=False,
+    #     initial_epoch=0)
     full_model.fit_generator(
         generator=train_generator,
-        # steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        steps=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        samples_per_epoch=N_train_samples,
+        nb_epoch=N_Epochs,
         verbose=1,
         callbacks=get_callbacks(model, group),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        nb_val_samples=N_test_samples,
         class_weight=None,
         max_q_size=10,
-        workers=4,
+        nb_worker=4,
         pickle_safe=False,
         initial_epoch=0)
 
@@ -297,18 +309,30 @@ def train(model, group, N_layers_to_finetune):
     # we train our model again (this time fine-tuning the top 2 inception blocks
     # alongside the top Dense layers
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
+    # full_model.fit_generator(
+    #     generator=train_generator,
+    #     steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+    #     epochs=N_Epochs,
+    #     verbose=1,
+    #     callbacks=get_callbacks(model, group),
+    #     validation_data=test_generator,
+    #     validation_steps=np.ceil(N_test_samples / Batch_size),
+    #     class_weight=None,
+    #     max_q_size=10,
+    #     workers=4,
+    #     pickle_safe=False,
+    #     initial_epoch=0)
     full_model.fit_generator(
         generator=train_generator,
-        # steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        steps=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        samples_per_epoch=N_train_samples,
+        nb_epoch=N_Epochs,
         verbose=1,
         callbacks=get_callbacks(model, group),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        nb_val_samples=N_test_samples,
         class_weight=None,
         max_q_size=10,
-        workers=4,
+        nb_worker=4,
         pickle_safe=False,
         initial_epoch=0)
 #
