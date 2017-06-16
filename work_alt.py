@@ -194,7 +194,7 @@ def get_callbacks(model, group):
 #     print('Model top trained.')
 
 
-def train(model, group):
+def train(model, group, N_layers_to_finetune):
     # create the base pre-trained model
     print('Loading model...')
     base_model = get_base_model(model)
