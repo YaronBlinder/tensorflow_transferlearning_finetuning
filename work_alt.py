@@ -227,7 +227,9 @@ def train(model, group, N_layers_to_finetune):
     N_test_samples = count_files(test_path)
 
     datagen = ImageDataGenerator(
-        rescale=1. / 255,
+        rescale=1./255,
+        samplewise_center=True,
+        samplewise_std_normalization=True
     )
 
     train_generator = datagen.flow_from_directory(
@@ -243,8 +245,6 @@ def train(model, group, N_layers_to_finetune):
         batch_size=Batch_size,
         class_mode='categorical',
         shuffle=True)
-
-
 
     # train the model on the new data for a few epochs
     print('Training top...')
@@ -277,14 +277,14 @@ def train(model, group, N_layers_to_finetune):
     # N_layers_to_finetune = input('# of last layers to finetune [14,24,34]:')
 
     for layer in full_model.layers[-N_layers_to_finetune:]:
-       layer.trainable = False
-    for layer in full_model.layers[:-N_layers_to_finetune]:
        layer.trainable = True
+    for layer in full_model.layers[:-N_layers_to_finetune]:
+       layer.trainable = False
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
     full_model.compile(
-        optimizer=SGD(lr=0.0001, momentum=0.9),
+        optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
@@ -378,13 +378,6 @@ def main():
     parser.add_argument('--model', default='resnet50',
                         help='The network eg. resnet50')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
-    # parser.add_argument('--generate_bn_features', action='store_true',
-    #                     help='Flag to generate bottleneck features')
-
-    # parser.add_argument('--train_top_only',
-    #                     action='store_true',  help='Flag to retrain')
-    # parser.add_argument('--finetune', action='store_true',
-    #                     help='Flag to fine tune')
 
     args = parser.parse_args()
 
@@ -395,26 +388,6 @@ def main():
 
     N_layers_to_finetune = int(input('# of last layers to finetune [14,24,34]:'))
     train(args.model, args.group, N_layers_to_finetune)
-
-
-    # if args.generate_bn_features:
-    #     generate_bn_features(model, group)
-
-    # if args.train_top_only:
-    #     if not os.path.exists(bn_features_path):
-    #         print('Bottleneck features file not found! Generate first.')
-    #     else:
-    #         train_top_only(model, group)
-    #
-    # if args.finetune:
-    #     if not os.path.exists(weights_path):
-    #         print('Weights file not found! Train top first.')
-    #     else:
-    #         print('Fine tuning:')
-    #         fine_tune(model, group)
-    #
-    # if not args.train_top_only and not args.fine_tune:
-    #     print('No retraining selected.')
 
 
 if __name__ == '__main__':
