@@ -211,7 +211,8 @@ def train(model, group, N_layers_to_finetune):
     # and a logistic layer -- let's say we have 200 classes
     predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
     # this is the model we will train
-    full_model = Model(inputs=base_model.input, outputs=predictions)
+    # full_model = Model(inputs=base_model.input, outputs=predictions)
+    full_model = Model(input=base_model.input, output=predictions)
     # first: train only the top layers (which were randomly initialized)
     # i.e. freeze all convolutional InceptionV3 layers
     for layer in base_model.layers:
