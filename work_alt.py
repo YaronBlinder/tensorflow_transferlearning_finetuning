@@ -95,7 +95,7 @@ def get_callbacks(model, group):
     path = 'models/' + group + '/' + model + '/'
     return [
         callbacks.ModelCheckpoint(
-            filepath=path+'weights.{epoch:02d}-{val_loss:.2f}.hdf5',
+            filepath=path+'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
