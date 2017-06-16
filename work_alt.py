@@ -196,7 +196,7 @@ def get_callbacks(model, group):
 #     print('Model top trained.')
 
 
-def train(model, group, N_layers_to_finetune):
+def train_top(model, group):
     # create the base pre-trained model
     print('Loading model...')
     base_model = get_base_model(model)
@@ -280,20 +280,46 @@ def train(model, group, N_layers_to_finetune):
         pickle_safe=False,
         initial_epoch=0)
 
+    weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
+    full_model.save_weights(weights_path)
+        print('Model top trained.')
+
+    def fine_tune(model, group, weights_path):
     # at this point, the top layers are well trained and we can start fine-tuning
     # convolutional layers from inception V3. We will freeze the bottom N layers
     # and train the remaining top layers.
 
     # let's visualize layer names and layer indices to see how many layers
     # we should freeze:
-    # for i, layer in enumerate(base_model.layers):
-    #    print(i, layer.name)
+    train_path = 'data/train_224x224/' + group + '/train/'
+    test_path = 'data/train_224x224/' + group + '/test/'
+    N_train_samples = count_files(train_path)
+    N_test_samples = count_files(test_path)
 
-    # we chose to train the top 2 inception blocks, i.e. we will freeze
-    # the first 249 layers and unfreeze the rest:
+    print('Loading model...')
+    base_model = get_base_model(model)
+    x = base_model.output
+    # New version (uncomment once cuda 8, keras 2, tf 1.2 installed:
+    # x = GlobalAveragePooling2D(data_format='channels_last')(x)
+    x = GlobalAveragePooling2D()(x)
+    # let's add a fully-connected layer
+    x = Dense(1024, activation='relu', name='fcc_0')(x)
+    # x = Dropout(0.5)(x)
+    # and a logistic layer -- let's say we have 200 classes
+    predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
+    # this is the model we will train
+    # full_model = Model(inputs=base_model.input, outputs=predictions)
+    full_model = Model(input=base_model.input, output=predictions)
+    full_model.load_weights(weights_path)
+    print('model weights loaded.')
 
-    # N_layers_to_finetune = input('# of last layers to finetune [14,24,34]:')
+    for i, layer in enumerate(base_model.layers):
+        print(i, layer.name)
 
+        # we chose to train the top 2 inception blocks, i.e. we will freeze
+        # the first 249 layers and unfreeze the rest:
+
+    N_layers_to_finetune = input('# of last layers to finetune:')
     for layer in full_model.layers[-N_layers_to_finetune:]:
        layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
@@ -409,16 +435,20 @@ def main():
     parser.add_argument('--model', default='resnet50',
                         help='The network eg. resnet50')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
+    parser.add_argument('--train_top', action='store_true', help='train top')
+    parser.add_argument('--finetune', action='store_true', help='finetune')
+
 
     args = parser.parse_args()
 
     assert_validity(args)
     model_path = prep_dir(args)
-    bn_features_path = model_path + 'bottleneck_features_train.npy'
     weights_path = model_path + 'bottleneck_fc_model.h5'
 
-    N_layers_to_finetune = int(input('# of last layers to finetune [14,24,34]:'))
-    train(args.model, args.group, N_layers_to_finetune)
+    if args.train_top:
+        train_top(args.model, args.group)
+    if args.finetune:
+        fine_tune(args.model, args.group, weights_path)
 
 
 if __name__ == '__main__':
