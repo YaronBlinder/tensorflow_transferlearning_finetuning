@@ -58,9 +58,10 @@ def get_base_model(model):
     #         weights='imagenet',
     #         include_top=False,
     #         input_tensor=input_tensor)
-
     else:
-        assert False, '{} is not an implemented model!'.format(model)
+        print('You should not be here')
+
+    return base_model
 
 
 def one_hot_labels(labels):
