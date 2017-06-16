@@ -271,7 +271,7 @@ def train(model, group):
     # we chose to train the top 2 inception blocks, i.e. we will freeze
     # the first 249 layers and unfreeze the rest:
 
-    N_layers_to_finetune = input('# of last layers to finetune [14,24,34]:')
+    # N_layers_to_finetune = input('# of last layers to finetune [14,24,34]:')
 
     for layer in full_model.layers[-N_layers_to_finetune:]:
        layer.trainable = False
@@ -387,7 +387,8 @@ def main():
     bn_features_path = model_path + 'bottleneck_features_train.npy'
     weights_path = model_path + 'bottleneck_fc_model.h5'
 
-    train(args.model, args.group)
+    N_layers_to_finetune = int(input('# of last layers to finetune [14,24,34]:'))
+    train(args.model, args.group, N_layers_to_finetune)
 
 
     # if args.generate_bn_features:
