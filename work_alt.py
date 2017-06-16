@@ -213,7 +213,10 @@ def train(model, group, N_layers_to_finetune):
     for layer in base_model.layers:
         layer.trainable = False
     # compile the model (should be done *after* setting layers to non-trainable)
-    full_model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+    full_model.compile(
+        optimizer='rmsprop',
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
 
     train_path = 'data/train_224x224/' + group + '/train/'
     test_path = 'data/train_224x224/' + group + '/test/'
@@ -280,7 +283,10 @@ def train(model, group, N_layers_to_finetune):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    full_model.compile(optimizer=SGD(lr=0.0001, momentum=0.9), loss='categorical_crossentropy')
+    full_model.compile(
+        optimizer=SGD(lr=0.0001, momentum=0.9),
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
 
     # we train our model again (this time fine-tuning the top 2 inception blocks
     # alongside the top Dense layers
