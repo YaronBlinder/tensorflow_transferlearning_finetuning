@@ -10,7 +10,7 @@ import tensorflow as tf
 import numpy as np
 import glob
 
-N_classes = 5
+N_classes = 3
 
 def assert_validity(args):
     valid_models = ['resnet50', 'vgg16', 'vgg19', 'inception_v3', 'xception']
