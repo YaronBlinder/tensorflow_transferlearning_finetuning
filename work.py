@@ -1,5 +1,5 @@
 import os
-from keras.applications import ResNet50
+from keras.applications import ResNet50, VGG16
 from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers, callbacks
 from keras.models import Sequential
@@ -12,16 +12,36 @@ import glob
 
 N_classes = 5
 
+def assert_validity(args):
+    valid_models = ['resnet50', 'vgg16', 'vgg19', 'inception_v3', 'xception']
+    valid_groups = [
+        'F_Ped', 'M_ped',
+        'F_YA', 'M_YA',
+        'F_Adult', 'M_Adult',
+        'F_Ger', 'M_Ger']
+
+    assert args.model in valid_models, '{} not a valid model name'.format(args.model)
+    assert args.group in valid_groups, '{} not a valid group'.format(args.group)
+
+
+def prep_dir(args):
+    group, model = args.group, args.model
+    model_path = 'models/' + group + '/' + model + '/'
+    if not os.path.exists(model_path):
+        os.mkdir(model_path)
+    return model_path
+
+
 def get_base_model(model):
     if model == 'resnet50':
         base_model = ResNet50(weights='imagenet', include_top=False,
          input_tensor=Input(shape=(224, 224, 3)))
-    # elif model == 'vgg16':
-    #     base_model = applications.vgg16.VGG16(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
 
+    elif model == 'vgg16':
+        base_model = VGG16(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=Input(shape=(224, 224, 3)))
 
     # elif model == 'vgg19':
     #     base_model = applications.vgg19.VGG19(
@@ -250,8 +270,9 @@ def main():
                         help='Flag to fine tune')
 
     args = parser.parse_args()
-    group, model = args.group, args.model
-    model_path = 'models/' + group + '/' + model + '/'
+
+    assert_validity(args)
+    model_path = prep_dir(args)
     bn_features_path = model_path + 'bottleneck_features_train.npy'
     weights_path = model_path + 'bottleneck_fc_model.h5'
 
