@@ -196,27 +196,25 @@ def get_callbacks(model, group):
 #     print('Model top trained.')
 
 
+def get_model(model, freeze_base=False):
+    base_model = get_base_model(model)
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    x = Dense(1024, activation='relu', name='fcc_0')(x)
+    x = Dropout(0.5)(x)
+    x = Dense(1024, activation='relu', name='fcc_1')(x)
+    predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
+    full_model = Model(input=base_model.input, output=predictions)
+    if freeze_base:
+        for layer in base_model.layers:
+            layer.trainable = False
+    return full_model
+
+
 def train_top(model, group):
     # create the base pre-trained model
     print('Loading model...')
-    base_model = get_base_model(model)
-    # add a global spatial average pooling layer
-    x = base_model.output
-    # New version (uncomment once cuda 8, keras 2, tf 1.2 installed:
-    # x = GlobalAveragePooling2D(data_format='channels_last')(x)
-    x = GlobalAveragePooling2D()(x)
-    # let's add a fully-connected layer
-    x = Dense(1024, activation='relu', name='fcc_0')(x)
-    # x = Dropout(0.5)(x)
-    # and a logistic layer -- let's say we have 200 classes
-    predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
-    # this is the model we will train
-    # full_model = Model(inputs=base_model.input, outputs=predictions)
-    full_model = Model(input=base_model.input, output=predictions)
-    # first: train only the top layers (which were randomly initialized)
-    # i.e. freeze all convolutional InceptionV3 layers
-    for layer in base_model.layers:
-        layer.trainable = False
+    full_model = get_model(model)
     # compile the model (should be done *after* setting layers to non-trainable)
     full_model.compile(
         optimizer='rmsprop',
@@ -299,7 +297,7 @@ def fine_tune(model, group, weights_path):
     print('Please input top training parameters: \n')
     Batch_size = int(input('Batch size: '))
     N_Epochs = int(input('Epochs:'))
-    
+
     datagen = ImageDataGenerator(
         rescale=1./255,
         samplewise_center=True,
@@ -321,19 +319,7 @@ def fine_tune(model, group, weights_path):
         shuffle=True)
 
     print('Loading model...')
-    base_model = get_base_model(model)
-    x = base_model.output
-    # New version (uncomment once cuda 8, keras 2, tf 1.2 installed:
-    # x = GlobalAveragePooling2D(data_format='channels_last')(x)
-    x = GlobalAveragePooling2D()(x)
-    # let's add a fully-connected layer
-    x = Dense(1024, activation='relu', name='fcc_0')(x)
-    # x = Dropout(0.5)(x)
-    # and a logistic layer -- let's say we have 200 classes
-    predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
-    # this is the model we will train
-    # full_model = Model(inputs=base_model.input, outputs=predictions)
-    full_model = Model(input=base_model.input, output=predictions)
+    full_model = get_model(model)
     full_model.load_weights(weights_path)
     print('model weights loaded.')
 
@@ -385,73 +371,6 @@ def fine_tune(model, group, weights_path):
         nb_worker=4,
         pickle_safe=False,
         initial_epoch=0)
-#
-# def fine_tune(model, group):
-#
-#     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
-    # train_path = 'data/train_224x224/' + group + '/train/'
-    # test_path = 'data/train_224x224/' + group + '/test/'
-#
-    # N_train_samples = count_files(train_path)
-    # N_test_samples = count_files(test_path)
-#
-#     base_model = get_base_model(model)
-#     print('Model bottom loaded.')
-#     top_model = Sequential()
-#     top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
-#     top_model.add(Dense(256, activation='relu', name='fcc_0'))
-#     top_model.add(Dropout(0.5))
-#     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
-#     top_model.load_weights(weights_path)
-#     full_model = Model(inputs=base_model.input,
-#                   outputs=top_model(base_model.output))
-#
-#     print('Please input fine-tuning parameters: \n')
-#     Batch_size = input('Batch size: ')
-#     N_Epochs = input('Epochs:')
-#     N_layers_to_finetune = input('# of last layers to finetune:')
-#
-#     for layer in full_model.layers[-N_layers_to_finetune:]:
-#         layer.trainable = False
-#     for layer in full_model.layers[:-N_layers_to_finetune]:
-#         layer.trainable = True
-#
-#     full_model.compile(loss='categorical_crossentropy',
-#                   optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-#                   metrics=['accuracy'])
-#
-#     datagen = ImageDataGenerator(
-#         rescale=1. / 255,
-#     )
-#
-#     train_generator = datagen.flow_from_directory(
-#         train_path,
-#         target_size=(224, 224),
-#         batch_size=Batch_size,
-#         class_mode='categorical',
-#         shuffle=True)
-#
-#     test_generator = datagen.flow_from_directory(
-#         test_path,
-#         target_size=(224, 224),
-#         batch_size=Batch_size,
-#         class_mode='categorical',
-#         shuffle=True)
-#
-#     # fine-tune the model
-#     full_model.fit_generator(
-#         generator=train_generator,
-#         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-#         epochs=N_epochs,
-#         verbose=1,
-#         callbacks=get_callbacks(model, group),
-#         validation_data=test_generator,
-#         validation_steps=np.ceil(N_test_samples / Batch_size),
-#         class_weight=None,
-#         max_q_size=10,
-#         workers=4,
-#         pickle_safe=False,
-#         initial_epoch=0)
 
 
 def main():
