@@ -118,44 +118,44 @@ def get_callbacks(model, group):
 
 
 # def generate_bn_features(model, group):
-    model = get_base_model(model)
-    train_path = 'data/train_224x224/' + group + '/train/'
-    test_path = 'data/train_224x224/' + group + '/test/'
-    batch_size = Batch_size
-    n_steps_train = np.ceil(count_files(train_path) / batch_size)
-    n_steps_test = np.ceil(count_files(test_path) / batch_size)
-    datagen = ImageDataGenerator(rescale=1./255)
-
-    train_generator = datagen.flow_from_directory(
-        directory=train_path,
-        target_size=(224, 224),
-        batch_size=Batch_size,
-        class_mode='categorical',
-        shuffle=False)
-    bottleneck_features_train = model.predict_generator(
-        generator=train_generator,
-        steps=n_steps_train,
-        workers=4,
-        verbose=1)
-    np.save('models/' + group + '/bottleneck_features_train',
-            bottleneck_features_train)
-    np.save('models/' + group + '/train_classes', train_generator.classes)
-
-    test_generator = datagen.flow_from_directory(
-        directory=test_path,
-        target_size=(224, 224),
-        batch_size=Batch_size,
-        class_mode='categorical',
-        shuffle=False)
-    bottleneck_features_test = model.predict_generator(
-        generator=test_generator,
-        steps=n_steps_test,
-        workers=4,
-        verbose=1)
-    np.save('models/' + group + '/bottleneck_features_test',
-            bottleneck_features_test)
-    np.save('models/' + group + '/test_classes', test_generator.classes)
-
+    # model = get_base_model(model)
+    # train_path = 'data/train_224x224/' + group + '/train/'
+    # test_path = 'data/train_224x224/' + group + '/test/'
+    # batch_size = Batch_size
+    # n_steps_train = np.ceil(count_files(train_path) / batch_size)
+    # n_steps_test = np.ceil(count_files(test_path) / batch_size)
+    # datagen = ImageDataGenerator(rescale=1./255)
+    #
+    # train_generator = datagen.flow_from_directory(
+    #     directory=train_path,
+    #     target_size=(224, 224),
+    #     batch_size=Batch_size,
+    #     class_mode='categorical',
+    #     shuffle=False)
+    # bottleneck_features_train = model.predict_generator(
+    #     generator=train_generator,
+    #     steps=n_steps_train,
+    #     workers=4,
+    #     verbose=1)
+    # np.save('models/' + group + '/bottleneck_features_train',
+    #         bottleneck_features_train)
+    # np.save('models/' + group + '/train_classes', train_generator.classes)
+    #
+    # test_generator = datagen.flow_from_directory(
+    #     directory=test_path,
+    #     target_size=(224, 224),
+    #     batch_size=Batch_size,
+    #     class_mode='categorical',
+    #     shuffle=False)
+    # bottleneck_features_test = model.predict_generator(
+    #     generator=test_generator,
+    #     steps=n_steps_test,
+    #     workers=4,
+    #     verbose=1)
+    # np.save('models/' + group + '/bottleneck_features_test',
+    #         bottleneck_features_test)
+    # np.save('models/' + group + '/test_classes', test_generator.classes)
+    #
 
 # def train_top_only(model, group):
 #     base_model = get_base_model(model)
@@ -199,7 +199,7 @@ def get_callbacks(model, group):
 def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
-    x = GlobalAveragePooling2D()(x)
+    x = Flatten()(x)
     x = Dense(1024, activation='relu', name='fcc_0')(x)
     x = Dropout(0.5)(x)
     x = Dense(1024, activation='relu', name='fcc_1')(x)
@@ -231,6 +231,8 @@ def train_top(model, group):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
+        vertical_flip=True,
+        zoon_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -300,6 +302,8 @@ def fine_tune(model, group, weights_path):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
+        vertical_flip=True,
+        zoon_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
