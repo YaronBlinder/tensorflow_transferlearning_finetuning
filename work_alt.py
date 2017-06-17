@@ -232,7 +232,7 @@ def train_top(model, group):
     datagen = ImageDataGenerator(
         rescale=1./255,
         vertical_flip=True,
-        zoon_range=0.1,
+        zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -303,7 +303,7 @@ def fine_tune(model, group, weights_path):
     datagen = ImageDataGenerator(
         rescale=1./255,
         vertical_flip=True,
-        zoon_range=0.1,
+        zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
