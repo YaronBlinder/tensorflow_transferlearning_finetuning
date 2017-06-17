@@ -296,6 +296,26 @@ def fine_tune(model, group, weights_path):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
+    datagen = ImageDataGenerator(
+        rescale=1./255,
+        samplewise_center=True,
+        samplewise_std_normalization=True
+    )
+
+    train_generator = datagen.flow_from_directory(
+        train_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        class_mode='categorical',
+        shuffle=True)
+
+    test_generator = datagen.flow_from_directory(
+        test_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        class_mode='categorical',
+        shuffle=True)
+
     print('Loading model...')
     base_model = get_base_model(model)
     x = base_model.output
