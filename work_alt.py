@@ -296,6 +296,10 @@ def fine_tune(model, group, weights_path):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
+    print('Please input top training parameters: \n')
+    Batch_size = int(input('Batch size: '))
+    N_Epochs = int(input('Epochs:'))
+    
     datagen = ImageDataGenerator(
         rescale=1./255,
         samplewise_center=True,
