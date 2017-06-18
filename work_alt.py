@@ -266,6 +266,9 @@ def train_top(model, group):
     #     workers=4,
     #     pickle_safe=False,
     #     initial_epoch=0)
+
+    class_weight={1:40, 2:40, 3:20}
+
     full_model.fit_generator(
         generator=train_generator,
         samples_per_epoch=N_train_samples,
@@ -274,7 +277,7 @@ def train_top(model, group):
         callbacks=get_callbacks(model, group),
         validation_data=test_generator,
         nb_val_samples=N_test_samples,
-        class_weight=None,
+        class_weight=class_weight,
         max_q_size=10,
         nb_worker=4,
         pickle_safe=False,
@@ -362,6 +365,9 @@ def fine_tune(model, group, weights_path):
     #     workers=4,
     #     pickle_safe=False,
     #     initial_epoch=0)
+
+    class_weight={1:40, 2:40, 3:20}
+
     full_model.fit_generator(
         generator=train_generator,
         samples_per_epoch=N_train_samples,
@@ -370,7 +376,7 @@ def fine_tune(model, group, weights_path):
         callbacks=get_callbacks(model, group),
         validation_data=test_generator,
         nb_val_samples=N_test_samples,
-        class_weight=None,
+        class_weight=class_weight,
         max_q_size=10,
         nb_worker=4,
         pickle_safe=False,
