@@ -267,7 +267,7 @@ def train_top(model, group):
     #     pickle_safe=False,
     #     initial_epoch=0)
 
-    class_weight={0:40, 1:40, 2:20}
+    class_weight={0:0.40, 1:0.40, 2:0.20}
 
     full_model.fit_generator(
         generator=train_generator,
@@ -366,7 +366,7 @@ def fine_tune(model, group, weights_path):
     #     pickle_safe=False,
     #     initial_epoch=0)
 
-    class_weight={0:40, 1:40, 2:20}
+    class_weight={0:0.40, 1:0.40, 2:0.20}
 
     full_model.fit_generator(
         generator=train_generator,
