@@ -105,8 +105,8 @@ def get_callbacks(model, group):
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.6,
-            patience=2,
+            factor=0.2,
+            patience=3,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
@@ -231,8 +231,8 @@ def train_top(model, group):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
-        vertical_flip=True,
-        zoom_range=0.1,
+        # vertical_flip=True,
+        # zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -302,8 +302,8 @@ def fine_tune(model, group, weights_path):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
-        vertical_flip=True,
-        zoom_range=0.1,
+        # vertical_flip=True,
+        # zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
