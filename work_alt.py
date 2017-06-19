@@ -37,7 +37,11 @@ def prep_dir(args):
             os.mkdir('models/'+group)
         os.mkdir(model_path)
     if not os.path.exists('TBlog/'+model_path):
-        os.mkdir('TBlog'+model_path)
+        if not os.path.exists('TBlog/models'):
+            os.mkdir('TBlog/models')
+        if not os.path.exists('TBlog/models/'+group):
+            os.mkdir('TBlog/models/'+group)
+        os.mkdir('TBlog/'+model_path)
     return model_path
 
 
