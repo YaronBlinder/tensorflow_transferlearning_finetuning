@@ -5,6 +5,7 @@ from keras import optimizers, callbacks
 from keras.models import Sequential
 from keras.layers import Input, Dropout, Flatten, Dense, GlobalAveragePooling2D
 from keras.models import Model
+from keras.initializers import TruncatedNormal
 import argparse
 import tensorflow as tf
 import numpy as np
@@ -211,9 +212,17 @@ def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
     x = Flatten()(x)
-    x = Dense(1024, activation='relu', name='fcc_0')(x)
+    x = Dense(
+        1024,
+        activation='relu',
+        kernel_initializer=TruncatedNormal()
+        name='fcc_0')(x)
     x = Dropout(0.5)(x)
-    x = Dense(1024, activation='relu', name='fcc_1')(x)
+    x = Dense(
+        1024,
+        activation='relu',
+        kernel_initializer=TruncatedNormal()
+        name='fcc_1')(x)
     predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
     full_model = Model(input=base_model.input, output=predictions)
     if freeze_base:
@@ -299,7 +308,7 @@ def train_top(model, group):
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
-def fine_tune(model, group, weights_path):
+def fine_tune(model, group, weights_path, ):
 # at this point, the top layers are well trained and we can start fine-tuning
 # convolutional layers from inception V3. We will freeze the bottom N layers
 # and train the remaining top layers.
