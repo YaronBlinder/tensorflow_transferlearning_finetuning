@@ -36,13 +36,17 @@ def prep_dir(args):
         if not os.path.exists('models/'+group):
             os.mkdir('models/'+group)
         os.mkdir(model_path)
+    if not os.path.exists('TBlog/'+model_path):
+        os.mkdir('TBlog'+model_path)
     return model_path
 
 
 def get_base_model(model):
     if model == 'resnet50':
-        base_model = ResNet50(weights='imagenet', include_top=False,
-         input_tensor=Input(shape=(224, 224, 3)))
+        base_model = ResNet50(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=Input(shape=(224, 224, 3)))
 
     elif model == 'vgg16':
         base_model = VGG16(
@@ -55,6 +59,7 @@ def get_base_model(model):
             weights='imagenet',
             include_top=False,
             input_tensor=Input(shape=(224, 224, 3)))
+
     # elif model == 'inception_v3':
     #     base_model = applications.inception_v3.InceptionV3(
     #         weights='imagenet',
@@ -112,7 +117,7 @@ def get_callbacks(model, group):
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
-            log_dir='TBlog/',
+            log_dir='TBlog/'+path,
             histogram_freq=4,
             write_graph=True,
             write_images=True)
