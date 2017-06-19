@@ -112,7 +112,7 @@ def get_callbacks(model, group):
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.2,
+            factor=0.5,
             patience=3,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
@@ -258,6 +258,7 @@ def train_top(model, group):
         class_mode='categorical',
         shuffle=True)
 
+
     # train the model on the new data for a few epochs
     print('Training top...')
     # full_model.fit_generator(
@@ -388,6 +389,10 @@ def fine_tune(model, group, weights_path):
         nb_worker=4,
         pickle_safe=False,
         initial_epoch=0)
+
+    weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
+    full_model.save_weights(weights_path)
+    print('Model fine-tuned.')
 
 
 def main():
