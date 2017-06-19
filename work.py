@@ -28,6 +28,8 @@ def prep_dir(args):
     group, model = args.group, args.model
     model_path = 'models/' + group + '/' + model + '/'
     if not os.path.exists(model_path):
+        os.mkdir('models')
+        os.mkdir('models/'+group)
         os.mkdir(model_path)
     return model_path
 
