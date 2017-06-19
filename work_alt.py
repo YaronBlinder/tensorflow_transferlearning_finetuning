@@ -1,5 +1,5 @@
 import os
-from keras.applications import ResNet50, VGG16
+from keras.applications import ResNet50, VGG16, VGG19
 from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers, callbacks
 from keras.models import Sequential
@@ -50,11 +50,11 @@ def get_base_model(model):
             include_top=False,
             input_tensor=Input(shape=(224, 224, 3)))
 
-    # elif model == 'vgg19':
-    #     base_model = applications.vgg19.VGG19(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
+    elif model == 'vgg19':
+        base_model = VGG19(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=Input(shape=(224, 224, 3)))
     # elif model == 'inception_v3':
     #     base_model = applications.inception_v3.InceptionV3(
     #         weights='imagenet',
