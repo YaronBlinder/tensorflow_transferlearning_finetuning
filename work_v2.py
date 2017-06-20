@@ -129,85 +129,6 @@ def get_callbacks(model, group):
     ]
 
 
-# def generate_bn_features(model, group):
-    # model = get_base_model(model)
-    # train_path = 'data/train_224x224/' + group + '/train/'
-    # test_path = 'data/train_224x224/' + group + '/test/'
-    # batch_size = Batch_size
-    # n_steps_train = np.ceil(count_files(train_path) / batch_size)
-    # n_steps_test = np.ceil(count_files(test_path) / batch_size)
-    # datagen = ImageDataGenerator(rescale=1./255)
-    #
-    # train_generator = datagen.flow_from_directory(
-    #     directory=train_path,
-    #     target_size=(224, 224),
-    #     batch_size=Batch_size,
-    #     class_mode='categorical',
-    #     shuffle=False)
-    # bottleneck_features_train = model.predict_generator(
-    #     generator=train_generator,
-    #     steps=n_steps_train,
-    #     workers=4,
-    #     verbose=1)
-    # np.save('models/' + group + '/bottleneck_features_train',
-    #         bottleneck_features_train)
-    # np.save('models/' + group + '/train_classes', train_generator.classes)
-    #
-    # test_generator = datagen.flow_from_directory(
-    #     directory=test_path,
-    #     target_size=(224, 224),
-    #     batch_size=Batch_size,
-    #     class_mode='categorical',
-    #     shuffle=False)
-    # bottleneck_features_test = model.predict_generator(
-    #     generator=test_generator,
-    #     steps=n_steps_test,
-    #     workers=4,
-    #     verbose=1)
-    # np.save('models/' + group + '/bottleneck_features_test',
-    #         bottleneck_features_test)
-    # np.save('models/' + group + '/test_classes', test_generator.classes)
-    #
-
-# def train_top_only(model, group):
-#     base_model = get_base_model(model)
-#     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
-#     train_data = np.load('models/' + group + '/bottleneck_features_train.npy')
-#     train_labels = one_hot_labels(
-#         np.load('models/' + group + '/train_classes.npy'))
-#     test_data = np.load('models/' + group + '/bottleneck_features_test.npy')
-#     test_labels = one_hot_labels(
-#         np.load('models/' + group + '/test_classes.npy'))
-#
-#     top_model = Sequential()
-#     top_model.add(Flatten(input_shape=base_model.output_shape[1:]))
-#     top_model.add(Dense(256, activation='relu', name='fcc_0'))
-#     top_model.add(Dropout(0.5))
-#     top_model.add(Dense(N_classes, activation='softmax', name='class_id'))
-#     print('Model bottom loaded.')
-#
-#     top_model.compile(
-#         optimizer='SGD',
-#         loss='categorical_crossentropy',
-#         metrics=['accuracy'])
-#
-#     print('Please input top training parameters: \n')
-#     Batch_size = input('Batch size: ')
-#     N_Epochs = input('Epochs:')
-#
-#     top_model.fit(
-#         x=train_data,
-#         y=train_labels,
-#         epochs=N_Epochs,
-#         batch_size=Batch_size,
-#         validation_data=(test_data, test_labels),
-#         callbacks=get_callbacks(),
-#         verbose=1)
-#
-#     top_model.save_weights(weights_path)
-#     print('Model top trained.')
-
-
 def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
@@ -250,8 +171,6 @@ def train_top(model, group):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
-        # vertical_flip=True,
-        # zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -290,21 +209,6 @@ def train_top(model, group):
         pickle_safe=False,
         initial_epoch=0)
 
-
-
-    # full_model.fit_generator(
-    #     generator=train_generator,
-    #     samples_per_epoch=N_train_samples,
-    #     nb_epoch=N_Epochs,
-    #     verbose=1,
-    #     callbacks=get_callbacks(model, group),
-    #     validation_data=test_generator,
-    #     nb_val_samples=N_test_samples,
-    #     class_weight=class_weight,
-    #     max_q_size=10,
-    #     nb_worker=4,
-    #     pickle_safe=False,
-    #     initial_epoch=0)
 
     weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
     full_model.save_weights(weights_path)
@@ -362,8 +266,6 @@ def fine_tune(model, group, weights_path):
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
-    # we train our model again (this time fine-tuning the top 2 inception blocks
-    # alongside the top Dense layers
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     class_weight={0:0.40, 1:0.40, 2:0.20}
@@ -383,20 +285,6 @@ def fine_tune(model, group, weights_path):
         initial_epoch=0)
 
 
-    # full_model.fit_generator(
-    #     generator=train_generator,
-    #     samples_per_epoch=N_train_samples,
-    #     nb_epoch=N_Epochs,
-    #     verbose=1,
-    #     callbacks=get_callbacks(model, group),
-    #     validation_data=test_generator,
-    #     nb_val_samples=N_test_samples,
-    #     class_weight=class_weight,
-    #     max_q_size=10,
-    #     nb_worker=4,
-    #     pickle_safe=False,
-    #     initial_epoch=0)
-
     weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
@@ -415,8 +303,6 @@ def ft_notop(model, group):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
-        # vertical_flip=True,
-        # zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -473,19 +359,6 @@ def ft_notop(model, group):
         pickle_safe=False,
         initial_epoch=0)
 
-    # full_model.fit_generator(
-    #     generator=train_generator,
-    #     samples_per_epoch=N_train_samples,
-    #     nb_epoch=N_Epochs,
-    #     verbose=1,
-    #     callbacks=get_callbacks(model, group),
-    #     validation_data=test_generator,
-    #     nb_val_samples=N_test_samples,
-    #     class_weight=class_weight,
-    #     max_q_size=10,
-    #     nb_worker=4,
-    #     pickle_safe=False,
-    #     initial_epoch=0)
 
     weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
     full_model.save_weights(weights_path)
