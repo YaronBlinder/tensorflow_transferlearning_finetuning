@@ -97,11 +97,11 @@ def ensemble(group, file):
     return(ens_pred)
 
 
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
+    # parser.add_argument('--position', default='PA', help='Positional argument')
     parser.add_argument('--file', required=True, help='path to image')
     parser.add_argument('--ensemble', action='store_true', help='Flag for ensemble classification')
 
