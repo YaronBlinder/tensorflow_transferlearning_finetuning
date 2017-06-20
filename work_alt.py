@@ -308,7 +308,8 @@ def train_top(model, group):
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
-def fine_tune(model, group, weights_path, ):
+
+def fine_tune(model, group, weights_path):
 # at this point, the top layers are well trained and we can start fine-tuning
 # convolutional layers from inception V3. We will freeze the bottom N layers
 # and train the remaining top layers.
@@ -408,6 +409,101 @@ def fine_tune(model, group, weights_path, ):
     print('Model fine-tuned.')
 
 
+def ft_notop(model, group):
+
+    train_path = 'data/train_224x224/' + group + '/train/'
+    test_path = 'data/train_224x224/' + group + '/test/'
+    N_train_samples = count_files(train_path)
+    N_test_samples = count_files(test_path)
+
+    print('Please input top training parameters: \n')
+    Batch_size = int(input('Batch size: '))
+    N_Epochs = int(input('Epochs:'))
+
+    datagen = ImageDataGenerator(
+        rescale=1./255,
+        # vertical_flip=True,
+        # zoom_range=0.1,
+        samplewise_center=True,
+        samplewise_std_normalization=True
+    )
+
+    train_generator = datagen.flow_from_directory(
+        train_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        class_mode='categorical',
+        shuffle=True)
+
+    test_generator = datagen.flow_from_directory(
+        test_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        class_mode='categorical',
+        shuffle=True)
+
+    print('Loading model...')
+    full_model = get_model(model)
+    # full_model.load_weights(weights_path)
+    print('model weights loaded.')
+
+    for i, layer in enumerate(full_model.layers):
+        print(i, layer.name)
+
+        # we chose to train the top 2 inception blocks, i.e. we will freeze
+        # the first 249 layers and unfreeze the rest:
+
+    N_layers_to_finetune = int(input('# of last layers to finetune:'))
+    for layer in full_model.layers[-N_layers_to_finetune:]:
+       layer.trainable = True
+    for layer in full_model.layers[:-N_layers_to_finetune]:
+       layer.trainable = False
+
+    # we need to recompile the model for these modifications to take effect
+    # we use SGD with a low learning rate
+    full_model.compile(
+        optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
+        loss='categorical_crossentropy',
+        metrics=['accuracy'])
+
+    # we train our model again (this time fine-tuning the top 2 inception blocks
+    # alongside the top Dense layers
+    print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
+    # full_model.fit_generator(
+    #     generator=train_generator,
+    #     steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+    #     epochs=N_Epochs,
+    #     verbose=1,
+    #     callbacks=get_callbacks(model, group),
+    #     validation_data=test_generator,
+    #     validation_steps=np.ceil(N_test_samples / Batch_size),
+    #     class_weight=None,
+    #     max_q_size=10,
+    #     workers=4,
+    #     pickle_safe=False,
+    #     initial_epoch=0)
+
+    class_weight={0:0.40, 1:0.40, 2:0.20}
+
+    full_model.fit_generator(
+        generator=train_generator,
+        samples_per_epoch=N_train_samples,
+        nb_epoch=N_Epochs,
+        verbose=1,
+        callbacks=get_callbacks(model, group),
+        validation_data=test_generator,
+        nb_val_samples=N_test_samples,
+        class_weight=class_weight,
+        max_q_size=10,
+        nb_worker=4,
+        pickle_safe=False,
+        initial_epoch=0)
+
+    weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
+    full_model.save_weights(weights_path)
+    print('Model fine-tuned.')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet50',
@@ -415,7 +511,7 @@ def main():
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
-
+    parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init')
 
     args = parser.parse_args()
 
@@ -427,6 +523,8 @@ def main():
         train_top(args.model, args.group)
     if args.finetune:
         fine_tune(args.model, args.group, weights_path)
+    if args.finetune_notop:
+        ft_notop(args.model, args.group)
 
 
 if __name__ == '__main__':
