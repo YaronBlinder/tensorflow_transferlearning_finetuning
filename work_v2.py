@@ -10,6 +10,7 @@ from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
 from keras.initializers import glorot_normal
 
+
 # This version uses the finetuning example from Keras documentation
 # instead of the bottleneck feature generation
 
@@ -155,7 +156,8 @@ def get_datagen():
         rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
-        zoom_range=0.05,
+        zoom_range=0.1,
+        fill_mode="nearest",
         vertical_flip=True
     )
     return datagen
