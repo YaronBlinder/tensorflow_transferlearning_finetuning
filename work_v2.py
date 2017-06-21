@@ -8,6 +8,7 @@ from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
+from keras.initializers import glorot_normal
 
 # This version uses the finetuning example from Keras documentation
 # instead of the bottleneck feature generation
