@@ -23,26 +23,19 @@ def assert_validity(args):
         'F_YA', 'M_YA',
         'F_Adult', 'M_Adult',
         'F_Ger', 'M_Ger']
+    valid_positions = ['PA', 'Lateral']
 
     assert args.model in valid_models, '{} not a valid model name'.format(args.model)
     assert args.group in valid_groups, '{} not a valid group'.format(args.group)
+    assert args.position in valid_positions, '{} not a valid position'.format(args.position)
 
 
 def prep_dir(args):
-    group, model = args.group, args.model
-    model_path = 'models/' + group + '/' + model + '/'
-    if not os.path.exists(model_path):
-        if not os.path.exists('models'):
-            os.mkdir('models')
-        if not os.path.exists('models/'+group):
-            os.mkdir('models/'+group)
-        os.mkdir(model_path)
-    if not os.path.exists('TBlog/'+model_path):
-        if not os.path.exists('TBlog/models'):
-            os.mkdir('TBlog/models')
-        if not os.path.exists('TBlog/models/'+group):
-            os.mkdir('TBlog/models/'+group)
-        os.mkdir('TBlog/'+model_path)
+    group, model, position = args.group, args.model, args.position
+    model_path = 'models/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
+    TBlog_path = 'TBlog/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
+    os.makedirs(model_path, exist_ok=True)
+    os.makedirs(TBlog_path, exist_ok=True)
     return model_path
 
 
@@ -152,8 +145,7 @@ def get_model(model, freeze_base=False):
     return full_model
 
 
-def train_top(model, group):
-    # create the base pre-trained model
+def train_top(model, group, position):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
@@ -161,8 +153,8 @@ def train_top(model, group):
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/train_224x224/' + group + '/train/'
-    test_path = 'data/train_224x224/' + group + '/test/'
+    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
     print('Please input top training parameters: \n')
     Batch_size = int(input('Batch size: '))
     N_Epochs = int(input('Epochs:'))
@@ -210,12 +202,12 @@ def train_top(model, group):
         initial_epoch=0)
 
 
-    weights_path = 'models/' + group + '/' + model + '/bottleneck_fc_model.h5'
+    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(position=position, group=group, model=model)
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
 
-def fine_tune(model, group, weights_path):
+def fine_tune(model, group, position, weights_path):
     train_path = 'data/train_224x224/' + group + '/train/'
     test_path = 'data/train_224x224/' + group + '/test/'
     N_train_samples = count_files(train_path)
@@ -290,10 +282,9 @@ def fine_tune(model, group, weights_path):
     print('Model fine-tuned.')
 
 
-def ft_notop(model, group):
-
-    train_path = 'data/train_224x224/' + group + '/train/'
-    test_path = 'data/train_224x224/' + group + '/test/'
+def ft_notop(model, group, position):
+    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
@@ -339,8 +330,6 @@ def ft_notop(model, group):
         loss='categorical_crossentropy',
         metrics=['accuracy'])
 
-    # we train our model again (this time fine-tuning the top 2 inception blocks
-    # alongside the top Dense layers
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
@@ -360,7 +349,7 @@ def ft_notop(model, group):
         initial_epoch=0)
 
 
-    weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
+    weights_path = 'models/{group}/{position}/{model}/finetuned_notop_model.h5'.format(group=group, position=position, model=model)
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
 
@@ -370,6 +359,7 @@ def main():
     parser.add_argument('--model', default='resnet50',
                         help='The network eg. resnet50')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
+    parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init')
@@ -381,11 +371,11 @@ def main():
     weights_path = model_path + 'bottleneck_fc_model.h5'
 
     if args.train_top:
-        train_top(args.model, args.group)
+        train_top(args.model, args.group, args.position)
     if args.finetune:
-        fine_tune(args.model, args.group, weights_path)
+        fine_tune(args.model, args.group, args.position, weights_path)
     if args.finetune_notop:
-        ft_notop(args.model, args.group)
+        ft_notop(args.model, args.group, args.position)
 
 
 if __name__ == '__main__':
