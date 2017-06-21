@@ -150,6 +150,17 @@ def get_model(model, freeze_base=False):
     return full_model
 
 
+def get_datagen():
+    datagen = ImageDataGenerator(
+        rescale=1. / 255,
+        samplewise_center=True,
+        samplewise_std_normalization=True,
+        zoom_range=0.05,
+        vertical_flip=True
+    )
+    return datagen
+
+
 def train_top(model, group, position):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
@@ -166,11 +177,7 @@ def train_top(model, group, position):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
-    datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        samplewise_center=True,
-        samplewise_std_normalization=True
-    )
+    datagen = get_datagen()
 
     train_generator = datagen.flow_from_directory(
         train_path,
@@ -226,11 +233,7 @@ def fine_tune(model, group, position, weights_path):
     Batch_size = int(input('Batch size: '))
     N_Epochs = int(input('Epochs:'))
 
-    datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        samplewise_center=True,
-        samplewise_std_normalization=True
-    )
+    datagen = get_datagen()
 
     train_generator = datagen.flow_from_directory(
         train_path,
@@ -300,11 +303,7 @@ def ft_notop(model, group, position):
     Batch_size = int(input('Batch size: '))
     N_Epochs = int(input('Epochs:'))
 
-    datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        samplewise_center=True,
-        samplewise_std_normalization=True
-    )
+    datagen = get_datagen()
 
     train_generator = datagen.flow_from_directory(
         train_path,
