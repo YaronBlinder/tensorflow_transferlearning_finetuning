@@ -136,13 +136,11 @@ def get_model(model, freeze_base=False):
     x = Dense(
         1024,
         activation='relu',
-        kernel_initializer=TruncatedNormal(),
         name='fcc_0')(x)
     x = Dropout(0.5)(x)
     x = Dense(
         1024,
         activation='relu',
-        kernel_initializer=TruncatedNormal(),
         name='fcc_1')(x)
     predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
