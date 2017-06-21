@@ -174,8 +174,10 @@ def train_top(model, group, position):
     train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
     print('Please input top training parameters: \n')
-    Batch_size = int(input('Batch size: '))
-    N_Epochs = int(input('Epochs:'))
+    # Batch_size = int(input('Batch size: '))
+    # N_Epochs = int(input('Epochs:'))
+    Batch_size = 32
+    N_Epochs = 50
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
@@ -232,8 +234,10 @@ def fine_tune(model, group, position, weights_path):
     N_test_samples = count_files(test_path)
 
     print('Please input top training parameters: \n')
-    Batch_size = int(input('Batch size: '))
-    N_Epochs = int(input('Epochs:'))
+    # Batch_size = int(input('Batch size: '))
+    # N_Epochs = int(input('Epochs:'))
+    Batch_size = 32
+    N_Epochs = 100
 
     datagen = get_datagen()
 
