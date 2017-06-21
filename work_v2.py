@@ -36,6 +36,9 @@ def prep_dir(args):
     TBlog_path = 'TBlog/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
+    os.makedirs(model_path + 'top', exist_ok=True)
+    os.makedirs(model_path + 'ft', exist_ok=True)
+    os.makedirs(model_path + 'ft_notop', exist_ok=True)
     return model_path
 
 
@@ -92,12 +95,16 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, group):
+def get_callbacks(model, group, position, train_type):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    path = 'models/' + group + '/' + model + '/'
+    path = 'models/{group}/{position}/{model}/{train_type}/'.format(
+        group=group,
+        position=position,
+        model=model,
+        train_type=train_type)
     return [
         callbacks.ModelCheckpoint(
             filepath=path+'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
@@ -193,7 +200,7 @@ def train_top(model, group, position):
         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_Epochs,
         verbose=1,
-        callbacks=get_callbacks(model, group),
+        callbacks=get_callbacks(model, group, position, train_type='top'),
         validation_data=test_generator,
         validation_steps=np.ceil(N_test_samples / Batch_size),
         class_weight=class_weight,
@@ -267,7 +274,7 @@ def fine_tune(model, group, position, weights_path):
         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_Epochs,
         verbose=1,
-        callbacks=get_callbacks(model, group),
+        callbacks=get_callbacks(model, group, position, train_type='ft'),
         validation_data=test_generator,
         validation_steps=np.ceil(N_test_samples / Batch_size),
         class_weight=class_weight,
@@ -339,7 +346,7 @@ def ft_notop(model, group, position):
         steps_per_epoch=np.ceil(N_train_samples / Batch_size),
         epochs=N_Epochs,
         verbose=1,
-        callbacks=get_callbacks(model, group),
+        callbacks=get_callbacks(model, group, position, train_type='ft_notop'),
         validation_data=test_generator,
         validation_steps=np.ceil(N_test_samples / Batch_size),
         class_weight=class_weight,
