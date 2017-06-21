@@ -1,23 +1,22 @@
-import os
-from keras.applications import ResNet50, VGG16, VGG19
-from keras.preprocessing.image import ImageDataGenerator
-from keras import optimizers, callbacks
-from keras.models import Sequential
-from keras.layers import Input, Dropout, Flatten, Dense, GlobalAveragePooling2D
-from keras.models import Model
-from keras.initializers import TruncatedNormal
 import argparse
-import tensorflow as tf
-import numpy as np
 import glob
+import os
+
+import keras.layers
+import numpy as np
+from keras import optimizers, callbacks
+from keras.applications import ResNet50, VGG16, VGG19
+from keras.models import Model
+from keras.preprocessing.image import ImageDataGenerator
 
 # This version uses the finetuning example from Keras documentation
 # instead of the bottleneck feature generation
 
 N_classes = 2
 
+
 def assert_validity(args):
-    valid_models = ['resnet50', 'vgg16', 'vgg19']#, 'inception_v3', 'xception']
+    valid_models = ['resnet50', 'vgg16', 'vgg19']  # , 'inception_v3', 'xception']
     valid_groups = [
         'F_Ped', 'M_ped',
         'F_YA', 'M_YA',
@@ -47,19 +46,19 @@ def get_base_model(model):
         base_model = ResNet50(
             weights='imagenet',
             include_top=False,
-            input_tensor=Input(shape=(224, 224, 3)))
+            input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
     elif model == 'vgg16':
         base_model = VGG16(
             weights='imagenet',
             include_top=False,
-            input_tensor=Input(shape=(224, 224, 3)))
+            input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
     elif model == 'vgg19':
         base_model = VGG19(
             weights='imagenet',
             include_top=False,
-            input_tensor=Input(shape=(224, 224, 3)))
+            input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
     # elif model == 'inception_v3':
     #     base_model = applications.inception_v3.InceptionV3(
@@ -107,7 +106,7 @@ def get_callbacks(model, group, position, train_type):
         train_type=train_type)
     return [
         callbacks.ModelCheckpoint(
-            filepath=path+'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
+            filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
@@ -122,7 +121,7 @@ def get_callbacks(model, group, position, train_type):
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
-            log_dir='TBlog/'+path,
+            log_dir='TBlog/' + path,
             histogram_freq=4,
             write_graph=True,
             write_images=True)
@@ -132,15 +131,12 @@ def get_callbacks(model, group, position, train_type):
 def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
-    if model=='resnet50':
-        x = Flatten()(x)
-    elif model in ['vgg16', 'vgg19']:
-        x = Flatten(name='flatten')(x)
-        x = Dense(4096, activation='relu', name='fc1', trainable=True)(x)
-        x = Dense(4096, activation='relu', name='fc2', trainable=True)(x)
-    else:
-        assert False, 'You Should Not Be Here'
-    predictions = Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
+    x = keras.layers.Flatten()(x)
+    x = keras.layers.Dense(1024, activation="relu", trainable=True)(x)
+    x = keras.layers.Dropout(0.5)(x)
+    x = keras.layers.Dense(1024, activation="relu", trainable=True)(x)
+
+    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
         for layer in base_model.layers:
@@ -165,7 +161,7 @@ def train_top(model, group, position):
     N_test_samples = count_files(test_path)
 
     datagen = ImageDataGenerator(
-        rescale=1./255,
+        rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -184,12 +180,11 @@ def train_top(model, group, position):
         # class_mode='categorical',
         shuffle=True)
 
-
     # train the model on the new data for a few epochs
     print('Training top...')
 
     # class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
-    class_weight='auto'
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
@@ -205,13 +200,17 @@ def train_top(model, group, position):
         pickle_safe=False,
         initial_epoch=0)
 
-
-    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(position=position, group=group, model=model)
+    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(position=position, group=group,
+                                                                                     model=model)
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
 
 def fine_tune(model, group, position, weights_path):
+    """
+
+    :type model: object
+    """
     train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
@@ -222,7 +221,7 @@ def fine_tune(model, group, position, weights_path):
     N_Epochs = int(input('Epochs:'))
 
     datagen = ImageDataGenerator(
-        rescale=1./255,
+        rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -251,9 +250,9 @@ def fine_tune(model, group, position, weights_path):
 
     N_layers_to_finetune = int(input('# of last layers to finetune:'))
     for layer in full_model.layers[-N_layers_to_finetune:]:
-       layer.trainable = True
+        layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
-       layer.trainable = False
+        layer.trainable = False
 
     full_model.compile(
         optimizer=optimizers.Adam(lr=5e-5),
@@ -279,8 +278,8 @@ def fine_tune(model, group, position, weights_path):
         pickle_safe=False,
         initial_epoch=0)
 
-
-    weights_path = 'models/' + group + '/' + model + '/finetuned_model.h5'
+    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+                                                                                 model=model)
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
 
@@ -296,7 +295,7 @@ def ft_notop(model, group, position):
     N_Epochs = int(input('Epochs:'))
 
     datagen = ImageDataGenerator(
-        rescale=1./255,
+        rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -324,9 +323,9 @@ def ft_notop(model, group, position):
 
     N_layers_to_finetune = int(input('# of last layers to finetune:'))
     for layer in full_model.layers[-N_layers_to_finetune:]:
-       layer.trainable = True
+        layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
-       layer.trainable = False
+        layer.trainable = False
 
     full_model.compile(
         optimizer=optimizers.adam(lr=5e-5),
@@ -352,8 +351,8 @@ def ft_notop(model, group, position):
         pickle_safe=False,
         initial_epoch=0)
 
-
-    weights_path = 'models/{group}/{position}/{model}/finetuned_notop_model.h5'.format(group=group, position=position, model=model)
+    weights_path = 'models/{group}/{position}/{model}/finetuned_notop_model.h5'.format(group=group, position=position,
+                                                                                       model=model)
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
 
