@@ -256,14 +256,14 @@ def fine_tune(model, group, position, weights_path):
        layer.trainable = False
 
     full_model.compile(
-        optimizer=optimizers.Adam(lr=1e-4),
+        optimizer=optimizers.Adam(lr=5e-5),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     # class_weight={0:0.40, 1:0.40, 2:0.20}
-    class_weight = None
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
@@ -305,14 +305,14 @@ def ft_notop(model, group, position):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='binary',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -329,13 +329,14 @@ def ft_notop(model, group, position):
        layer.trainable = False
 
     full_model.compile(
-        optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
+        optimizer=optimizers.adam(lr=5e-5),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
-    class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
+    # class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
