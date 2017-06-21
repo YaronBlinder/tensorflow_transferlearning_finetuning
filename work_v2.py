@@ -132,17 +132,15 @@ def get_callbacks(model, group, position, train_type):
 def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
-    x = Flatten()(x)
-    x = Dense(
-        1024,
-        activation='relu',
-        name='fcc_0')(x)
-    x = Dropout(0.5)(x)
-    x = Dense(
-        1024,
-        activation='relu',
-        name='fcc_1')(x)
-    predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
+    if model=='resnet50':
+        x = Flatten()(x)
+    elif model in ['vgg16', 'vgg19']:
+        x = Flatten(name='flatten')(x)
+        x = Dense(4096, activation='relu', name='fc1', trainable=True)(x)
+        x = Dense(4096, activation='relu', name='fc2', trainable=True)(x)
+    else:
+        assert False, 'You Should Not Be Here'
+    predictions = Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
         for layer in base_model.layers:
@@ -233,14 +231,14 @@ def fine_tune(model, group, position, weights_path):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='binary',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -258,7 +256,7 @@ def fine_tune(model, group, position, weights_path):
        layer.trainable = False
 
     full_model.compile(
-        optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
+        optimizer=optimizers.Adam(lr=1e-4),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
