@@ -138,7 +138,7 @@ def get_model(model, freeze_base=False):
         kernel_initializer=TruncatedNormal(),
         name='fcc_1')(x)
     predictions = Dense(N_classes, activation='softmax', name='class_id')(x)
-    full_model = Model(input=base_model.input, output=predictions)
+    full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
         for layer in base_model.layers:
             layer.trainable = False
