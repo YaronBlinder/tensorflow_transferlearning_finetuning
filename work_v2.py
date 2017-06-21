@@ -185,7 +185,8 @@ def train_top(model, group, position):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
+    # class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
+    class_weight=None
 
     full_model.fit_generator(
         generator=train_generator,
@@ -219,8 +220,6 @@ def fine_tune(model, group, position, weights_path):
 
     datagen = ImageDataGenerator(
         rescale=1./255,
-        # vertical_flip=True,
-        # zoom_range=0.1,
         samplewise_center=True,
         samplewise_std_normalization=True
     )
@@ -260,7 +259,8 @@ def fine_tune(model, group, position, weights_path):
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
-    class_weight={0:0.40, 1:0.40, 2:0.20}
+    # class_weight={0:0.40, 1:0.40, 2:0.20}
+    class_weight = None
 
     full_model.fit_generator(
         generator=train_generator,
@@ -356,8 +356,7 @@ def ft_notop(model, group, position):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='resnet50',
-                        help='The network eg. resnet50')
+    parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
     parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--train_top', action='store_true', help='train top')
@@ -365,7 +364,6 @@ def main():
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init')
 
     args = parser.parse_args()
-
     assert_validity(args)
     model_path = prep_dir(args)
     weights_path = model_path + 'bottleneck_fc_model.h5'
