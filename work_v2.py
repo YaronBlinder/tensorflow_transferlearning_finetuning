@@ -191,7 +191,7 @@ def train_top(model, group, position):
     print('Training top...')
 
     # class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
-    class_weight=None
+    class_weight='auto'
 
     full_model.fit_generator(
         generator=train_generator,
