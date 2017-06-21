@@ -14,7 +14,7 @@ import glob
 # This version uses the finetuning example from Keras documentation
 # instead of the bottleneck feature generation
 
-N_classes = 3
+N_classes = 2
 
 def assert_validity(args):
     valid_models = ['resnet50', 'vgg16', 'vgg19']#, 'inception_v3', 'xception']
@@ -155,7 +155,7 @@ def train_top(model, group, position):
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
         optimizer='rmsprop',
-        loss='categorical_crossentropy',
+        loss='binary_crossentropy',
         metrics=['accuracy'])
 
     train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
@@ -176,14 +176,14 @@ def train_top(model, group, position):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
 
@@ -233,14 +233,14 @@ def fine_tune(model, group, position, weights_path):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -259,7 +259,7 @@ def fine_tune(model, group, position, weights_path):
 
     full_model.compile(
         optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
-        loss='categorical_crossentropy',
+        loss='binary_crossentropy',
         metrics=['accuracy'])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
@@ -307,14 +307,14 @@ def ft_notop(model, group, position):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='categorical',
+        class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -332,7 +332,7 @@ def ft_notop(model, group, position):
 
     full_model.compile(
         optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
-        loss='categorical_crossentropy',
+        loss='binary_crossentropy',
         metrics=['accuracy'])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
