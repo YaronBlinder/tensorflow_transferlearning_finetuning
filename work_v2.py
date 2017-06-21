@@ -216,8 +216,8 @@ def train_top(model, group, position):
 
 
 def fine_tune(model, group, position, weights_path):
-    train_path = 'data/train_224x224/' + group + '/train/'
-    test_path = 'data/train_224x224/' + group + '/test/'
+    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
