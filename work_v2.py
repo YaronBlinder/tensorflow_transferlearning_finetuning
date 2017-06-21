@@ -176,14 +176,14 @@ def train_top(model, group, position):
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='categorical',
         shuffle=True)
 
     test_generator = datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        class_mode='binary',
+        # class_mode='categorical',
         shuffle=True)
 
 
