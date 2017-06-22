@@ -76,9 +76,11 @@ def predict(model, group, position, file):
                                                                                  model=model)
     assert os.path.exists(weights_path), 'Model not trained!'
 
+    size = 224
     clf = get_model(model)
     clf.load_weights(weights_path)
     image = imread(file)
+    image = np.reshape(image, [1, size, size, 1])
     preds = clf.predict(image)
 
     return preds
