@@ -1,0 +1,28 @@
+cd data/PA/M_Adult/test
+mkdir other
+mv 2/* other/
+mv 3/* other/
+mv 10/* other/
+mv 11/* other/
+rm -r 2 3 10 11
+cd ../train
+mkdir other
+mv 2/* other/
+mv 3/* other/
+mv 10/* other/
+mv 11/* other/
+rm -r 2 3 10 11
+cd data/PA/F_Adult/test
+mkdir other
+mv 2/* other/
+mv 3/* other/
+mv 10/* other/
+mv 11/* other/
+rm -r 2 3 10 11
+cd ../train
+mkdir other
+mv 2/* other/
+mv 3/* other/
+mv 10/* other/
+mv 11/* other/
+rm -r 2 3 10 11
