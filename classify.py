@@ -98,6 +98,9 @@ def ensemble(group, position, file):
     vgg16_pred = predict('vgg16', group, position, file)
     vgg19_pred = predict('vgg19', group, position, file)
 
+    print('resnet50_pred: {}'.format(resnet50_pred))
+    print('vgg16_pred: {}'.format(vgg16_pred))
+    print('vgg19_pred: {}'.format(vgg19_pred))
     ens_pred = np.mean([resnet50_pred, vgg16_pred, vgg19_pred])
 
     return (ens_pred)
