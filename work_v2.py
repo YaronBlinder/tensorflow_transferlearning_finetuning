@@ -18,7 +18,7 @@ N_classes = 2
 
 
 def assert_validity(args):
-    valid_models = ['resnet50', 'vgg16', 'vgg19']  # , 'inception_v3', 'xception']
+    valid_models = ['resnet50', 'vgg16', 'vgg19', 'scratch']  # , 'inception_v3', 'xception']
     valid_groups = [
         'F_Ped', 'M_ped',
         'F_YA', 'M_YA',
