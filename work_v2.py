@@ -293,8 +293,8 @@ def fine_tune(model, group, position, weights_path):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
-                                                                                 model=model)
+    `weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+                                                                                 model=model)`
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
 
