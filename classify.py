@@ -6,6 +6,7 @@ import numpy as np
 from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import TruncatedNormal
 from keras.models import Model
+from keras.preprocessing.image import img_to_array, load_img
 from scipy.misc import imread
 
 
@@ -79,9 +80,15 @@ def predict(model, group, position, file):
     size = 224
     clf = get_model(model)
     clf.load_weights(weights_path)
-    image = imread(file)
-    image = np.reshape(image, [1, size, size, 1])
-    preds = clf.predict(image)
+    img = load_img(
+        file,
+        False,
+        target_size=(size, size))
+    x = img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    # image = imread(file)
+    # image = np.reshape(image, [1, size, size, 1])
+    preds = clf.predict(x)
 
     return preds
 
