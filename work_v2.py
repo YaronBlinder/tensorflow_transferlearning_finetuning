@@ -151,7 +151,7 @@ def get_model(model, freeze_base=False):
     return full_model
 
 
-def get_datagen():
+def get_train_datagen():
     datagen = ImageDataGenerator(
         rescale=1. / 255,
         samplewise_center=True,
@@ -159,6 +159,12 @@ def get_datagen():
         zoom_range=0.1,
         fill_mode="nearest",
         vertical_flip=True
+    )
+    return datagen
+
+def get_test_datagen():
+    datagen = ImageDataGenerator(
+        rescale=1. / 255
     )
     return datagen
 
@@ -181,20 +187,19 @@ def train_top(model, group, position):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
-    datagen = get_datagen()
+    train_datagen = get_train_datagen()
+    test_datagen = get_test_datagen()
 
-    train_generator = datagen.flow_from_directory(
+    train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='categorical',
         shuffle=True)
 
-    test_generator = datagen.flow_from_directory(
+    test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='categorical',
         shuffle=True)
 
     # train the model on the new data for a few epochs
@@ -239,20 +244,19 @@ def fine_tune(model, group, position, weights_path):
     Batch_size = 32
     N_Epochs = 100
 
-    datagen = get_datagen()
+    train_datagen = get_train_datagen()
+    test_datagen = get_test_datagen()
 
-    train_generator = datagen.flow_from_directory(
+    train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='binary',
         shuffle=True)
 
-    test_generator = datagen.flow_from_directory(
+    test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -309,20 +313,19 @@ def ft_notop(model, group, position):
     Batch_size = int(input('Batch size: '))
     N_Epochs = int(input('Epochs:'))
 
-    datagen = get_datagen()
+    train_datagen = get_train_datagen()
+    test_datagen = get_test_datagen()
 
-    train_generator = datagen.flow_from_directory(
+    train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='binary',
         shuffle=True)
 
-    test_generator = datagen.flow_from_directory(
+    test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
-        # class_mode='binary',
         shuffle=True)
 
     print('Loading model...')
@@ -442,6 +445,7 @@ def train_from_scratch(group, position):
                                                                           model=model)
     full_model.save_weights(weights_path)
     print('Model trained.')
+
 
 def main():
     parser = argparse.ArgumentParser()
