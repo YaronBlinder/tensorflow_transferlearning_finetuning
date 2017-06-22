@@ -1,4 +1,4 @@
-import argparse
+cdimport argparse
 import glob
 import os
 
@@ -171,8 +171,8 @@ def train_top(model, group, position):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_224x224_w_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224_w_flip/{group}/test/'.format(position=position, group=group)
     print('Please input top training parameters: \n')
     # Batch_size = int(input('Batch size: '))
     # N_Epochs = int(input('Epochs:'))
@@ -228,8 +228,8 @@ def fine_tune(model, group, position, weights_path):
 
     :type model: object
     """
-    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_224x224_w_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224_w_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
@@ -300,8 +300,8 @@ def fine_tune(model, group, position, weights_path):
 
 
 def ft_notop(model, group, position):
-    train_path = 'data/{position}/train_224x224/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224x224/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_224x224_w_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224_w_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
