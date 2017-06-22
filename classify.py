@@ -9,6 +9,9 @@ from keras.models import Model
 from scipy.misc import imread
 
 
+N_classes = 2
+
+
 def get_base_model(model):
     implemented_models = ['resnet50', 'vgg16', 'vgg19']
 
