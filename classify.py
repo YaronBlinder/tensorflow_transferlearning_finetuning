@@ -71,8 +71,7 @@ def get_model(model, freeze_base=False):
 def predict(model, group, position, file):
     weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
                                                                                  model=model)
-    Assert
-    os.path.exists(weights_path), 'Model not trained!'
+    assert os.path.exists(weights_path), 'Model not trained!'
 
     clf = get_model(model)
     clf.load_weights(weights_path)
