@@ -375,7 +375,7 @@ def train_from_scratch(group, position):
     N_test_samples = count_files(test_path)
 
     full_model = Sequential()
-    full_model.add(keras.layers.Conv2D(32, (3, 3)))
+    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(3, 224, 224)))
     full_model.add(keras.layers.Activation('relu'))
     full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
