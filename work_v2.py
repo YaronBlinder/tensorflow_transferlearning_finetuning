@@ -6,7 +6,7 @@ import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19
-from keras.models import Model
+from keras.models import Model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
 from keras.initializers import glorot_normal
 
@@ -146,8 +146,8 @@ def get_model(model, freeze_base=False):
     predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
-        for layer in base_model.layers:
-            layer.trainable = False
+            for layer in base_model.layers:
+                layer.trainable = False
     return full_model
 
 
@@ -368,6 +368,81 @@ def ft_notop(model, group, position):
     print('Model fine-tuned.')
 
 
+def train_from_scratch(group, position):
+    train_path = 'data/{position}/train_224x224_w_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_224x224_w_flip/{group}/test/'.format(position=position, group=group)
+    N_train_samples = count_files(train_path)
+    N_test_samples = count_files(test_path)
+
+    full_model = Sequential()
+    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(224, 224)))
+    full_model.add(keras.layers.Activation('relu'))
+    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+    full_model.add(keras.layers.Conv2D(32, (3, 3)))
+    full_model.add(keras.layers.Activation('relu'))
+    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+    full_model.add(keras.layers.Conv2D(64, (3, 3)))
+    full_model.add(keras.layers.Activation('relu'))
+    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+    full_model.add(keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
+    full_model.add(keras.layers.Dense(64))
+    full_model.add(keras.layers.Activation('relu'))
+    full_model.add(keras.layers.Dropout(0.5))
+    full_model.add(keras.layers.Dense(1))
+    full_model.add(keras.layers.Activation('softmax'))
+
+    full_model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['accuracy'])
+
+    Batch_size = 32
+    N_Epochs = 100
+
+    datagen = get_datagen()
+
+    train_generator = datagen.flow_from_directory(
+        train_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        shuffle=True)
+
+    test_generator = datagen.flow_from_directory(
+        test_path,
+        target_size=(224, 224),
+        batch_size=Batch_size,
+        shuffle=True)
+
+    full_model.compile(
+        optimizer=optimizers.rmsprop(),
+        loss='binary_crossentropy',
+        metrics=['accuracy'])
+
+    print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
+
+    class_weight = 'auto'
+
+    full_model.fit_generator(
+        generator=train_generator,
+        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
+        epochs=N_Epochs,
+        verbose=1,
+        callbacks=get_callbacks(model, group, position, train_type='ft'),
+        validation_data=test_generator,
+        validation_steps=np.ceil(N_test_samples / Batch_size),
+        class_weight=class_weight,
+        max_q_size=10,
+        workers=4,
+        pickle_safe=False,
+        initial_epoch=0)
+
+    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+                                                                          model=model)
+    full_model.save_weights(weights_path)
+    print('Model trained.')
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
@@ -375,13 +450,15 @@ def main():
     parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
-    parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init')
+    parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init top')
 
     args = parser.parse_args()
     assert_validity(args)
     model_path = prep_dir(args)
     weights_path = model_path + 'bottleneck_fc_model.h5'
 
+    if args.model == 'scratch':
+        train_from_scratch(args.group, args.position)
     if args.train_top:
         train_top(args.model, args.group, args.position)
     if args.finetune:
