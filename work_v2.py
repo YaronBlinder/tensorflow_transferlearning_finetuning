@@ -420,7 +420,7 @@ def train_from_scratch(group, position):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
+    print('Training from scratch')
 
     class_weight = 'auto'
 
