@@ -191,6 +191,7 @@ def train_top(model, group, position):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
+
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
 
@@ -209,8 +210,7 @@ def train_top(model, group, position):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    # class_weight = {0: 0.40, 1: 0.40, 2: 0.20}
-    class_weight = 'auto'
+    class_weight = {0:count_files(train_path+'1/'), 1:count_files(train_path+'other/')}
 
     full_model.fit_generator(
         generator=train_generator,
