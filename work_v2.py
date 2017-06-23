@@ -34,7 +34,7 @@ def assert_validity(args):
 def prep_dir(args):
     group, model, position = args.group, args.model, args.position
     model_path = 'models/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
-    TBlog_path = 'TBlog/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
+    TBlog_path = 'TBlog/models/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(model_path + 'top', exist_ok=True)
@@ -161,6 +161,7 @@ def get_train_datagen():
         # vertical_flip=True
     )
     return datagen
+
 
 def get_test_datagen():
     datagen = ImageDataGenerator(
