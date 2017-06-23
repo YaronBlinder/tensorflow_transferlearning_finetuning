@@ -114,12 +114,12 @@ def get_callbacks(model, group, position, train_type):
             save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
-            patience=12,
+            patience=15,
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.2,
-            patience=3,
+            factor=0.75,
+            patience=2,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
@@ -156,7 +156,7 @@ def get_train_datagen():
         rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
-        zoom_range=0.2,
+        zoom_range=0.25,
         fill_mode="constant",
         cval=0
         # vertical_flip=True
