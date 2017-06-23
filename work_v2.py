@@ -226,7 +226,7 @@ def train_top(model, group, position):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(position=position, group=group,
+    weights_path = 'models/{group}/{position}/{model}/top_trained.h5'.format(position=position, group=group,
                                                                                      model=model)
     full_model.save_weights(weights_path)
     print('Model top trained.')
@@ -471,7 +471,7 @@ def main():
     args = parser.parse_args()
     assert_validity(args)
     model_path = prep_dir(args)
-    weights_path = model_path + 'bottleneck_fc_model.h5'
+    weights_path = model_path + 'top_trained.h5'
 
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position)

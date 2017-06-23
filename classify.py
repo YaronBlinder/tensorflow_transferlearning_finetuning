@@ -73,7 +73,7 @@ def get_model(model, freeze_base=False):
 
 
 def predict(model, group, position, file):
-    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(group=group, position=position,
                                                                                  model=model)
     assert os.path.exists(weights_path), 'Model not trained!'
 
@@ -86,9 +86,8 @@ def predict(model, group, position, file):
         target_size=(size, size))
     x = img_to_array(img)
     x = np.expand_dims(x, axis=0)
-    # image = imread(file)
-    # image = np.reshape(image, [1, size, size, 1])
-    preds = clf.predict(x)
+
+    preds = clf.predict_proba(x)
 
     return preds
 
@@ -101,7 +100,8 @@ def ensemble(group, position, file):
     print('resnet50_pred: {}'.format(resnet50_pred))
     print('vgg16_pred: {}'.format(vgg16_pred))
     print('vgg19_pred: {}'.format(vgg19_pred))
-    ens_pred = np.mean([resnet50_pred, vgg16_pred, vgg19_pred])
+
+    ens_pred = np.mean([resnet50_pred, vgg16_pred, vgg19_pred], axis=0)
 
     return (ens_pred)
 
@@ -122,7 +122,7 @@ def main():
 
     if args.ensemble:
         ens_preds = ensemble(group, position, file)
-        print(ens_preds)
+        print('ensemble pred: {}'.format(ens_preds))
     else:
         preds = predict(model, group, position, file)
         print(preds)
