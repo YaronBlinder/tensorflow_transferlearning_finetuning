@@ -269,7 +269,16 @@ def fine_tune(model, group, position, weights_path):
     for i, layer in enumerate(full_model.layers):
         print(i, layer.name)
 
-    N_layers_to_finetune = int(input('# of last layers to finetune:'))
+    # N_layers_to_finetune = int(input('# of last layers to finetune:'))
+    if model == 'resnet50':
+        N_layers_to_finetune = 17
+    elif model == 'vgg16':
+        N_layers_to_finetune = 10
+    elif model == 'vgg19':
+        N_layers_to_finetune = 11
+    else:
+        assert False, 'you should not be here'
+
     for layer in full_model.layers[-N_layers_to_finetune:]:
         layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
