@@ -113,7 +113,7 @@ def ensemble_all(group, position):
     df = pd.DataFrame(columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
     data_path = 'data/{position}/train_224_3ch_flip/{group}/test/'.format(position=position, group=group)
 
-    for filename in tqdm(os.listdir(data_path+'1')[:3]):
+    for filename in tqdm(os.listdir(data_path+'1')[:2]):
         file_path = data_path + '1/' + filename
         id = filename.split('.')[0]
         label = 0
@@ -123,7 +123,7 @@ def ensemble_all(group, position):
         vgg19_score = predict('vgg19', group, position, file_path)
         df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
 
-    for filename in tqdm(os.listdir(data_path+'other')[:3]):
+    for filename in tqdm(os.listdir(data_path+'other')[:2]):
         file_path = data_path + 'other/' + filename
         id = filename.split('.')[0]
         label = 1
