@@ -87,7 +87,7 @@ def predict(model, group, position, file):
     x = img_to_array(img)
     x = np.expand_dims(x, axis=0)
 
-    preds = clf.predict_proba(x)
+    preds = clf.predict(x)
 
     return preds
 
