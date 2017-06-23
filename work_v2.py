@@ -155,10 +155,10 @@ def get_train_datagen():
     datagen = ImageDataGenerator(
         # rescale=1. / 255,
         samplewise_center=True,
-        samplewise_std_normalization=True,
+        # samplewise_std_normalization=True,
         zoom_range=0.1,
         fill_mode="nearest",
-        vertical_flip=True
+        # vertical_flip=True
     )
     return datagen
 
@@ -166,7 +166,7 @@ def get_test_datagen():
     datagen = ImageDataGenerator(
         # rescale=1. / 255,
         samplewise_center=True,
-        samplewise_std_normalization=True,
+        # samplewise_std_normalization=True,
     )
     return datagen
 
