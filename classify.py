@@ -110,10 +110,12 @@ def ensemble(group, position, file):
 
 def ensemble_all(group, position):
 
-    df = pd.DataFrame(columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
+
     data_path = 'data/{position}/train_224_3ch_flip/{group}/test/'.format(position=position, group=group)
 
+    rows_list = []
     for filename in tqdm(os.listdir(data_path+'1')[:2]):
+        tmp_dict = {}
         file_path = data_path + '1/' + filename
         id = filename.split('.')[0]
         label = 0
@@ -121,9 +123,18 @@ def ensemble_all(group, position):
         resnet50_score = predict('resnet50', group, position, file_path)
         vgg16_score = predict('vgg16', group, position, file_path)
         vgg19_score = predict('vgg19', group, position, file_path)
-        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score], ignore_index=True)
+        tmp_dict.update({
+            'id':id,
+            'label':label,
+            'ensemble_score':ensemble_score,
+            'resnet50_score':resnet50_score,
+            'vgg16_score':vgg16_score,
+            'vgg19_score':vgg19_score})
+        rows_list.append(tmp_dict)
+
 
     for filename in tqdm(os.listdir(data_path+'other')[:2]):
+        tmp_dict = {}
         file_path = data_path + 'other/' + filename
         id = filename.split('.')[0]
         label = 1
@@ -131,7 +142,16 @@ def ensemble_all(group, position):
         resnet50_score = predict('resnet50', group, position, file_path)
         vgg16_score = predict('vgg16', group, position, file_path)
         vgg19_score = predict('vgg19', group, position, file_path)
-        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score], ignore_index=True)
+        tmp_dict.update({
+            'id': id,
+            'label': label,
+            'ensemble_score': ensemble_score,
+            'resnet50_score': resnet50_score,
+            'vgg16_score': vgg16_score,
+            'vgg19_score': vgg19_score})
+        rows_list.append(tmp_dict)
+
+    df = pd.DataFrame(rows_list, columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
     return df
 
 def main():
