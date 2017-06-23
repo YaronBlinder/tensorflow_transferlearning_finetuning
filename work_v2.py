@@ -153,7 +153,7 @@ def get_model(model, freeze_base=False):
 
 def get_train_datagen():
     datagen = ImageDataGenerator(
-        rescale=1. / 255,
+        # rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
         zoom_range=0.1,
@@ -164,7 +164,7 @@ def get_train_datagen():
 
 def get_test_datagen():
     datagen = ImageDataGenerator(
-        rescale=1. / 255,
+        # rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
     )
@@ -366,7 +366,7 @@ def ft_notop(model, group, position):
         workers=4,
         pickle_safe=False,
         initial_epoch=0)
-
+git
     weights_path = 'models/{group}/{position}/{model}/finetuned_notop_model.h5'.format(group=group, position=position,
                                                                                        model=model)
     full_model.save_weights(weights_path)
