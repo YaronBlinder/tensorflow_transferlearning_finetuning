@@ -4,6 +4,7 @@ import os
 import keras.layers
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import TruncatedNormal
 from keras.models import Model
@@ -112,7 +113,7 @@ def ensemble_all(group, position):
     df = pd.DataFrame(columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
     data_path = 'data/{position}/train_224_3ch_flip/{group}/test/'.format(position=position, group=group)
 
-    for filename in os.listdir(data_path+'1'):
+    for filename in tqdm(os.listdir(data_path+'1')):
         file_path = data_path + '1/' + filename
         id = filename.split('.')[0]
         label = 0
@@ -122,7 +123,7 @@ def ensemble_all(group, position):
         vgg19_score = predict('vgg19', group, position, file_path)
         df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
 
-    for filename in os.listdir(data_path+'other'):
+    for filename in tqdm(os.listdir(data_path+'other')):
         file_path = data_path + 'other/' + filename
         id = filename.split('.')[0]
         label = 1
