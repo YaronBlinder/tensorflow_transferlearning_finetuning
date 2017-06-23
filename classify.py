@@ -3,6 +3,7 @@ import os
 
 import keras.layers
 import numpy as np
+import pandas as pd
 from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import TruncatedNormal
 from keras.models import Model
@@ -97,14 +98,40 @@ def ensemble(group, position, file):
     vgg16_pred = predict('vgg16', group, position, file)
     vgg19_pred = predict('vgg19', group, position, file)
 
-    print('resnet50_pred: {}'.format(resnet50_pred))
-    print('vgg16_pred: {}'.format(vgg16_pred))
-    print('vgg19_pred: {}'.format(vgg19_pred))
+    # print('resnet50_pred: {}'.format(resnet50_pred))
+    # print('vgg16_pred: {}'.format(vgg16_pred))
+    # print('vgg19_pred: {}'.format(vgg19_pred))
 
     ens_pred = np.mean([resnet50_pred, vgg16_pred, vgg19_pred], axis=0)
 
     return (ens_pred)
 
+
+def ensemble_all(group, position):
+
+    df = pd.DataFrame(columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
+    data_path = 'data/{position}/train_224_3ch_flip/{group}/test/'.format(position=position, group=group)
+
+    for filename in os.listdir(data_path+'1'):
+        file_path = data_path + '1/' + filename
+        id = filename.split('.')[0]
+        label = 0
+        ensemble_score = ensemble(group, position, file_path)
+        resnet50_score = predict('resnet50', group, position, file_path)
+        vgg16_score = predict('vgg16', group, position, file_path)
+        vgg19_score = predict('vgg19', group, position, file_path)
+        df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
+
+    for filename in os.listdir(data_path+'other'):
+        file_path = data_path + 'other/' + filename
+        id = filename.split('.')[0]
+        label = 1
+        ensemble_score = ensemble(group, position, file_path)
+        resnet50_score = predict('resnet50', group, position, file_path)
+        vgg16_score = predict('vgg16', group, position, file_path)
+        vgg19_score = predict('vgg19', group, position, file_path)
+        df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
+    return df
 
 def main():
     parser = argparse.ArgumentParser()
@@ -113,6 +140,8 @@ def main():
     parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--file', required=True, help='path to image')
     parser.add_argument('--ensemble', action='store_true', help='Flag for ensemble classification')
+    parser.add_argument('--ensemble_all', action='store_true', help='Flag to go over test set and produce dataframe')
+
 
     args = parser.parse_args()
     model = args.model
@@ -120,7 +149,10 @@ def main():
     position = args.position
     file = args.file
 
-    if args.ensemble:
+    if args.ensemble_all:
+        df = ensemble_all(group, position)
+        df.tocsv('ensemble_{group}_{position}.csv'.format(group=group, position=position))
+    elif args.ensemble:
         ens_preds = ensemble(group, position, file)
         print('ensemble pred: {}'.format(ens_preds))
     else:
