@@ -75,7 +75,7 @@ def get_model(model, freeze_base=False):
 def predict(model, group, position, file):
     weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(group=group, position=position,
                                                                                  model=model)
-    assert os.path.exists(weights_path), 'Model not trained!'
+    assert os.path.exists(weights_path), 'Model not trained! ({})'.format(weights_path)
 
     size = 224
     clf = get_model(model)
