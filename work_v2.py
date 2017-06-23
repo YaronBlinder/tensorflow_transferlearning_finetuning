@@ -176,7 +176,7 @@ def train_top(model, group, position):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
-        optimizer='rmsprop',
+        optimizer=optimizers.adam(lr=1e-4),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
@@ -285,7 +285,7 @@ def fine_tune(model, group, position, weights_path):
         layer.trainable = False
 
     full_model.compile(
-        optimizer=optimizers.Adam(lr=5e-5),
+        optimizer=optimizers.Adam(lr=1e-5),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
