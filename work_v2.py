@@ -153,7 +153,7 @@ def get_model(model, freeze_base=False):
 
 def get_train_datagen():
     datagen = ImageDataGenerator(
-        # rescale=1. / 255,
+        rescale=1. / 255,
         samplewise_center=True,
         # samplewise_std_normalization=True,
         zoom_range=0.1,
@@ -165,7 +165,7 @@ def get_train_datagen():
 
 def get_test_datagen():
     datagen = ImageDataGenerator(
-        # rescale=1. / 255,
+        rescale=1. / 255,
         samplewise_center=True,
         # samplewise_std_normalization=True,
     )
