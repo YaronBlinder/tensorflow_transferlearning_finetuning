@@ -152,7 +152,7 @@ def main():
 
     if args.ensemble_all:
         df = ensemble_all(group, position)
-        df.tocsv('ensemble_{group}_{position}.csv'.format(group=group, position=position))
+        df.to_csv('ensemble_{group}_{position}.csv'.format(group=group, position=position))
     elif args.ensemble:
         ens_preds = ensemble(group, position, file)
         print('ensemble pred: {}'.format(ens_preds))
