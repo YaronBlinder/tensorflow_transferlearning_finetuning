@@ -121,7 +121,7 @@ def ensemble_all(group, position):
         resnet50_score = predict('resnet50', group, position, file_path)
         vgg16_score = predict('vgg16', group, position, file_path)
         vgg19_score = predict('vgg19', group, position, file_path)
-        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
+        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score], ignore_index=True)
 
     for filename in tqdm(os.listdir(data_path+'other')[:2]):
         file_path = data_path + 'other/' + filename
@@ -131,7 +131,7 @@ def ensemble_all(group, position):
         resnet50_score = predict('resnet50', group, position, file_path)
         vgg16_score = predict('vgg16', group, position, file_path)
         vgg19_score = predict('vgg19', group, position, file_path)
-        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score])
+        df = df.append([id, label, ensemble_score, resnet50_score, vgg16_score, vgg19_score], ignore_index=True)
     return df
 
 def main():
