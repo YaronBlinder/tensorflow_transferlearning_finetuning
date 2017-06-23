@@ -278,7 +278,6 @@ def fine_tune(model, group, position, weights_path):
         N_layers_to_finetune = 11
     else:
         assert False, 'you should not be here'
-
     for layer in full_model.layers[-N_layers_to_finetune:]:
         layer.trainable = True
     for layer in full_model.layers[:-N_layers_to_finetune]:
@@ -375,7 +374,7 @@ def ft_notop(model, group, position):
         workers=4,
         pickle_safe=False,
         initial_epoch=0)
-git
+
     weights_path = 'models/{group}/{position}/{model}/finetuned_notop_model.h5'.format(group=group, position=position,
                                                                                        model=model)
     full_model.save_weights(weights_path)
