@@ -156,9 +156,9 @@ def get_train_datagen():
         rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
-        # zoom_range=0.1,
-        # fill_mode="constant",
-        # cval=0
+        zoom_range=0.2,
+        fill_mode="constant",
+        cval=0
         # vertical_flip=True
     )
     return datagen
