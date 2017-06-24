@@ -210,7 +210,7 @@ def train_top(model, group, position):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0:0.4, 1:0.6}
+    class_weight = {0:0.8, 1:1.2}
 
     full_model.fit_generator(
         generator=train_generator,
