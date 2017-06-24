@@ -177,7 +177,7 @@ def train_top(model, group, position):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
-        optimizer=optimizers.rmsprop(lr=1e-4),
+        optimizer=optimizers.rmsprop(lr=1e-4, momentum=0.9),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
