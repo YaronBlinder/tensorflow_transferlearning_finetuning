@@ -156,7 +156,7 @@ def get_train_datagen():
         rescale=1. / 255,
         samplewise_center=True,
         samplewise_std_normalization=True,
-        zoom_range=0.25,
+        zoom_range=0.2,
         fill_mode="constant",
         cval=0
         # vertical_flip=True
@@ -177,7 +177,8 @@ def train_top(model, group, position):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
-        optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+        # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+        optimizer=optimizers.Adam(lr=1e-5),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
@@ -293,7 +294,7 @@ def fine_tune(model, group, position, weights_path):
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     # class_weight={0:0.40, 1:0.40, 2:0.20}
-    class_weight = 'auto'
+    class_weight = {0: 1.2, 1: 0.8}
 
     full_model.fit_generator(
         generator=train_generator,
