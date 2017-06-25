@@ -424,15 +424,16 @@ def train_from_scratch(group, position):
     Batch_size = 32
     N_Epochs = 100
 
-    datagen = get_datagen()
+    train_datagen = get_train_datagen()
+    test_datagen = get_test_datagen()
 
-    train_generator = datagen.flow_from_directory(
+    train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
         batch_size=Batch_size,
         shuffle=True)
 
-    test_generator = datagen.flow_from_directory(
+    test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
         batch_size=Batch_size,
