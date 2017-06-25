@@ -155,8 +155,9 @@ def get_train_datagen():
     datagen = ImageDataGenerator(
         rescale=1. / 255,
         samplewise_center=True,
-        samplewise_std_normalization=True,
+        # samplewise_std_normalization=True,
         zoom_range=0.2,
+        rotation_range=20,
         fill_mode="constant",
         cval=0
         # vertical_flip=True
@@ -168,7 +169,7 @@ def get_test_datagen():
     datagen = ImageDataGenerator(
         rescale=1. / 255,
         samplewise_center=True,
-        samplewise_std_normalization=True,
+        # samplewise_std_normalization=True,
     )
     return datagen
 
@@ -195,6 +196,11 @@ def train_top(model, group, position):
 
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
+
+    sample_file_path = train_path+'1/{firstfile}'.format(firstfile=os.listdir(train_path+'1/')[0])
+    sample = imread(sample_file_path)
+    train_datagen.fit(sample)
+    test_datagen.fit(sample)
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
