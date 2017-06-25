@@ -119,7 +119,7 @@ def get_callbacks(model, group, position, train_type):
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
             factor=0.75,
-            patience=2,
+            patience=5,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
@@ -179,7 +179,7 @@ def train_top(model, group, position):
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-        optimizer=optimizers.Adam(lr=1e-5),
+        optimizer=optimizers.Adam(lr=1e-4),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
