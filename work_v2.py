@@ -134,14 +134,14 @@ def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
     x = keras.layers.Flatten()(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-    # x = keras.layers.Dropout(0.5)(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    x = keras.layers.Dropout(0.5)(x)
+    x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
 
-    x = keras.layers.Dense(1024)(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.advanced_activations.LeakyReLU()(x)
-    x = keras.layers.Dropout(0.25)(x)
+    # x = keras.layers.Dense(1024)(x)
+    # x = keras.layers.BatchNormalization()(x)
+    # x = keras.layers.advanced_activations.LeakyReLU()(x)
+    # x = keras.layers.Dropout(0.25)(x)
 
     predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
