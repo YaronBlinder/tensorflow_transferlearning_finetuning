@@ -199,6 +199,7 @@ def train_top(model, group, position):
 
     sample_file_path = train_path+'1/{firstfile}'.format(firstfile=os.listdir(train_path+'1/')[0])
     sample = imread(sample_file_path)
+    sample = np.reshape(sample, [1, 224, 224, 1])
     train_datagen.fit(sample)
     test_datagen.fit(sample)
 
