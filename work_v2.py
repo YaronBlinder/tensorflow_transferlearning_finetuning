@@ -9,7 +9,7 @@ from keras.applications import ResNet50, VGG16, VGG19
 # from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
-from keras.applications.imagenet_utils import preprocess_input
+# from keras.applications.imagenet_utils import preprocess_input
 from scipy.misc import imread
 
 # This version uses the finetuning example from Keras documentation
@@ -155,16 +155,29 @@ def get_model(model, freeze_base=False):
     return full_model
 
 
+def preprocess_input(im):
+
+    im = np.reshape([1, 256, 256, 3])
+    #RGB->BGR
+    im = im[:, :, :, ::-1]
+    # Zero-center by mean pixel
+    im[:, :, :, 0] -= 103.939
+    im[:, :, :, 1] -= 116.779
+    im[:, :, :, 2] -= 123.68
+
+    #TODO: random crop to 224x224
+    return im
+
 def get_train_datagen():
     datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         # rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
-        zoom_range=0.2,
-        rotation_range=20,
-        fill_mode="constant",
-        cval=0
+        # zoom_range=0.2,
+        # rotation_range=20,
+        # fill_mode="constant",
+        # cval=0
         # vertical_flip=True
     )
     return datagen
