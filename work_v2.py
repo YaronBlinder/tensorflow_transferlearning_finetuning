@@ -9,6 +9,7 @@ from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
+from keras.applications.imagenet_utils import preprocess_input
 from scipy.misc import imread
 
 # This version uses the finetuning example from Keras documentation
@@ -156,10 +157,15 @@ def get_model(model, freeze_base=False):
     return full_model
 
 
+def preprocess_input(im):
+
+
+
 def get_train_datagen():
     datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        samplewise_center=True,
+        preprocessing_function=preprocess_input,
+        # rescale=1. / 255,
+        # samplewise_center=True,
         # samplewise_std_normalization=True,
         zoom_range=0.2,
         rotation_range=20,
@@ -172,8 +178,9 @@ def get_train_datagen():
 
 def get_test_datagen():
     datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        samplewise_center=True,
+        preprocessing_function=preprocess_input,
+        # rescale=1. / 255,
+        # samplewise_center=True,
         # samplewise_std_normalization=True,
     )
     return datagen
@@ -189,8 +196,8 @@ def train_top(model, group, position):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/{position}/train_224_3ch_flip_fix/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224_3ch_flip_fix/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     print('Please input top training parameters: \n')
     # Batch_size = int(input('Batch size: '))
     # N_Epochs = int(input('Epochs:'))
@@ -205,7 +212,7 @@ def train_top(model, group, position):
 
     sample_file_path = train_path+'1/{firstfile}'.format(firstfile=os.listdir(train_path+'1/')[0])
     sample = imread(sample_file_path)
-    sample = np.reshape(sample, [1, 224, 224, 3 ])
+    sample = np.reshape(sample, [1, 224, 224, 3])
     train_datagen.fit(sample)
     test_datagen.fit(sample)
 
@@ -251,8 +258,8 @@ def fine_tune(model, group, position, weights_path):
 
     :type model: object
     """
-    train_path = 'data/{position}/train_224_3ch_flip_fix/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224_3ch_flip_fix/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
@@ -330,8 +337,8 @@ def fine_tune(model, group, position, weights_path):
 
 
 def ft_notop(model, group, position):
-    train_path = 'data/{position}/train_224_3ch_flip_fix/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224_3ch_flip_fix/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
@@ -398,8 +405,8 @@ def ft_notop(model, group, position):
 
 
 def train_from_scratch(group, position):
-    train_path = 'data/{position}/train_224_3ch_flip_fix/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_224_3ch_flip_fix/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
