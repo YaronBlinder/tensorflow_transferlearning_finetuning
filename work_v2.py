@@ -135,14 +135,14 @@ def get_model(model, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
     x = keras.layers.Flatten()(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-    # x = keras.layers.Dropout(0.5)(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    x = keras.layers.Dropout(0.5)(x)
+    x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
 
-    x = keras.layers.Dense(1024)(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.advanced_activations.ELU()(x)
-    x = keras.layers.Dropout(0.25)(x)
+    # x = keras.layers.Dense(1024)(x)
+    # x = keras.layers.BatchNormalization()(x)
+    # x = keras.layers.advanced_activations.ELU()(x)
+    # x = keras.layers.Dropout(0.25)(x)
 
     # x = keras.layers.Dense(256)(x)
     # x = keras.layers.Dropout(0.5)(x)
@@ -170,6 +170,7 @@ def preprocess_input(im):
     #TODO: random crop to 224x224
     im = np.reshape(im, [224, 224, 3])
     return im
+
 
 def get_train_datagen():
     datagen = ImageDataGenerator(
@@ -202,7 +203,7 @@ def train_top(model, group, position):
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
         # optimizer=optimizers.Adam(lr=1e-4),
-        optimizer=optimizers.rmsprop(),
+        optimizer=optimizers.SGD(lr=1e-3),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
