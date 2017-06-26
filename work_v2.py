@@ -146,7 +146,7 @@ def get_model(model, freeze_base=False):
 
     x = keras.layers.Dense(256)(x)
     x = keras.layers.Dropout(0.5)(x)
-    predictions = keras.layers.Dense(1, activation='sigmoid', name='class_id')(x)
+    predictions = keras.layers.Dense(N_classes, activation='sigmoid', name='class_id')(x)
 
     # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
