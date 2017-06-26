@@ -138,12 +138,17 @@ def get_model(model, freeze_base=False):
     # x = keras.layers.Dropout(0.5)(x)
     # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
 
-    x = keras.layers.Dense(1024)(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.advanced_activations.LeakyReLU()(x)
-    x = keras.layers.Dropout(0.25)(x)
+    # x = keras.layers.Dense(1024)(x)
+    # x = keras.layers.BatchNormalization()(x)
+    # x = keras.layers.advanced_activations.LeakyReLU()(x)
+    # x = keras.layers.Dropout(0.25)(x)
 
-    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
+
+    x = keras.layers.Dense(256)(x)
+    x = keras.layers.Dropout(0.5)(x)
+    predictions = keras.layers.Dense(1, activation='sigmoid', name='class_id')(x)
+
+    # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
             for layer in base_model.layers:
@@ -179,7 +184,8 @@ def train_top(model, group, position):
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
-        optimizer=optimizers.Adam(lr=1e-4),
+        # optimizer=optimizers.Adam(lr=1e-4),
+        optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
@@ -218,7 +224,7 @@ def train_top(model, group, position):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0:1.2, 1:0.8}
+    class_weight = {0:1.5, 1:1}
 
     full_model.fit_generator(
         generator=train_generator,
@@ -301,7 +307,7 @@ def fine_tune(model, group, position, weights_path):
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     # class_weight={0:0.40, 1:0.40, 2:0.20}
-    class_weight = {0: 1.2, 1: 0.8}
+    class_weight = {0: 1.5, 1: 1}
 
     full_model.fit_generator(
         generator=train_generator,
@@ -446,7 +452,7 @@ def train_from_scratch(group, position):
 
     print('Training from scratch')
 
-    class_weight = 'auto'
+    class_weight = {0: 1.5, 1: 1}
 
     full_model.fit_generator(
         generator=train_generator,
