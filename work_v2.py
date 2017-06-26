@@ -157,7 +157,7 @@ def get_model(model, freeze_base=False):
 
 def preprocess_input(im):
 
-    im = np.reshape([1, 256, 256, 3])
+    im = np.reshape(im, [1, 256, 256, 3])
     #RGB->BGR
     im = im[:, :, :, ::-1]
     # Zero-center by mean pixel
@@ -166,6 +166,7 @@ def preprocess_input(im):
     im[:, :, :, 2] -= 123.68
 
     #TODO: random crop to 224x224
+    im = np.reshape(im, [256, 256, 3])
     return im
 
 def get_train_datagen():
