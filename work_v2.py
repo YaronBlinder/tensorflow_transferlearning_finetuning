@@ -6,7 +6,7 @@ import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19
-from keras.initializers import glorot_normal
+# from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
 from keras.applications.imagenet_utils import preprocess_input
@@ -143,8 +143,6 @@ def get_model(model, freeze_base=False):
     # x = keras.layers.BatchNormalization()(x)
     # x = keras.layers.advanced_activations.LeakyReLU()(x)
     # x = keras.layers.Dropout(0.25)(x)
-
-
     x = keras.layers.Dense(256)(x)
     x = keras.layers.Dropout(0.5)(x)
     predictions = keras.layers.Dense(N_classes, activation='sigmoid', name='class_id')(x)
@@ -152,13 +150,9 @@ def get_model(model, freeze_base=False):
     # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
-            for layer in base_model.layers:
-                layer.trainable = False
+        for layer in base_model.layers:
+            layer.trainable = False
     return full_model
-
-
-def preprocess_input(im):
-
 
 
 def get_train_datagen():
@@ -206,11 +200,10 @@ def train_top(model, group, position):
     N_train_samples = count_files(train_path)
     N_test_samples = count_files(test_path)
 
-
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
 
-    sample_file_path = train_path+'1/{firstfile}'.format(firstfile=os.listdir(train_path+'1/')[0])
+    sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
     sample = imread(sample_file_path)
     sample = np.reshape(sample, [1, 224, 224, 3])
     train_datagen.fit(sample)
@@ -231,7 +224,7 @@ def train_top(model, group, position):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0:1.5, 1:1}
+    class_weight = {0: 1.5, 1: 1}
 
     full_model.fit_generator(
         generator=train_generator,
@@ -248,16 +241,12 @@ def train_top(model, group, position):
         initial_epoch=0)
 
     weights_path = 'models/{group}/{position}/{model}/top_trained.h5'.format(position=position, group=group,
-                                                                                     model=model)
+                                                                             model=model)
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
 
 def fine_tune(model, group, position, weights_path):
-    """
-
-    :type model: object
-    """
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     N_train_samples = count_files(train_path)
@@ -430,9 +419,10 @@ def train_from_scratch(group, position):
     full_model.add(keras.layers.Dense(1))
     full_model.add(keras.layers.Activation('softmax'))
 
-    full_model.compile(loss='binary_crossentropy',
-                  optimizer='rmsprop',
-                  metrics=['accuracy'])
+    full_model.compile(
+        loss='binary_crossentropy',
+        optimizer='rmsprop',
+        metrics=['accuracy'])
 
     Batch_size = 32
     N_Epochs = 100
@@ -476,7 +466,7 @@ def train_from_scratch(group, position):
         initial_epoch=0)
 
     weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
-                                                                          model=model)
+                                                                                 model='scratch')
     full_model.save_weights(weights_path)
     print('Model trained.')
 
