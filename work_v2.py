@@ -6,7 +6,7 @@ import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19
-# from keras.initializers import glorot_normal
+from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.preprocessing.image import ImageDataGenerator
 # from keras.applications.imagenet_utils import preprocess_input
