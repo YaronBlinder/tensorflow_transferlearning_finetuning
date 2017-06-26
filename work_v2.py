@@ -203,11 +203,11 @@ def train_top(model, group, position):
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
 
-    sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
-    sample = imread(sample_file_path)
-    sample = np.reshape(sample, [1, 256, 256, 3])
-    train_datagen.fit(sample)
-    test_datagen.fit(sample)
+    # sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
+    # sample = imread(sample_file_path)
+    # sample = np.reshape(sample, [1, 256, 256, 3])
+    # train_datagen.fit(sample)
+    # test_datagen.fit(sample)
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
