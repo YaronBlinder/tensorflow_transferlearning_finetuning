@@ -149,7 +149,7 @@ def get_model(model, freeze_base=False):
     # x = keras.layers.Dense(256)(x)
     # x = keras.layers.Dropout(0.5)(x)
 
-    predictions = keras.layers.Dense(N_classes, activation='sigmoid', name='class_id')(x)
+    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id')(x)
 
     # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
@@ -207,9 +207,9 @@ def train_top(model, group, position, n_epochs):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
-        # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
+        optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         # optimizer=optimizers.Adam(lr=1e-4),
-        optimizer=optimizers.rmsprop(),
+        # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
@@ -246,8 +246,8 @@ def train_top(model, group, position, n_epochs):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0: 1.5, 1: 1}
-    # class_weight = 'auto'
+    # class_weight = {0: 1.5, 1: 1}
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
