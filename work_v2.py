@@ -9,7 +9,7 @@ from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize
+from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im
 # from keras.applications.imagenet_utils import preprocess_input
 from scipy.misc import imread
 
@@ -198,8 +198,8 @@ def get_test_datagen():
         # samplewise_center=True,
         # samplewise_std_normalization=True,
     )
-    datagen.config['random_crop_size'] = (224, 224)
-    datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
+    # datagen.config['random_crop_size'] = (224, 224)
+    datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
     return datagen
 
 
