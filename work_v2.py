@@ -233,13 +233,13 @@ def train_top(model, group, position):
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
         batch_size=Batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
         batch_size=Batch_size,
         shuffle=True)
 
