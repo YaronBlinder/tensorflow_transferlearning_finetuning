@@ -205,7 +205,7 @@ def get_test_datagen(model):
     )
     # datagen.config['random_crop_size'] = (224, 224)
     if model in ['xception', 'inception_v3']:
-        dataget.config['size'] = 299
+        datagen.config['size'] = 299
         datagen.set_pipeline([scale_im, inception_preprocess, standardize])
     else:
         datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
