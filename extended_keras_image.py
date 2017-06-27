@@ -20,6 +20,8 @@ import types
 from keras import backend as K
 from keras.utils.generic_utils import Progbar
 
+from cv2 import resize
+
 
 def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
                     fill_mode='nearest', cval=0.):
@@ -93,6 +95,10 @@ def imagenet_preprocess(x, *args, **kwargs):
     # TODO: random crop to 224x224
     x = np.reshape(x, [224, 224, 3])
     return x
+
+
+def scale_im(x, size=224):
+    return resize(x, (size, size))
 
 
 def random_barrel_transform(x, intensity):
