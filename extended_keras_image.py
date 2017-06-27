@@ -97,7 +97,7 @@ def imagenet_preprocess(x, *args, **kwargs):
     return x
 
 
-def scale_im(x, size=224):
+def scale_im(x, size=224, *args, **kwargs):
     return resize(x, (size, size))
 
 
