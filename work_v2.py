@@ -186,7 +186,7 @@ def get_train_datagen():
         # vertical_flip=True
     )
     datagen.config['random_crop_size'] = (224, 224)
-    dataget.config['preprocessing_function'] = preprocess_input
+    datagen.config['preprocessing_function'] = preprocess_input
     datagen.set_pipeline(['random_crop', 'standardize'])
     return datagen
 
