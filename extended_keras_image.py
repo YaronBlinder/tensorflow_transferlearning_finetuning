@@ -573,7 +573,7 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self, directory,
                             color_mode=None, target_size=None,
-                            image_reader='pil', reader_config={'target_mode': 'RGB', 'target_size': (256, 256)},
+                            image_reader='pil', reader_config={'target_mode': 'RGB', 'target_size': (299, 299)},
                             read_formats={'png', 'jpg', 'jpeg', 'bmp'},
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
