@@ -175,7 +175,7 @@ def preprocess_input(im):
 
 def get_train_datagen():
     datagen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
+        # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
@@ -185,6 +185,9 @@ def get_train_datagen():
         # cval=0
         # vertical_flip=True
     )
+    datagen.config['random_crop_size'] = (224, 224)
+    dataget.config['preprocessing_function'] = preprocess_input
+    datagen.set_pipeline(['random_crop', 'standardize'])
     return datagen
 
 
@@ -195,6 +198,8 @@ def get_test_datagen():
         # samplewise_center=True,
         # samplewise_std_normalization=True,
     )
+    datagen.config['random_crop_size'] = (224, 224)
+    datagen.set_pipeline(['random_crop', 'standardize'])
     return datagen
 
 

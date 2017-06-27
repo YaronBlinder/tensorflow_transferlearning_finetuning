@@ -177,7 +177,7 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
     return img_to_array(img, dim_ordering=dim_ordering)
 
 def standardize(x,
-                dim_ordering='th',
+                dim_ordering='tf',
                 rescale=False,
                 featurewise_center=False,
                 samplewise_center=False,
@@ -190,6 +190,7 @@ def standardize(x,
                 fitting=False,
                 verbose=0,
                 config={},
+                preprocessing_function=None,
                 **kwargs):
     '''
 
@@ -252,6 +253,9 @@ def standardize(x,
     if rescale:
         x *= rescale
 
+    if preprocessing_function:
+        x = preprocessing_function(x)
+
     # x is a single image, so it doesn't have image number at index 0
     if dim_ordering == 'th':
         channel_index = 0
@@ -300,7 +304,7 @@ def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
     return x[:, offsetw:offsetw+random_crop_size[0], offseth:offseth+random_crop_size[1]]
 
 def random_transform(x,
-                     dim_ordering='th',
+                     dim_ordering='tf',
                      rotation_range=0.,
                      width_shift_range=0.,
                      height_shift_range=0.,
@@ -454,6 +458,12 @@ class ImageDataGenerator(object):
             If you never set it, then it will be "th".
         seed: random seed for reproducible pipeline processing. If not None, it will also be used by `flow` or
             `flow_from_directory` to generate the shuffle index in case of no seed is set.
+        --YB:
+        preprocessing_function: function that will be implied on each input.
+            The function will run before any other modification on it.
+            The function should take one argument:
+            one image (Numpy tensor with rank 3),
+            and should output a Numpy tensor with the same shape.
     '''
     def __init__(self,
                  featurewise_center=False,
@@ -476,6 +486,7 @@ class ImageDataGenerator(object):
                  rescale=None,
                  dim_ordering=K.image_dim_ordering(),
                  seed=None,
+                 preprocessing_function=None,
                  verbose=1):
         self.config = copy.deepcopy(locals())
         self.config['config'] = self.config
@@ -483,6 +494,7 @@ class ImageDataGenerator(object):
         self.config['std'] = None
         self.config['principal_components'] = None
         self.config['rescale'] = rescale
+        self.config['preprocessing_function'] = preprocessing_function
 
         if dim_ordering not in {'tf', 'th'}:
             raise Exception('dim_ordering should be "tf" (channel after row and '
