@@ -1,4 +1,4 @@
-cd data/PA/train_224_3ch_flip/M_Adult/test
+cd ~/Radical/data/PA/train_256_3ch_flip/M_Adult/test
 mkdir other
 mv 2/* other/
 mv 3/* other/
@@ -12,8 +12,11 @@ mv 3/* other/
 mv 10/* other/
 mv 11/* other/
 rm -r 2 3 10 11
-cd ..
-cd ../F_Adult/test
+cd other
+ls | grep f. -m 503 | xargs rm -fr
+ls | grep ^[^f] -m 503 | xargs rm -fr
+
+cd ~/Radical/data/PA/train_256_3ch_flip/F_Adult/test
 mkdir other
 mv 2/* other/
 mv 3/* other/
@@ -27,3 +30,7 @@ mv 3/* other/
 mv 10/* other/
 mv 11/* other/
 rm -r 2 3 10 11
+cd other
+ls | grep f. -m 437 | xargs rm -fr
+ls | grep ^[^f] -m 437 | xargs rm -fr
+
