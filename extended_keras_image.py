@@ -307,7 +307,7 @@ def center_crop(x, center_crop_size, **kwargs):
 
 def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
     np.random.seed(sync_seed)
-    w, h = x.shape[1], x.shape[2]
+    w, h = x.shape[0], x.shape[1]
     rangew = (w - random_crop_size[0]) // 2
     rangeh = (h - random_crop_size[1]) // 2
     print([w, h, rangew, rangeh])
