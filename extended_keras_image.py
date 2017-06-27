@@ -330,7 +330,7 @@ def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
     w, h = x.shape[0], x.shape[1]
     rangew = (w - random_crop_size[0]) // 2
     rangeh = (h - random_crop_size[1]) // 2
-    print([w,h])
+    # print([w,h])
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
     return x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1], :]
