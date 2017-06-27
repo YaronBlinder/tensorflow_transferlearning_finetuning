@@ -186,20 +186,19 @@ def get_train_datagen():
         # vertical_flip=True
     )
     datagen.config['random_crop_size'] = (224, 224)
-    datagen.config['preprocessing_function'] = preprocess_input
-    datagen.set_pipeline(['random_crop', 'standardize'])
+    datagen.set_pipeline(['random_crop', 'imagenet_preprocess', 'standardize'])
     return datagen
 
 
 def get_test_datagen():
     datagen = ImageDataGenerator(
-        preprocessing_function=preprocess_input,
+        # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
         # samplewise_center=True,
         # samplewise_std_normalization=True,
     )
     datagen.config['random_crop_size'] = (224, 224)
-    datagen.set_pipeline(['random_crop', 'standardize'])
+    datagen.set_pipeline(['random_crop', 'imagenet_preprocess', 'standardize'])
     return datagen
 
 
