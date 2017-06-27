@@ -186,7 +186,7 @@ def get_train_datagen():
         # vertical_flip=True
     )
     datagen.config['random_crop_size'] = (224, 224)
-    datagen.set_pipeline(['random_crop', 'imagenet_preprocess', 'standardize'])
+    datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
     return datagen
 
 
