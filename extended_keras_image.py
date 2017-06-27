@@ -196,7 +196,7 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
 
 
 def standardize(x,
-                dim_ordering='th',
+                dim_ordering='tf',
                 rescale=False,
                 featurewise_center=False,
                 samplewise_center=False,
@@ -323,7 +323,7 @@ def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
 
 
 def random_transform(x,
-                     dim_ordering='th',
+                     dim_ordering='tf',
                      rotation_range=0.,
                      width_shift_range=0.,
                      height_shift_range=0.,

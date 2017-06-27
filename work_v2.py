@@ -64,16 +64,16 @@ def get_base_model(model):
             include_top=False,
             input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
-    # elif model == 'inception_v3':
-    #     base_model = applications.inception_v3.InceptionV3(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
-    # elif model == 'xception':
-    #     base_model = applications.xception.Xception(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
+    elif model == 'inception_v3':
+        base_model = applications.inception_v3.InceptionV3(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=keras.layers.Input(shape=(299, 299, 3)))
+    elif model == 'xception':
+        base_model = applications.xception.Xception(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=keras.layers.Input(shape=(299, 299, 3)))
 
     else:
         assert False, '{} is not an implemented model!'.format(model)
@@ -202,25 +202,24 @@ def get_test_datagen():
     return datagen
 
 
-def train_top(model, group, position):
+def train_top(model, group, position, n_epochs):
     print('Loading model...')
     full_model = get_model(model, freeze_base=True)
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.9),
         # optimizer=optimizers.Adam(lr=1e-4),
-        optimizer=optimizers.SGD(lr=1e-3),
+        optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     print('Please input top training parameters: \n')
-    # Batch_size = int(input('Batch size: '))
-    # N_Epochs = int(input('Epochs:'))
-    Batch_size = 32
-    N_Epochs = 50
-    N_train_samples = count_files(train_path)
-    N_test_samples = count_files(test_path)
+    # batch_size = int(input('Batch size: '))
+    # n_epochs = int(input('Epochs:'))
+    batch_size = 32
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
 
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
@@ -234,28 +233,29 @@ def train_top(model, group, position):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = {0: 1.5, 1: 1}
+    # class_weight = {0: 1.5, 1: 1}
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, group, position, train_type='top'),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
         max_q_size=10,
         workers=4,
@@ -271,14 +271,14 @@ def train_top(model, group, position):
 def fine_tune(model, group, position, weights_path):
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
-    N_train_samples = count_files(train_path)
-    N_test_samples = count_files(test_path)
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
 
     print('Please input top training parameters: \n')
-    # Batch_size = int(input('Batch size: '))
-    # N_Epochs = int(input('Epochs:'))
-    Batch_size = 32
-    N_Epochs = 100
+    # batch_size = int(input('Batch size: '))
+    # n_epochs = int(input('Epochs:'))
+    batch_size = 32
+    n_epochs = 100
 
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
@@ -286,13 +286,13 @@ def fine_tune(model, group, position, weights_path):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     print('Loading model...')
@@ -329,12 +329,12 @@ def fine_tune(model, group, position, weights_path):
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, group, position, train_type='ft'),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
         max_q_size=10,
         workers=4,
@@ -350,12 +350,12 @@ def fine_tune(model, group, position, weights_path):
 def ft_notop(model, group, position):
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
-    N_train_samples = count_files(train_path)
-    N_test_samples = count_files(test_path)
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
 
     print('Please input top training parameters: \n')
-    Batch_size = int(input('Batch size: '))
-    N_Epochs = int(input('Epochs:'))
+    batch_size = int(input('Batch size: '))
+    n_epochs = int(input('Epochs:'))
 
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
@@ -363,13 +363,13 @@ def ft_notop(model, group, position):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     print('Loading model...')
@@ -397,12 +397,12 @@ def ft_notop(model, group, position):
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, group, position, train_type='ft_notop'),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
         max_q_size=10,
         workers=4,
@@ -418,8 +418,8 @@ def ft_notop(model, group, position):
 def train_from_scratch(group, position):
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
-    N_train_samples = count_files(train_path)
-    N_test_samples = count_files(test_path)
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
 
     full_model = Sequential()
     full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(224, 224, 3)))
@@ -446,8 +446,8 @@ def train_from_scratch(group, position):
         optimizer='rmsprop',
         metrics=['accuracy'])
 
-    Batch_size = 32
-    N_Epochs = 100
+    batch_size = 32
+    n_epochs = 100
 
     train_datagen = get_train_datagen()
     test_datagen = get_test_datagen()
@@ -455,13 +455,13 @@ def train_from_scratch(group, position):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         target_size=(224, 224),
-        batch_size=Batch_size,
+        batch_size=batch_size,
         shuffle=True)
 
     full_model.compile(
@@ -475,12 +475,12 @@ def train_from_scratch(group, position):
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(N_train_samples / Batch_size),
-        epochs=N_Epochs,
+        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks('scratch', group, position, train_type='ft'),
         validation_data=test_generator,
-        validation_steps=np.ceil(N_test_samples / Batch_size),
+        validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
         max_q_size=10,
         workers=4,
@@ -501,16 +501,19 @@ def main():
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init top')
+    parser.add_argument('--epochs', default=50, help='# of epochs for top training')
+
 
     args = parser.parse_args()
     assert_validity(args)
     model_path = prep_dir(args)
     weights_path = model_path + 'top_trained.h5'
+    n_epochs = int(args.epochs)
 
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position)
     if args.train_top:
-        train_top(args.model, args.group, args.position)
+        train_top(args.model, args.group, args.position, n_epochs)
     if args.finetune:
         fine_tune(args.model, args.group, args.position, weights_path)
     if args.finetune_notop:
