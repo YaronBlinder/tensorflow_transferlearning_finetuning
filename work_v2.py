@@ -246,8 +246,8 @@ def train_top(model, group, position, n_epochs):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    # class_weight = {0: 1.5, 1: 1}
-    class_weight = 'auto'
+    class_weight = {0: 1.5, 1: 1}
+    # class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
