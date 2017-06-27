@@ -9,7 +9,7 @@ from keras.applications import ResNet50, VGG16, VGG19
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im
+from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, inception_preprocess
 # from keras.applications.imagenet_utils import preprocess_input
 from scipy.misc import imread
 
@@ -69,6 +69,7 @@ def get_base_model(model):
             weights='imagenet',
             include_top=False,
             input_tensor=keras.layers.Input(shape=(299, 299, 3)))
+
     elif model == 'xception':
         base_model = applications.xception.Xception(
             weights='imagenet',
@@ -174,7 +175,7 @@ def preprocess_input(im):
     return im
 
 
-def get_train_datagen():
+def get_train_datagen(model):
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
@@ -186,12 +187,16 @@ def get_train_datagen():
         # cval=0
         # vertical_flip=True
     )
-    datagen.config['random_crop_size'] = (224, 224)
-    datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
+    if model in ['xception', 'inception_v3']:
+        datagen.config['random_crop_size'] = (299, 299)
+        datagen.set_pipeline([random_crop, inception_preprocess, standardize])
+    else:
+        datagen.config['random_crop_size'] = (224, 224)
+        datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
     return datagen
 
 
-def get_test_datagen():
+def get_test_datagen(model):
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
@@ -199,7 +204,10 @@ def get_test_datagen():
         # samplewise_std_normalization=True,
     )
     # datagen.config['random_crop_size'] = (224, 224)
-    datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
+    if model in ['xception', 'inception_v3']:
+        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
+    else:
+        datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
     return datagen
 
 
@@ -213,17 +221,23 @@ def train_top(model, group, position, n_epochs):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
-    print('Please input top training parameters: \n')
+    if model in ['xception', 'inception_v3']:
+        train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
+        test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
+    else:
+        train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+        test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+
+    # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))
     # n_epochs = int(input('Epochs:'))
+
     batch_size = 32
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
-    train_datagen = get_train_datagen()
-    test_datagen = get_test_datagen()
+    train_datagen = get_train_datagen(model)
+    test_datagen = get_test_datagen(model)
 
     # sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
     # sample = imread(sample_file_path)
