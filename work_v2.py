@@ -208,7 +208,7 @@ def get_test_datagen(model):
         datagen.set_pipeline([scale_im, inception_preprocess, standardize])
     else:
         datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
-    return datagenp
+    return datagen
 
 
 def train_top(model, group, position, n_epochs):
