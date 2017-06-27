@@ -5,20 +5,22 @@ new process methods, etc...
 from __future__ import absolute_import
 from __future__ import print_function
 
-import numpy as np
-import re
-from scipy import linalg
-import scipy.ndimage as ndi
-from six.moves import range
-import os
-import sys
-import threading
 import copy
 import inspect
+import os
+import re
+import sys
+import threading
 import types
 
-from .. import backend as K
-from ..utils.generic_utils import Progbar
+import numpy as np
+import scipy.ndimage as ndi
+from scipy import linalg
+from six.moves import range
+
+from keras import backend as K
+from keras.utils.generic_utils import Progbar
+
 
 def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
                     fill_mode='nearest', cval=0.):
@@ -91,7 +93,7 @@ def random_channel_shift(x, intensity, channel_index=0):
     channel_images = [np.clip(x_channel + np.random.uniform(-intensity, intensity), min_x, max_x)
                       for x_channel in x]
     x = np.stack(channel_images, axis=0)
-    x = np.rollaxis(x, 0, channel_index+1)
+    x = np.rollaxis(x, 0, channel_index + 1)
     return x
 
 
@@ -109,9 +111,10 @@ def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', c
     final_affine_matrix = transform_matrix[:2, :2]
     final_offset = transform_matrix[:2, 2]
     channel_images = [ndi.interpolation.affine_transform(x_channel, final_affine_matrix,
-                      final_offset, order=0, mode=fill_mode, cval=cval) for x_channel in x]
+                                                         final_offset, order=0, mode=fill_mode, cval=cval) for x_channel
+                      in x]
     x = np.stack(channel_images, axis=0)
-    x = np.rollaxis(x, 0, channel_index+1)
+    x = np.rollaxis(x, 0, channel_index + 1)
     return x
 
 
@@ -168,13 +171,16 @@ def load_img(path, target_mode=None, target_size=None):
         img = img.resize((target_size[1], target_size[0]))
     return img
 
+
 def list_pictures(directory, ext='jpg|jpeg|bmp|png'):
     return [os.path.join(directory, f) for f in os.listdir(directory)
             if os.path.isfile(os.path.join(directory, f)) and re.match('([\w]+\.(?:' + ext + '))', f)]
 
+
 def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
     img = load_img(filepath, target_mode=target_mode, target_size=target_size)
     return img_to_array(img, dim_ordering=dim_ordering)
+
 
 def standardize(x,
                 dim_ordering='tf',
@@ -208,9 +214,9 @@ def standardize(x,
         if config.has_key('_X'):
             # add data to _X array
             config['_X'][config['_iX']] = x
-            config['_iX'] +=1
+            config['_iX'] += 1
             if verbose and config.has_key('_fit_progressbar'):
-                config['_fit_progressbar'].update(config['_iX'], force=(config['_iX']==fitting))
+                config['_fit_progressbar'].update(config['_iX'], force=(config['_iX'] == fitting))
 
             # the array (_X) is ready to fit
             if config['_iX'] >= fitting:
@@ -220,7 +226,7 @@ def standardize(x,
                 if featurewise_center or featurewise_std_normalization:
                     featurewise_standardize_axis = featurewise_standardize_axis or 0
                     if type(featurewise_standardize_axis) is int:
-                        featurewise_standardize_axis = (featurewise_standardize_axis, )
+                        featurewise_standardize_axis = (featurewise_standardize_axis,)
                     assert 0 in featurewise_standardize_axis, 'feature-wise standardize axis should include 0'
 
                 if featurewise_center:
@@ -242,10 +248,10 @@ def standardize(x,
                     del config['_fit_progressbar']
         else:
             # start a new fitting, fitting = total sample number
-            config['_X'] = np.zeros((fitting,)+x.shape)
+            config['_X'] = np.zeros((fitting,) + x.shape)
             config['_iX'] = 0
             config['_X'][config['_iX']] = x
-            config['_iX'] +=1
+            config['_iX'] += 1
             if verbose:
                 config['_fit_progressbar'] = Progbar(target=fitting, verbose=verbose)
         return x
@@ -264,7 +270,7 @@ def standardize(x,
 
     samplewise_standardize_axis = samplewise_standardize_axis or channel_index
     if type(samplewise_standardize_axis) is int:
-        samplewise_standardize_axis = (samplewise_standardize_axis, )
+        samplewise_standardize_axis = (samplewise_standardize_axis,)
 
     if samplewise_center:
         x -= np.mean(x, axis=samplewise_standardize_axis, keepdims=True)
@@ -272,7 +278,8 @@ def standardize(x,
         x /= (np.std(x, axis=samplewise_standardize_axis, keepdims=True) + 1e-7)
 
     if verbose:
-        if (featurewise_center and mean is None) or (featurewise_std_normalization and std is None) or (zca_whitening and principal_components is None):
+        if (featurewise_center and mean is None) or (featurewise_std_normalization and std is None) or (
+            zca_whitening and principal_components is None):
             print('WARNING: feature-wise standardization and zca whitening will be disabled, please run "fit" first.')
 
     if featurewise_center:
@@ -289,10 +296,12 @@ def standardize(x,
             x = np.reshape(whitex, (x.shape[0], x.shape[1], x.shape[2]))
     return x
 
+
 def center_crop(x, center_crop_size, **kwargs):
-    centerw, centerh = x.shape[1]//2, x.shape[2]//2
-    halfw, halfh = center_crop_size[0]//2, center_crop_size[1]//2
-    return x[:, centerw-halfw:centerw+halfw,centerh-halfh:centerh+halfh]
+    centerw, centerh = x.shape[1] // 2, x.shape[2] // 2
+    halfw, halfh = center_crop_size[0] // 2, center_crop_size[1] // 2
+    return x[:, centerw - halfw:centerw + halfw, centerh - halfh:centerh + halfh]
+
 
 def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
     np.random.seed(sync_seed)
@@ -301,7 +310,8 @@ def random_crop(x, random_crop_size, sync_seed=None, **kwargs):
     rangeh = (h - random_crop_size[1]) // 2
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
-    return x[:, offsetw:offsetw+random_crop_size[0], offseth:offseth+random_crop_size[1]]
+    return x[:, offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
+
 
 def random_transform(x,
                      dim_ordering='tf',
@@ -421,6 +431,7 @@ def random_transform(x,
     np.random.seed()
     return x
 
+
 class ImageDataGenerator(object):
     '''Generate minibatches with
     real-time data augmentation.
@@ -465,6 +476,7 @@ class ImageDataGenerator(object):
             one image (Numpy tensor with rank 3),
             and should output a Numpy tensor with the same shape.
     '''
+
     def __init__(self,
                  featurewise_center=False,
                  samplewise_center=False,
@@ -546,8 +558,8 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self, directory,
                             color_mode=None, target_size=None,
-                            image_reader='pil', reader_config={'target_mode':'RGB', 'target_size':(256,256)},
-                            read_formats={'png','jpg','jpeg','bmp'},
+                            image_reader='pil', reader_config={'target_mode': 'RGB', 'target_size': (256, 256)},
+                            read_formats={'png', 'jpg', 'jpeg', 'bmp'},
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
                             save_to_dir=None, save_prefix='',
@@ -582,7 +594,7 @@ class ImageDataGenerator(object):
         '''
         with self.fit_lock:
             try:
-                self.__fitting = nb_iter*generator.batch_size
+                self.__fitting = nb_iter * generator.batch_size
                 for i in xrange(nb_iter):
                     next(generator)
             finally:
@@ -598,15 +610,15 @@ class ImageDataGenerator(object):
         X = np.copy(X)
         with self.fit_lock:
             try:
-                self.__fitting = rounds*X.shape[0]
+                self.__fitting = rounds * X.shape[0]
                 for r in xrange(rounds):
                     for i in xrange(X.shape[0]):
                         self.process(X[i])
             finally:
                 self.__fitting = False
 
-class Iterator(object):
 
+class Iterator(object):
     def __init__(self, N, batch_size, shuffle, seed):
         self.N = N
         self.batch_size = batch_size
@@ -669,7 +681,6 @@ class Iterator(object):
 
 
 class NumpyArrayIterator(Iterator):
-
     def __init__(self, X, y, image_data_generator,
                  batch_size=32, shuffle=False, seed=None,
                  dim_ordering=K.image_dim_ordering(),
@@ -728,11 +739,10 @@ class NumpyArrayIterator(Iterator):
 
 
 class DirectoryIterator(Iterator):
-
     def __init__(self, directory, image_data_generator,
                  color_mode=None, target_size=None,
-                 image_reader="pil", read_formats={'png','jpg','jpeg','bmp'},
-                 reader_config={'target_mode': 'RGB', 'target_size':None},
+                 image_reader="pil", read_formats={'png', 'jpg', 'jpeg', 'bmp'},
+                 reader_config={'target_mode': 'RGB', 'target_size': None},
                  dim_ordering=K.image_dim_ordering,
                  classes=None, class_mode='categorical',
                  batch_size=32, shuffle=True, seed=None,
@@ -810,7 +820,7 @@ class DirectoryIterator(Iterator):
                     self.filenames.append(os.path.join(subdir, fname))
                     i += 1
 
-        assert len(self.filenames)>0, 'No valid file is found in the target directory.'
+        assert len(self.filenames) > 0, 'No valid file is found in the target directory.'
         self.reader_config['class_mode'] = self.class_mode
         self.reader_config['classes'] = self.classes
         self.reader_config['filenames'] = self.filenames
@@ -823,7 +833,7 @@ class DirectoryIterator(Iterator):
             self._reader_generator_mode = True
             self._reader_generator = []
             # set index batch_size to 1
-            self.index_generator = self._flow_index(self.N, 1 , self.shuffle, seed)
+            self.index_generator = self._flow_index(self.N, 1, self.shuffle, seed)
         else:
             self._reader_generator_mode = False
 
@@ -847,7 +857,7 @@ class DirectoryIterator(Iterator):
             sampleCount = 0
             batch_x = None
             _new_generator_flag = False
-            while sampleCount<self.batch_size:
+            while sampleCount < self.batch_size:
                 for x in self._reader_generator:
                     _new_generator_flag = False
                     if x.ndim == 2:
@@ -857,7 +867,7 @@ class DirectoryIterator(Iterator):
                     if sampleCount == 0:
                         batch_x = np.zeros((self.batch_size,) + x.shape)
                     batch_x[sampleCount] = x
-                    sampleCount +=1
+                    sampleCount += 1
                     if sampleCount >= self.batch_size:
                         break
                 if sampleCount >= self.batch_size or _new_generator_flag:
