@@ -237,6 +237,8 @@ def train_top(model, group, position, n_epochs):
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
+
+    print(train_path)
     train_datagen = get_train_datagen(model)
     test_datagen = get_test_datagen(model)
 
