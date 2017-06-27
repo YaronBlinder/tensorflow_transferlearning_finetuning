@@ -5,7 +5,7 @@ import os
 import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
-from keras.applications import ResNet50, VGG16, VGG19
+from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 # from keras.preprocessing.image import ImageDataGenerator
@@ -65,13 +65,13 @@ def get_base_model(model):
             input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
     elif model == 'inception_v3':
-        base_model = applications.inception_v3.InceptionV3(
+        base_model = InceptionV3(
             weights='imagenet',
             include_top=False,
             input_tensor=keras.layers.Input(shape=(299, 299, 3)))
 
     elif model == 'xception':
-        base_model = applications.xception.Xception(
+        base_model = Xception(
             weights='imagenet',
             include_top=False,
             input_tensor=keras.layers.Input(shape=(299, 299, 3)))
