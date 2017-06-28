@@ -85,14 +85,15 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
 
 def imagenet_preprocess(x, *args, **kwargs):
     x = np.reshape(x, [1, 224, 224, 3])
-    # RGB->BGR
-    x = x[:, :, :, ::-1]
+
     # Zero-center by mean pixel
     x[:, :, :, 0] -= 103.939
     x[:, :, :, 1] -= 116.779
     x[:, :, :, 2] -= 123.68
 
-    # TODO: random crop to 224x224
+    # RGB->BGR
+    x = x[:, :, :, ::-1]
+
     x = np.reshape(x, [224, 224, 3])
     return x
 
