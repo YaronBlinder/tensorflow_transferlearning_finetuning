@@ -566,7 +566,7 @@ def train_from_scratch(group, position):
         steps_per_epoch=np.ceil(n_train_samples / batch_size),
         epochs=n_epochs,
         verbose=1,
-        callbacks=get_callbacks('scratch', 'scratch_top', group, position, train_type='ft'),
+        callbacks=get_callbacks('scratch', 'ft_notop', group, position, train_type='ft'),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
