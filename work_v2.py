@@ -559,7 +559,8 @@ def train_from_scratch(group, position):
 
     print('Training from scratch')
 
-    class_weight = {0: 1.5, 1: 1}cd
+    # class_weight = {0: 1.5, 1: 1}
+    class_weight = 'auto'
 
     full_model.fit_generator(
         generator=train_generator,
