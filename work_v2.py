@@ -527,7 +527,7 @@ def train_from_scratch(group, position):
     full_model.add(keras.layers.Dense(64))
     full_model.add(keras.layers.Activation('relu'))
     full_model.add(keras.layers.Dropout(0.5))
-    full_model.add(keras.layers.Dense(1))
+    full_model.add(keras.layers.Dense(N_classes))
     full_model.add(keras.layers.Activation('softmax'))
 
     full_model.compile(
