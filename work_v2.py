@@ -39,7 +39,8 @@ def assert_validity(args):
 def prep_dir(args):
     group, model, position, top = args.group, args.model, args.position, args.top
     model_path = 'models/{group}/{position}/{model}/{top}'.format(group=group, position=position, model=model, top=top)
-    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
+    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model,
+                                                                         top=top)
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(model_path + 'top', exist_ok=True)
@@ -143,16 +144,16 @@ def get_model(model, top, freeze_base=False):
     base_model = get_base_model(model)
     x = base_model.output
     x = keras.layers.Flatten()(x)
-    if top=='chollet':
+    if top == 'chollet':
         x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
         x = keras.layers.Dropout(0.5)(x)
         x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-    elif top=='waya':
+    elif top == 'waya':
         x = keras.layers.Dense(1024)(x)
         x = keras.layers.BatchNormalization()(x)
         x = keras.layers.advanced_activations.LeakyReLU()(x)
         x = keras.layers.Dropout(0.25)(x)
-    elif top=='linear':
+    elif top == 'linear':
         x = keras.layers.Dense(256)(x)
         x = keras.layers.Dropout(0.5)(x)
     else:
@@ -348,8 +349,8 @@ def train_top(model, top, group, position, n_epochs):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/top_trained.h5'.format(position=position, group=group,
-                                                                             model=model)
+    weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,
+                                                                                   model=model, top=top)
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
