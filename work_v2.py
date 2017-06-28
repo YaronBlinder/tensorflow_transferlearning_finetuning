@@ -534,7 +534,7 @@ def train_from_scratch(group, position):
         loss='binary_crossentropy',
         optimizer='rmsprop',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=[f'accuracy', f1_score, precision, recall])
+        metrics=['accuracy', f1_score, precision, recall])
 
     batch_size = 32
     n_epochs = 100
