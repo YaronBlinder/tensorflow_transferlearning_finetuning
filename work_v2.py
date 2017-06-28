@@ -2,17 +2,18 @@ import argparse
 import glob
 import os
 
-import keras.layers
 import keras.backend as K
+import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
-from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
+
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, inception_preprocess
+from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
+    inception_preprocess
+
 # from keras.applications.imagenet_utils import preprocess_input
-from scipy.misc import imread
 
 # This version uses the finetuning example from Keras documentation
 # instead of the bottleneck feature generation
@@ -162,22 +163,20 @@ def get_model(model, freeze_base=False):
 
 
 def preprocess_input(im):
-
     im = np.reshape(im, [1, 224, 224, 3])
-    #RGB->BGR
+    # RGB->BGR
     im = im[:, :, :, ::-1]
     # Zero-center by mean pixel
     im[:, :, :, 0] -= 103.939
     im[:, :, :, 1] -= 116.779
     im[:, :, :, 2] -= 123.68
 
-    #TODO: random crop to 224x224
+    # TODO: random crop to 224x224
     im = np.reshape(im, [224, 224, 3])
     return im
 
 
 def f1_score(y_true, y_pred):
-
     # Count positive samples.
     c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
@@ -245,7 +244,7 @@ def train_top(model, group, position, n_epochs):
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-    metrics=['accuracy', f1_score]
+        metrics=['accuracy', f1_score])
 
     if model in ['xception', 'inception_v3']:
         train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
@@ -261,7 +260,6 @@ def train_top(model, group, position, n_epochs):
     batch_size = 32
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
-
 
     print(train_path)
     train_datagen = get_train_datagen(model)
@@ -371,7 +369,7 @@ def fine_tune(model, group, position, weights_path):
         optimizer=optimizers.Adam(lr=1e-5),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score]
+        metrics=['accuracy', f1_score])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
@@ -440,7 +438,7 @@ def ft_notop(model, group, position):
         optimizer=optimizers.adam(lr=5e-5),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score]
+        metrics=['accuracy', f1_score])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
@@ -497,7 +495,7 @@ def train_from_scratch(group, position):
         loss='binary_crossentropy',
         optimizer='rmsprop',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score]
+        metrics=['accuracy', f1_score])
 
     batch_size = 32
     n_epochs = 100
@@ -516,12 +514,6 @@ def train_from_scratch(group, position):
         target_size=(224, 224),
         batch_size=batch_size,
         shuffle=True)
-
-    full_model.compile(
-        optimizer=optimizers.rmsprop(),
-        loss='binary_crossentropy',
-        # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score]
 
     print('Training from scratch')
 
@@ -556,7 +548,6 @@ def main():
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init top')
     parser.add_argument('--epochs', default=50, help='# of epochs for top training')
-
 
     args = parser.parse_args()
     assert_validity(args)
