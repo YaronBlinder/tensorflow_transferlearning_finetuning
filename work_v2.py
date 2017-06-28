@@ -135,22 +135,26 @@ def get_callbacks(model, group, position, train_type):
     ]
 
 
-def get_model(model, freeze_base=False):
+def get_model(model, top, freeze_base=False):
+    assert top in ['chollet', 'waya', 'linear'], 'top selection invalid'
+
     base_model = get_base_model(model)
     x = base_model.output
     x = keras.layers.Flatten()(x)
-
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-    # x = keras.layers.Dropout(0.5)(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-
-    x = keras.layers.Dense(1024)(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.advanced_activations.LeakyReLU()(x)
-    x = keras.layers.Dropout(0.25)(x)
-
-    # x = keras.layers.Dense(256)(x)
-    # x = keras.layers.Dropout(0.5)(x)
+    if top=='chollet':
+        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+        x = keras.layers.Dropout(0.5)(x)
+        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    elif top=='waya':
+        x = keras.layers.Dense(1024)(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.advanced_activations.LeakyReLU()(x)
+        x = keras.layers.Dropout(0.25)(x)
+    elif top=='linear':
+        x = keras.layers.Dense(256)(x)
+        x = keras.layers.Dropout(0.5)(x)
+    else:
+        assert False, 'you should not be here'
 
     predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id')(x)
 
@@ -267,9 +271,9 @@ def get_test_datagen(model):
     return datagen
 
 
-def train_top(model, group, position, n_epochs):
+def train_top(model, top, group, position, n_epochs):
     print('Loading model...')
-    full_model = get_model(model, freeze_base=True)
+    full_model = get_model(model, top, freeze_base=True)
     full_model.compile(
         optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         # optimizer=optimizers.Adam(lr=1e-4),
@@ -348,7 +352,7 @@ def train_top(model, group, position, n_epochs):
     print('Model top trained.')
 
 
-def fine_tune(model, group, position, weights_path):
+def fine_tune(model, top, group, position, weights_path):
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
@@ -376,7 +380,7 @@ def fine_tune(model, group, position, weights_path):
         shuffle=True)
 
     print('Loading model...')
-    full_model = get_model(model)
+    full_model = get_model(model, top)
     full_model.load_weights(weights_path)
     print('model weights loaded.')
 
@@ -428,7 +432,7 @@ def fine_tune(model, group, position, weights_path):
     print('Model fine-tuned.')
 
 
-def ft_notop(model, group, position):
+def ft_notop(model, top, group, position):
     train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
@@ -454,7 +458,7 @@ def ft_notop(model, group, position):
         shuffle=True)
 
     print('Loading model...')
-    full_model = get_model(model)
+    full_model = get_model(model, top)
     print('model weights loaded.')
 
     for i, layer in enumerate(full_model.layers):
@@ -574,6 +578,7 @@ def train_from_scratch(group, position):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
+    parser.add_argument('--top', default='waya', help='Top classifier')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
     parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--train_top', action='store_true', help='train top')
@@ -590,11 +595,11 @@ def main():
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position)
     if args.train_top:
-        train_top(args.model, args.group, args.position, n_epochs)
+        train_top(args.model, args.top, args.group, args.position, n_epochs)
     if args.finetune:
-        fine_tune(args.model, args.group, args.position, weights_path)
+        fine_tune(args.model, args.top, args.group, args.position, weights_path)
     if args.finetune_notop:
-        ft_notop(args.model, args.group, args.position)
+        ft_notop(args.model, args.top, args.group, args.position)
 
 
 if __name__ == '__main__':
