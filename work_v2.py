@@ -8,6 +8,7 @@ import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.models import Model, Sequential
+from keras.initializers import glorot_normal
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
