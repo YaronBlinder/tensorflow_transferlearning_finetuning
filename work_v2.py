@@ -276,7 +276,7 @@ def train_top(model, group, position, n_epochs):
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=[f1_score, precision, recall])
+        metrics=['accuracy', f1_score, precision, recall])
 
     if model in ['xception', 'inception_v3']:
         train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
@@ -401,7 +401,7 @@ def fine_tune(model, group, position, weights_path):
         optimizer=optimizers.Adam(lr=1e-5),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=[f1_score, precision, recall])
+        metrics=['accuracy', f1_score, precision, recall])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
@@ -470,7 +470,7 @@ def ft_notop(model, group, position):
         optimizer=optimizers.adam(lr=5e-5),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=[f1_score, precision, recall])
+        metrics=['accuracy', f1_score, precision, recall])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
@@ -527,7 +527,7 @@ def train_from_scratch(group, position):
         loss='binary_crossentropy',
         optimizer='rmsprop',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=[f1_score, precision, recall])
+        metrics=[f'accuracy', f1_score, precision, recall])
 
     batch_size = 32
     n_epochs = 100
