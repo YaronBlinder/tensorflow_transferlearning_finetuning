@@ -248,7 +248,7 @@ def get_train_datagen(model):
         # cval=0
         # vertical_flip=True
     )
-    if model in ['xception', 'inception_v3']:
+    if model in ['xception', 'inception_v3', 'scratch']:
         datagen.config['random_crop_size'] = (299, 299)
         datagen.set_pipeline([random_crop, inception_preprocess, standardize])
     else:
@@ -265,7 +265,7 @@ def get_test_datagen(model):
         # samplewise_std_normalization=True,
     )
     # datagen.config['random_crop_size'] = (224, 224)
-    if model in ['xception', 'inception_v3']:
+    if model in ['xception', 'inception_v3', 'scratch']:
         datagen.config['size'] = 299
         datagen.set_pipeline([scale_im, inception_preprocess, standardize])
     else:
@@ -505,13 +505,13 @@ def ft_notop(model, top, group, position):
 
 
 def train_from_scratch(group, position):
-    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
     full_model = Sequential()
-    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(224, 224, 3)))
+    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(299, 299, 3)))
     full_model.add(keras.layers.Activation('relu'))
     full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
@@ -539,18 +539,21 @@ def train_from_scratch(group, position):
     batch_size = 32
     n_epochs = 100
 
-    train_datagen = get_train_datagen()
-    test_datagen = get_test_datagen()
+    train_datagen = get_train_datagen('scratch')
+    test_datagen = get_test_datagen('scratch')
 
+    target_size = (299, 299)
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
