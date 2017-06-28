@@ -37,9 +37,9 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    group, model, position = args.group, args.model, args.position
-    model_path = 'models/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
-    TBlog_path = 'TBlog/models/{group}/{position}/{model}/'.format(group=group, position=position, model=model)
+    group, model, position, top = args.group, args.model, args.position, args.top
+    model_path = 'models/{group}/{position}/{model}/{top}'.format(group=group, position=position, model=model, top=top)
+    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(model_path + 'top', exist_ok=True)
@@ -102,15 +102,16 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, group, position, train_type):
+def get_callbacks(model, top, group, position, train_type):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    path = 'models/{group}/{position}/{model}/{train_type}/'.format(
+    path = 'models/{group}/{position}/{model}/{top}/{train_type}/'.format(
         group=group,
         position=position,
         model=model,
+        top=top,
         train_type=train_type)
     return [
         callbacks.ModelCheckpoint(
