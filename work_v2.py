@@ -248,15 +248,22 @@ def train_top(model, group, position, n_epochs):
     # train_datagen.fit(sample)
     # test_datagen.fit(sample)
 
+    if model in ['xception', 'inception_v3']:
+        target_size = (299, 299)
+    else:
+        target_size = (224, 224)
+
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
