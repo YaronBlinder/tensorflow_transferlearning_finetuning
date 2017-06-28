@@ -532,7 +532,7 @@ def train_from_scratch(group, position):
 
     full_model.compile(
         loss='binary_crossentropy',
-        optimizer='rmsprop',
+        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
         # metrics=['accuracy', f1_score, precision_score, recall_score])
         metrics=['accuracy', f1_score, precision, recall])
 
@@ -559,7 +559,7 @@ def train_from_scratch(group, position):
 
     print('Training from scratch')
 
-    class_weight = {0: 1.5, 1: 1}
+    class_weight = {0: 1.5, 1: 1}cd
 
     full_model.fit_generator(
         generator=train_generator,
