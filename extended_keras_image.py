@@ -104,7 +104,7 @@ def inception_preprocess(x, *args, **kwargs):
     return x
 
 
-def scale_im(x, size=224, *args, **kwargs):
+def scale_im(x, size, *args, **kwargs):
     return resize(x, (size, size))
 
 
