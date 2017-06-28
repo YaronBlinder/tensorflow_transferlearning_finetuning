@@ -7,8 +7,8 @@ import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
-from keras.models import Model, Sequential
 from keras.initializers import glorot_normal
+from keras.models import Model, Sequential
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
@@ -38,7 +38,7 @@ def assert_validity(args):
 
 def prep_dir(args):
     group, model, position, top = args.group, args.model, args.position, args.top
-    model_path = 'models/{group}/{position}/{model}/{top}'.format(group=group, position=position, model=model, top=top)
+    model_path = 'models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
     TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model,
                                                                          top=top)
     os.makedirs(model_path, exist_ok=True)
