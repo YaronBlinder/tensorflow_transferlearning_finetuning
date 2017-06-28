@@ -103,7 +103,7 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type):
+def get_callbacks(model, top=None, group, position, train_type):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
