@@ -185,9 +185,11 @@ def preprocess_input(im):
 
 def f1_score(y_true, y_pred):
     # Count positive samples.
-    c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    c3 = K.sum(K.round(K.clip(y_true, 0, 1)))
+    c1 = K.sum(K.round(y_true * y_pred))
+    c2 = K.sum(K.round(y_pred))
+    c3 = K.sum(K.round(y_true))
+
+
 
     # If there are no true samples, fix the F1 score at 0.
     if c3 == 0:
@@ -206,15 +208,10 @@ def f1_score(y_true, y_pred):
 
 def precision(y_true, y_pred):
     # Count positive samples.
-    c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    # c3 = K.sum(K.round(K.clip(y_true, 0, 1)))
+    c1 = K.sum(K.round(y_true * y_pred))
+    c2 = K.sum(K.round(y_pred))
+    # c3 = K.sum(K.round(y_true))
 
-    # # If there are no true samples, fix the F1 score at 0.
-    # if c3 == 0:
-    #     return 0
-
-    # How many selected items are relevant?
     precision = c1 / c2
 
     return precision
@@ -222,9 +219,9 @@ def precision(y_true, y_pred):
 
 def recall(y_true, y_pred):
     # Count positive samples.
-    c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    # c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    c3 = K.sum(K.round(K.clip(y_true, 0, 1)))
+    c1 = K.sum(K.round(y_true * y_pred))
+    # c2 = K.sum(K.round(y_pred))
+    c3 = K.sum(K.round(y_true))
 
     # If there are no true samples, fix the F1 score at 0.
     if c3 == 0:
