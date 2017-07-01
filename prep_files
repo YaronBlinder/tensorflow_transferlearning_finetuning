@@ -1,0 +1,41 @@
+cd ~/Radical/data/PA_224/F_Adult/
+rm -r */10 */11 */3
+cd train/2
+ls | grep f. -m 318 | xargs rm -fr
+ls | grep ^[^f] -m 318 | xargs rm -fr
+cd ~/Radical/data/PA_224/F_Adult/test/2
+ls | grep f. -m 83 | xargs rm -fr
+ls | grep ^[^f] -m 83 | xargs rm -fr
+
+cd ~/Radical/data/PA_224/M_Adult/
+rm -r */10 */11 */3
+cd train/2
+ls | grep f. -m 103 | xargs rm -fr
+ls | grep ^[^f] -m 103 | xargs rm -fr
+cd ~/Radical/data/PA_224/M_Adult/test/2
+ls | grep f. -m 374 | xargs rm -fr
+ls | grep ^[^f] -m 374 | xargs rm -fr
+
+cd ~/Radical/data/LAT_224/F_Adult/
+rm -r */10 */11 */3
+cd train/2
+ls | grep f. -m 318 | xargs rm -fr
+ls | grep ^[^f] -m 318 | xargs rm -fr
+cd ~/Radical/data/PA_224/F_Adult/test/2
+ls | grep f. -m 83 | xargs rm -fr
+ls | grep ^[^f] -m 83 | xargs rm -fr
+
+cd ~/Radical/data/LAT_224/M_Adult/
+rm -r */10 */11 */3
+cd train/2
+ls | grep f. -m 103 | xargs rm -fr
+ls | grep ^[^f] -m 103 | xargs rm -fr
+cd ~/Radical/data/PA_224/M_Adult/test/2
+ls | grep f. -m 374 | xargs rm -fr
+ls | grep ^[^f] -m 374 | xargs rm -fr
+
+
+
+
+
+

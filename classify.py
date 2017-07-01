@@ -16,10 +16,6 @@ N_classes = 2
 
 
 def get_base_model(model):
-    implemented_models = ['resnet50', 'vgg16', 'vgg19']
-
-    assert model in implemented_models, '{} is not an implemented model!'.format(model)
-
     if model == 'resnet50':
         base_model = ResNet50(
             weights='imagenet',
@@ -38,35 +34,48 @@ def get_base_model(model):
             include_top=False,
             input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
-    # elif model == 'inception_v3':
-    #     base_model = applications.inception_v3.InceptionV3(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
-    # elif model == 'xception':
-    #     base_model = applications.xception.Xception(
-    #         weights='imagenet',
-    #         include_top=False,
-    #         input_tensor=input_tensor)
+    elif model == 'inception_v3':
+        base_model = InceptionV3(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=keras.layers.Input(shape=(299, 299, 3)))
 
+    elif model == 'xception':
+        base_model = Xception(
+            weights='imagenet',
+            include_top=False,
+            input_tensor=keras.layers.Input(shape=(299, 299, 3)))
+
+    else:
+        assert False, '{} is not an implemented model!'.format(model)
 
     return base_model
 
 
-def get_model(model, freeze_base=False):
+def get_model(model, top, freeze_base=False):
+    assert top in ['chollet', 'waya', 'linear'], 'top selection invalid'
+
     base_model = get_base_model(model)
     x = base_model.output
     x = keras.layers.Flatten()(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
-    # x = keras.layers.Dropout(0.5)(x)
-    # x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    if top == 'chollet':
+        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+        x = keras.layers.Dropout(0.5)(x)
+        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+    elif top == 'waya':
+        x = keras.layers.Dense(1024)(x)
+        x = keras.layers.BatchNormalization()(x)
+        x = keras.layers.advanced_activations.LeakyReLU()(x)
+        x = keras.layers.Dropout(0.25)(x)
+    elif top == 'linear':
+        x = keras.layers.Dense(256)(x)
+        x = keras.layers.Dropout(0.5)(x)
+    else:
+        assert False, 'you should not be here'
 
-    x = keras.layers.Dense(1024)(x)
-    x = keras.layers.BatchNormalization()(x)
-    x = keras.layers.advanced_activations.LeakyReLU()(x)
-    x = keras.layers.Dropout(0.25)(x)
+    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id')(x)
 
-    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
+    # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
     full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
         for layer in base_model.layers:
@@ -75,21 +84,25 @@ def get_model(model, freeze_base=False):
 
 
 def predict(model, group, position, file):
-    weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(group=group, position=position,
-                                                                                 model=model)
+    # weights_path = 'models/{group}/{position}/{model}/bottleneck_fc_model.h5'.format(group=group, position=position,
+    #                                                                              model=model)
+    weights_path = 'saved_models/{model}/{top}/top_trained.h5'.format(model=model, top=top)
     assert os.path.exists(weights_path), 'Model not trained! ({})'.format(weights_path)
 
     size = 224
     clf = get_model(model)
     clf.load_weights(weights_path)
-    img = load_img(
-        file,
-        False,
-        target_size=(size, size))
-    x = img_to_array(img)
-    x = np.expand_dims(x, axis=0)
+    if file == None:
+        pass
+    else:
+        img = load_img(
+            file,
+            False,
+            target_size=(size, size))
+        x = img_to_array(img)
+        x = np.expand_dims(x, axis=0)
 
-    preds = clf.predict(x)
+        preds = clf.predict(x)
 
     return preds
 
@@ -111,7 +124,7 @@ def ensemble(group, position, file):
 def ensemble_all(group, position):
 
 
-    data_path = 'data/{position}/train_224_3ch_flip/{group}/test/'.format(position=position, group=group)
+    data_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
 
     rows_list = []
     for filename in tqdm(os.listdir(data_path+'1')[:2]):
@@ -154,12 +167,14 @@ def ensemble_all(group, position):
     df = pd.DataFrame(rows_list, columns=['id', 'label', 'ensemble_score', 'resnet50_score', 'vgg16_score', 'vgg19_score'])
     return df
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
+    parser.add_argument('--top', default='chollet', help='Top classifier architecture')
     parser.add_argument('--group', default='F_Adult', help='Demographic group')
     parser.add_argument('--position', default='PA', help='patient position')
-    parser.add_argument('--file', required=True, help='path to image')
+    parser.add_argument('--file', default=None, help='path to image')
     parser.add_argument('--ensemble', action='store_true', help='Flag for ensemble classification')
     parser.add_argument('--ensemble_all', action='store_true', help='Flag to go over test set and produce dataframe')
 
@@ -174,10 +189,10 @@ def main():
         df = ensemble_all(group, position)
         df.to_csv('ensemble_{group}_{position}.csv'.format(group=group, position=position))
     elif args.ensemble:
-        ens_preds = ensemble(group, position, file)
+        ens_preds = ensemble(group, top, position, file)
         print('ensemble pred: {}'.format(ens_preds))
     else:
-        preds = predict(model, group, position, file)
+        preds = predict(model, top, group, position, file)
         print(preds)
 
 

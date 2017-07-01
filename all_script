@@ -1,0 +1,19 @@
+python work_v2.py --model resnet50 --group M_Adult --train_top --top chollet
+python work_v2.py --model resnet50 --group M_Adult --train_top --top waya
+python work_v2.py --model resnet50 --group M_Adult --train_top --top linear
+python work_v2.py --model vgg16 --group M_Adult --train_top --top chollet
+python work_v2.py --model vgg16 --group M_Adult --train_top --top waya
+python work_v2.py --model vgg16 --group M_Adult --train_top --top linear
+python work_v2.py --model vgg19 --group M_Adult --train_top --top chollet
+python work_v2.py --model vgg19 --group M_Adult --train_top --top waya
+python work_v2.py --model vgg19 --group M_Adult --train_top --top linear
+python work_v2.py --model resnet50 --group F_Adult --train_top --top chollet
+python work_v2.py --model resnet50 --group F_Adult --train_top --top waya
+python work_v2.py --model resnet50 --group F_Adult --train_top --top linear
+python work_v2.py --model vgg16 --group F_Adult --train_top --top chollet
+python work_v2.py --model vgg16 --group F_Adult --train_top --top waya
+python work_v2.py --model vgg16 --group F_Adult --train_top --top linear
+python work_v2.py --model vgg19 --group F_Adult --train_top --top chollet
+python work_v2.py --model vgg19 --group F_Adult --train_top --top waya
+python work_v2.py --model vgg19 --group F_Adult --train_top --top linear
+python PA_LAT_ensemble.py

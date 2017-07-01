@@ -115,11 +115,11 @@ def get_callbacks(model, top, group, position, train_type):
         top=top,
         train_type=train_type)
     return [
-        callbacks.ModelCheckpoint(
-            filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
-            monitor='val_acc',
-            verbose=1,
-            save_best_only=True),
+        # callbacks.ModelCheckpoint(
+        #     filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
+        #     monitor='val_acc',
+        #     verbose=1,
+        #     save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
             patience=15,
@@ -183,56 +183,6 @@ def preprocess_input(im):
     return im
 
 
-def f1_score(y_true, y_pred):
-    # Count positive samples.
-    c1 = K.sum(K.round(y_true * y_pred))
-    c2 = K.sum(K.round(y_pred))
-    c3 = K.sum(K.round(y_true))
-
-
-
-    # If there are no true samples, fix the F1 score at 0.
-    if c3 == 0:
-        return 0
-
-    # How many selected items are relevant?
-    precision = c1 / c2
-
-    # How many relevant items are selected?
-    recall = c1 / c3
-
-    # Calculate f1_score
-    f1_score = 2 * (precision * recall) / (precision + recall)
-    return f1_score
-
-
-def precision(y_true, y_pred):
-    # Count positive samples.
-    c1 = K.sum(K.round(y_true * y_pred))
-    c2 = K.sum(K.round(y_pred))
-    # c3 = K.sum(K.round(y_true))
-
-    precision = c1 / c2
-
-    return precision
-
-
-def recall(y_true, y_pred):
-    # Count positive samples.
-    c1 = K.sum(K.round(y_true * y_pred))
-    # c2 = K.sum(K.round(y_pred))
-    c3 = K.sum(K.round(y_true))
-
-    # If there are no true samples, fix the F1 score at 0.
-    if c3 == 0:
-        return 0
-
-    # How many relevant items are selected?
-    recall = c1 / c3
-
-    return recall
-
-
 def get_train_datagen(model):
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
@@ -280,14 +230,16 @@ def train_top(model, top, group, position, n_epochs):
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score, precision, recall])
+        metrics=['accuracy'])
 
     if model in ['xception', 'inception_v3']:
-        train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
-        test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
+        # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
+        # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
     else:
-        train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-        test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+        # train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+        # test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+        train_path = 'data/{position}_224/{group}/train/'.format(position=position, group=group)
+        test_path = 'data/{position}_224/{group}/test/'.format(position=position, group=group)
 
     # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))
@@ -364,18 +316,25 @@ def fine_tune(model, top, group, position, weights_path):
     batch_size = 32
     n_epochs = 100
 
-    train_datagen = get_train_datagen()
-    test_datagen = get_test_datagen()
+    train_datagen = get_train_datagen(model)
+    test_datagen = get_test_datagen(model)
+
+    if model in ['xception', 'inception_v3']:
+        target_size = (299, 299)
+    else:
+        target_size = (224, 224)
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        target_size=(224, 224),
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
