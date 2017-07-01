@@ -233,13 +233,15 @@ def train_top(model, top, group, position, n_epochs):
         metrics=['accuracy'])
 
     if model in ['xception', 'inception_v3']:
+        pass
         # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
         # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
     else:
-        # train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-        # test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
         train_path = 'data/{position}_224/{group}/train/'.format(position=position, group=group)
         test_path = 'data/{position}_224/{group}/test/'.format(position=position, group=group)
+        # train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
+        # test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+
 
     # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))
