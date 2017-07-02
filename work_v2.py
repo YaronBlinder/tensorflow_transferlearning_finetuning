@@ -12,7 +12,7 @@ from keras.models import Model, Sequential
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
-    inception_preprocess
+    inception_preprocess, random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -200,7 +200,7 @@ def get_train_datagen(model):
         datagen.set_pipeline([random_crop, inception_preprocess, standardize])
     else:
         datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
+        datagen.set_pipeline([random_crop, random_90deg_rotation, imagenet_preprocess, standardize])
     return datagen
 
 

@@ -35,6 +35,18 @@ def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
     x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
     return x
 
+def random_90deg_rotation(x, row_index=1, col_index=2, channel_index=0,
+                    fill_mode='nearest', cval=0.):
+    theta = np.pi / 180 * 90* np.random.randint(0, 4)
+    rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
+                                [np.sin(theta), np.cos(theta), 0],
+                                [0, 0, 1]])
+
+    h, w = x.shape[row_index], x.shape[col_index]
+    transform_matrix = transform_matrix_offset_center(rotation_matrix, h, w)
+    x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
+    return x
+
 
 def random_shift(x, wrg, hrg, row_index=1, col_index=2, channel_index=0,
                  fill_mode='nearest', cval=0.):
