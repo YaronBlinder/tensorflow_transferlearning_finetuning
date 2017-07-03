@@ -47,9 +47,31 @@ def ensemble_precision_recall(y, scores, combination):
 scores = [scores_from_model_top(group, position, model, top) for group, position, model, top in
           itertools.product(groups, positions, models, tops)]
 np.save('scores.npy', scores)
-# test_path = 'data/{position}_224/{group}/test/'.format(position=position, group=group)
-# num_files = sum(os.path.isfile(os.path.join(test_path, f)) for f in os.listdir(test_path))
-# y = num_files/2 * [0] + num_files/2 * [1]
+test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
+num_files = sum(os.path.isfile(os.path.join(test_path, f)) for f in os.listdir(test_path))
+y = num_files/2 * [0] + num_files/2 * [1]
 # combinations = [comb for comb in itertools.combinations(range(9), 2)]
 # aucs = [ensemble_roc_auc(y, scores, comb) for comb in combinations]
 # comb_names = [(m1, m2) for (m1, m2) in itertools.combinations(itertools.product(models, tops), 2)]
+
+comb_aucs = []
+comb_precision = []
+comb_recall = []
+for i_group, group in enumerate(groups):
+    for i_model, model in enumerate(models):
+        test_path = 'data/PA_256/{group}/test/'.format(group=group)
+        num_files = sum(os.path.isfile(os.path.join(test_path, f)) for f in os.listdir(test_path))
+        y = num_files / 2 * [0] + num_files / 2 * [1]
+        for i_top, top in enumerate(tops):
+            PA_model_score = scores[i_group, 0, i_model, i_top]
+            LAT_model_score = scores[i_group, 1, i_model, i_top]
+            ensemble_score = np.mean(PA_model_score, LAT_model_score, axis=0)
+            fpr, tpr, thresholds = metrics.roc_curve(y, ensemble_score, pos_label=1)
+            roc_auc = metrics.auc(fpr, tpr)
+            PA_LAT_aucs.append(roc_auc)
+            precision, recall, thresholds = metrics.precision_recall_curve(y, ensemble_score)
+            PA_LAT_precision.append(precision)
+            PA_LAT_recall.append(recall)
+np.save('comb_aucs.npy', comb_aucs)
+np.save('comb_precision.npy', comb_precision)
+np.save('comb_recall.npy', comb_recall)
