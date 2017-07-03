@@ -10,23 +10,24 @@ tops = ['waya', 'chollet', 'linear']
 
 
 def scores_from_model_top(group, position, model, top):
-    weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,                                                                           model=model, top=top)
+    weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,
+                                                                                   model=model, top=top)
     test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
     full_model = get_model(model, top)
     full_model.load_weights(weights_path)
     test_datagen = get_test_datagen(model)
     test_generator = test_datagen.flow_from_directory(
-            test_path,
-            # target_size=(224, 224),
-            reader_config={'target_mode': 'RGB', 'target_size': target_size},
-            batch_size=batch_size,
-            shuffle=False)
+        test_path,
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
+        batch_size=batch_size,
+        shuffle=False)
     preds = full_model.predict_generator(
         generator=test_generator,
         steps=n_steps_test,
         workers=4,
         verbose=1)
-    scores = preds[:,1]
+    scores = preds[:, 1]
     return scores
 
 
@@ -43,7 +44,8 @@ def ensemble_precision_recall(y, scores, combination):
     return precision, recall, thresholds
 
 
-scores = [scores_from_model_top(group, position, model, top) for model, top in itertools.product(groups, position, models, tops)]
+scores = [scores_from_model_top(group, position, model, top) for group, position, model, top in
+          itertools.product(groups, positions, models, tops)]
 np.save('scores.npy', scores)
 # test_path = 'data/{position}_224/{group}/test/'.format(position=position, group=group)
 # num_files = sum(os.path.isfile(os.path.join(test_path, f)) for f in os.listdir(test_path))
