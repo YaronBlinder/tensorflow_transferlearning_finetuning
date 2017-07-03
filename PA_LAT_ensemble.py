@@ -16,6 +16,7 @@ def scores_from_model_top(group, position, model, top):
     full_model = get_model(model, top)
     full_model.load_weights(weights_path)
     test_datagen = get_test_datagen(model)
+    target_size = (224, 224)
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
