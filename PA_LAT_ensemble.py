@@ -11,7 +11,7 @@ tops = ['waya', 'chollet', 'linear']
 
 def scores_from_model_top(group, position, model, top):
     weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,                                                                           model=model, top=top)
-    test_path = 'data/{position}_224/{group}/test/'.format(position=position, group=group)
+    test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
     full_model = get_model(model, top)
     full_model.load_weights(weights_path)
     test_datagen = get_test_datagen(model)
