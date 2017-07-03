@@ -29,7 +29,7 @@ def assert_validity(args):
         'F_YA', 'M_YA',
         'F_Adult', 'M_Adult',
         'F_Ger', 'M_Ger']
-    valid_positions = ['PA', 'Lateral']
+    valid_positions = ['PA', 'LAT']
 
     assert args.model in valid_models, '{} not a valid model name'.format(args.model)
     assert args.group in valid_groups, '{} not a valid group'.format(args.group)
