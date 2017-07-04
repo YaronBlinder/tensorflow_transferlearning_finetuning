@@ -35,7 +35,7 @@ def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
     x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
     return x
 
-def random_90deg_rotation(x, row_index=1, col_index=2, channel_index=0,
+def random_90deg_rotation(x, row_index=0, col_index=1, channel_index=0,
                     fill_mode='nearest', cval=0., *args, **kwargs):
     theta = np.pi / 180 * 90* np.random.randint(0, 4)
     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],

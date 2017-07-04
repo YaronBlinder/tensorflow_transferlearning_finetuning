@@ -19,9 +19,9 @@ def augment_ims(path):
         file_90 = file.split('.')[0]+'_90.'+file.split('.')[1]
         file_180 = file.split('.')[0] + '_180.' + file.split('.')[1]
         file_270 = file.split('.')[0] + '_270.' + file.split('.')[1]
-        imsave(im_90, path+file_90)
-        imsave(im_180, path+file_180)
-        imsave(im_270, path+file_270)
+        imsave(path+file_90, im_90)
+        imsave(path+file_180, im_180)
+        imsave(path+file_270, im_270)
 
 
 def main():
