@@ -229,7 +229,6 @@ def train_top(model, top, group, position, n_epochs):
         # optimizer=optimizers.Adam(lr=1e-4),
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
-        # metrics=['accuracy', f1_score, precision_score, recall_score])
         metrics=['accuracy'])
 
     if model in ['xception', 'inception_v3']:
@@ -239,9 +238,6 @@ def train_top(model, top, group, position, n_epochs):
     else:
         train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
         test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
-        # train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-        # test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
-
 
     # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))

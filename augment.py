@@ -3,6 +3,7 @@ import argparse
 
 import numpy as np
 from scipy.misc import imread, imsave
+from tqdm import tqdm
 
 
 def make_rots(im):
@@ -13,7 +14,7 @@ def make_rots(im):
 
 def augment_ims(path):
     im_list = os.listdir(path)
-    for file in im_list:
+    for file in tqdm(im_list):
         im = imread(path+file)
         im_90, im_180, im_270 = make_rots(im)
         file_90 = file.split('.')[0]+'_90.'+file.split('.')[1]
