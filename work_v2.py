@@ -145,9 +145,9 @@ def get_model(model, top, freeze_base=False):
     x = base_model.output
     x = keras.layers.Flatten()(x)
     if top == 'chollet':
-        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+        x = keras.layers.Dense(1024, activation="relu")(x)
         x = keras.layers.Dropout(0.5)(x)
-        x = keras.layers.Dense(1024, activation="relu", kernel_initializer=glorot_normal(), trainable=True)(x)
+        x = keras.layers.Dense(1024, activation="relu")(x)
     elif top == 'waya':
         x = keras.layers.Dense(1024)(x)
         x = keras.layers.BatchNormalization()(x)
@@ -303,8 +303,8 @@ def train_top(model, top, group, position, n_epochs):
 
 
 def fine_tune(model, top, group, position, weights_path):
-    train_path = 'data/{position}/train_256_3ch_flip/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_256_3ch_flip/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
@@ -459,13 +459,13 @@ def ft_notop(model, top, group, position):
 
 
 def train_from_scratch(group, position):
-    train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
     full_model = Sequential()
-    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(299, 299, 3)))
+    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(224, 224, 3)))
     full_model.add(keras.layers.Activation('relu'))
     full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
@@ -488,7 +488,7 @@ def train_from_scratch(group, position):
         loss='binary_crossentropy',
         optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score, precision, recall])
+        metrics=['accuracy'])
 
     batch_size = 32
     n_epochs = 100
@@ -496,7 +496,7 @@ def train_from_scratch(group, position):
     train_datagen = get_train_datagen('scratch')
     test_datagen = get_test_datagen('scratch')
 
-    target_size = (299, 299)
+    target_size = (224, 224)
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
