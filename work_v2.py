@@ -218,6 +218,9 @@ def get_test_datagen(model):
     if model in ['xception', 'inception_v3']: #, 'scratch']:
         datagen.config['size'] = 299
         datagen.set_pipeline([scale_im, inception_preprocess, standardize])
+    elif model == 'scratch':
+        datagen.config['size'] = 224
+        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
     else:
         datagen.config['size'] = 224
         datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
