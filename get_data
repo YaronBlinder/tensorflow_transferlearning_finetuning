@@ -1,0 +1,25 @@
+aws s3 cp s3://first-batch/LAT_256/M_Adult.rar ~/Radical/data/LAT_256/M_Adult.rar
+cd ~/Radical/data/LAT_256/ 
+unrar x M_Adult.rar
+cd ~/Radical/data/LAT_256/M_Adult/
+rm -r */10 */11 */3
+cd ~/Radical/data/LAT_256/M_Adult/test/2/
+ls | grep f. -m 103 | xargs rm -fr
+ls | grep ^[^f] -m 103 | xargs rm -fr
+cd ~/Radical/data/LAT_256/M_Adult/train/2
+ls | grep f. -m 374 | xargs rm -fr
+ls | grep ^[^f] -m 374 | xargs rm -fr
+
+aws s3 cp s3://first-batch/PA_256/M_Adult.rar ~/Radical/data/PA_256/M_Adult.rar
+cd ~/Radical/data/PA_256/
+unrar x M_Adult.rar
+cd ~/Radical/data/PA_256/M_Adult/
+rm -r */10 */11 */3
+cd ~/Radical/data/PA_256/M_Adult/test/2/
+ls | grep f. -m 103 | xargs rm -fr
+ls | grep ^[^f] -m 103 | xargs rm -fr
+cd ~/Radical/data/PA_256/M_Adult/train/2
+ls | grep f. -m 374 | xargs rm -fr
+ls | grep ^[^f] -m 374 | xargs rm -fr
+
+
