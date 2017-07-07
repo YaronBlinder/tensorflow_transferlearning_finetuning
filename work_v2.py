@@ -198,6 +198,9 @@ def get_train_datagen(model):
     if model in ['xception', 'inception_v3']: #, 'scratch']:
         datagen.config['random_crop_size'] = (299, 299)
         datagen.set_pipeline([random_crop, inception_preprocess, standardize])
+    elif model == 'scratch':
+        datagen.config['random_crop_size'] = (224, 224)
+        datagen.set_pipeline([random_crop, random_90deg_rotation, inception_preprocess, standardize])
     else:
         datagen.config['random_crop_size'] = (224, 224)
         datagen.set_pipeline([random_crop, random_90deg_rotation, imagenet_preprocess, standardize])
