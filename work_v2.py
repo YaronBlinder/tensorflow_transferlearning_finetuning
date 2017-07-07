@@ -490,7 +490,7 @@ def train_from_scratch(group, position):
         # metrics=['accuracy', f1_score, precision_score, recall_score])
         metrics=['accuracy'])
 
-    batch_size = 32
+    batch_size = 128
     n_epochs = 100
 
     train_datagen = get_train_datagen('scratch')
