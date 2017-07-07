@@ -195,7 +195,7 @@ def get_train_datagen(model):
         # cval=0
         # vertical_flip=True
     )
-    if model in ['xception', 'inception_v3', 'scratch']:
+    if model in ['xception', 'inception_v3']#, 'scratch']:
         datagen.config['random_crop_size'] = (299, 299)
         datagen.set_pipeline([random_crop, inception_preprocess, standardize])
     else:
@@ -212,7 +212,7 @@ def get_test_datagen(model):
         # samplewise_std_normalization=True,
     )
     # datagen.config['random_crop_size'] = (224, 224)
-    if model in ['xception', 'inception_v3', 'scratch']:
+    if model in ['xception', 'inception_v3']#, 'scratch']:
         datagen.config['size'] = 299
         datagen.set_pipeline([scale_im, inception_preprocess, standardize])
     else:
