@@ -227,85 +227,85 @@ def get_test_datagen(model):
     return datagen
 
 
-# def train_top(model, top, group, position, n_epochs):
-#     print('Loading model...')
-#     full_model = get_model(model, top, freeze_base=True)
-#     full_model.compile(
-#         optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-#         # optimizer=optimizers.Adam(lr=1e-4),
-#         # optimizer=optimizers.rmsprop(),
-#         loss='binary_crossentropy',
-#         metrics=['accuracy'])
-#
-#     if model in ['xception', 'inception_v3']:
-#         pass
-#         # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
-#         # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
-#     else:
-#         train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
-#         test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
-#
-#     # print('Please input top training parameters: \n')
-#     # batch_size = int(input('Batch size: '))
-#     # n_epochs = int(input('Epochs:'))
-#
-#     batch_size = 32
-#     n_train_samples = count_files(train_path)
-#     n_test_samples = count_files(test_path)
-#
-#     print(train_path)
-#     train_datagen = get_train_datagen(model)
-#     test_datagen = get_test_datagen(model)
-#
-#     # sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
-#     # sample = imread(sample_file_path)
-#     # sample = np.reshape(sample, [1, 256, 256, 3])
-#     # train_datagen.fit(sample)
-#     # test_datagen.fit(sample)
-#
-#     if model in ['xception', 'inception_v3']:
-#         target_size = (299, 299)
-#     else:
-#         target_size = (224, 224)
-#
-#     train_generator = train_datagen.flow_from_directory(
-#         train_path,
-#         # target_size=(224, 224),
-#         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-#         batch_size=batch_size,
-#         shuffle=True)
-#
-#     test_generator = test_datagen.flow_from_directory(
-#         test_path,
-#         # target_size=(224, 224),
-#         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-#         batch_size=batch_size,
-#         shuffle=True)
-#
-#     # train the model on the new data for a few epochs
-#     print('Training top...')
-#
-#     # class_weight = {0: 1.5, 1: 1}
-#     class_weight = 'auto'
-#
-#     full_model.fit_generator(
-#         generator=train_generator,
-#         steps_per_epoch=np.ceil(n_train_samples / batch_size),
-#         epochs=n_epochs,
-#         verbose=1,
-#         callbacks=get_callbacks(model, top, group, position, train_type='top'),
-#         validation_data=test_generator,
-#         validation_steps=np.ceil(n_test_samples / batch_size),
-#         class_weight=class_weight,
-#         max_q_size=10,
-#         workers=4,
-#         pickle_safe=False,
-#         initial_epoch=0)
-#
-#     weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,
-#                                                                                    model=model, top=top)
-#     full_model.save_weights(weights_path)
-#     print('Model top trained.')
+def train_top(model, top, group, position, n_epochs):
+    print('Loading model...')
+    full_model = get_model(model, top, freeze_base=True)
+    full_model.compile(
+        optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+        # optimizer=optimizers.Adam(lr=1e-4),
+        # optimizer=optimizers.rmsprop(),
+        loss='binary_crossentropy',
+        metrics=['accuracy'])
+
+    if model in ['xception', 'inception_v3']:
+        pass
+        # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
+        # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
+    else:
+        train_path = 'data/LAT_PA/train/'
+        test_path = 'data/LAT_PA/test/'
+
+    # print('Please input top training parameters: \n')
+    # batch_size = int(input('Batch size: '))
+    # n_epochs = int(input('Epochs:'))
+
+    batch_size = 32
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
+
+    print(train_path)
+    train_datagen = get_train_datagen(model)
+    test_datagen = get_test_datagen(model)
+
+    # sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
+    # sample = imread(sample_file_path)
+    # sample = np.reshape(sample, [1, 256, 256, 3])
+    # train_datagen.fit(sample)
+    # test_datagen.fit(sample)
+
+    if model in ['xception', 'inception_v3']:
+        target_size = (299, 299)
+    else:
+        target_size = (224, 224)
+
+    train_generator = train_datagen.flow_from_directory(
+        train_path,
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
+        batch_size=batch_size,
+        shuffle=True)
+
+    test_generator = test_datagen.flow_from_directory(
+        test_path,
+        # target_size=(224, 224),
+        reader_config={'target_mode': 'RGB', 'target_size': target_size},
+        batch_size=batch_size,
+        shuffle=True)
+
+    # train the model on the new data for a few epochs
+    print('Training top...')
+
+    # class_weight = {0: 1.5, 1: 1}
+    class_weight = 'auto'
+
+    full_model.fit_generator(
+        generator=train_generator,
+        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        epochs=n_epochs,
+        verbose=1,
+        callbacks=get_callbacks(model, top, group, position, train_type='top'),
+        validation_data=test_generator,
+        validation_steps=np.ceil(n_test_samples / batch_size),
+        class_weight=class_weight,
+        max_q_size=10,
+        workers=4,
+        pickle_safe=False,
+        initial_epoch=0)
+
+    weights_path = 'models/PA_LAT/{model}/{top}/top_trained.h5'.format(position=position, group=group,
+                                                                                   model=model, top=top)
+    full_model.save_weights(weights_path)
+    print('Model top trained.')
 
 
 # def fine_tune(model, top, group, position, weights_path):
