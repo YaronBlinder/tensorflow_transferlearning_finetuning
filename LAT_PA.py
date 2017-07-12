@@ -492,6 +492,7 @@ def train_from_scratch(group, position):
 
     full_model.compile(
         loss='binary_crossentropy',
+        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
         metrics=['accuracy'])
 
     batch_size = 128
