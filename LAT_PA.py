@@ -126,7 +126,7 @@ def get_callbacks(model, top, group, position, train_type):
         #     save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
-            patience=15,
+            patience=7,
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
