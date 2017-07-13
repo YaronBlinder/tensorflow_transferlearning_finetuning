@@ -302,7 +302,7 @@ def train_top(model, top, group, position, n_epochs):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/PA_LAT/{model}/{top}/top_trained.h5'.format(position=position, group=group,
+    weights_path = 'models/LAT_PA/{model}/{top}/top_trained.h5'.format(position=position, group=group,
                                                                                    model=model, top=top)
     full_model.save_weights(weights_path)
     print('Model top trained.')
@@ -535,7 +535,7 @@ def train_from_scratch(group, position):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/PA_LAT/scratch/ft_notop/finetuned_model.h5'
+    weights_path = 'models/LAT_PA/scratch/ft_notop/finetuned_model.h5'
     full_model.save_weights(weights_path)
     print('Model trained.')
 
