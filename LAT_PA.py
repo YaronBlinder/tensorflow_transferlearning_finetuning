@@ -38,9 +38,13 @@ def assert_validity(args):
 
 def prep_dir(args):
     group, model, position, top = args.group, args.model, args.position, args.top
-    model_path = 'models/LAT_PA/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
-    TBlog_path = 'TBlog/models/LAT_PA/{model}/{top}/'.format(group=group, position=position, model=model,
-                                                                         top=top)
+    if model == scratch:
+        model_path = 'models/LAT_PA/scratch/'
+    else:
+        model_path = 'models/LAT_PA/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
+
+    TBlog_path = 'TBlog/' + model_path
+
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(model_path + 'top', exist_ok=True)
