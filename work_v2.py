@@ -122,12 +122,12 @@ def get_callbacks(model, top, group, position, train_type):
         #     save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
-            patience=15,
+            patience=12,
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.75,
-            patience=5,
+            factor=0.6,
+            patience=2,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
