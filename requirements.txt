@@ -4,3 +4,4 @@ keras
 argparse
 pillow
 h5py
+tensorflow-gpu
