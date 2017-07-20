@@ -37,7 +37,7 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    group, model, position, top, size = args.group, args.model, args.position, args.top, args.size
+    group, model, position, size = args.group, args.model, args.position, args.size
     model_path = 'models/{group}/{position}/{model}/{size}/'.format(group=group, position=position, model=model, size=size)
     TBlog_path = 'TBlog/models/{group}/{position}/{model}/{size}/'.format(group=group, position=position, model=model, size=size)
     os.makedirs(model_path, exist_ok=True)
