@@ -368,7 +368,7 @@ def fine_tune(model, top, group, position, weights_path):
         optimizer=optimizers.Adam(lr=1e-5),
         loss='binary_crossentropy',
         # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy', f1_score, precision, recall])
+        metrics=['accuracy'])
 
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
@@ -380,7 +380,7 @@ def fine_tune(model, top, group, position, weights_path):
         steps_per_epoch=np.ceil(n_train_samples / batch_size),
         epochs=n_epochs,
         verbose=1,
-        callbacks=get_callbacks(model, top, position, train_type='ft'),
+        callbacks=get_callbacks(model, top, group, position, train_type='ft'),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
