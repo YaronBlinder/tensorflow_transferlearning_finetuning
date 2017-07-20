@@ -5,3 +5,4 @@ argparse
 pillow
 h5py
 tensorflow-gpu
+opencv-python
