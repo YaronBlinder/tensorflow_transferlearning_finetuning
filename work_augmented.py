@@ -200,10 +200,10 @@ def get_train_datagen(model):
         datagen.set_pipeline([random_crop, inception_preprocess, standardize])
     elif model == 'scratch':
         datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, random_90deg_rotation, inception_preprocess, standardize])
+        datagen.set_pipeline([random_crop, inception_preprocess, standardize])
     else:
         datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, random_90deg_rotation, imagenet_preprocess, standardize])
+        datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
     return datagen
 
 
@@ -227,7 +227,7 @@ def get_test_datagen(model):
     return datagen
 
 
-def train_top(model, top, group, position, n_epochs):
+def train_top(model, top, group, position, size, n_epochs):
     print('Loading model...')
     full_model = get_model(model, top, freeze_base=True)
     full_model.compile(
@@ -242,8 +242,8 @@ def train_top(model, top, group, position, n_epochs):
         # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
         # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
     else:
-        train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
-        test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
+        train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+        test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
 
     # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))
@@ -308,7 +308,7 @@ def train_top(model, top, group, position, n_epochs):
     print('Model top trained.')
 
 
-def fine_tune(model, top, group, position, weights_path):
+def fine_tune(model, top, group, position, size, weights_path):
     train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
     test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
@@ -563,9 +563,9 @@ def main():
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, n_epochs)
+        train_top(args.model, args.top, args.group, args.position, args.size, n_epochs)
     if args.finetune:
-        fine_tune(args.model, args.top, args.group, args.position, weights_path)
+        fine_tune(args.model, args.top, args.group, args.position, args.size, weights_path)
     if args.finetune_notop:
         ft_notop(args.model, args.top, args.group, args.position)
 
