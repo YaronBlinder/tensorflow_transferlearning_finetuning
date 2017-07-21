@@ -35,10 +35,10 @@ def augment_ims(path):
         file_tr = file.split('.')[0]+'_tr.'+file.split('.')[1]
         file_bl = file.split('.')[0]+'_bl.'+file.split('.')[1]
         file_br = file.split('.')[0]+'_br.'+file.split('.')[1]
-        imsave(path+file_tl, file_tl)
-        imsave(path + file_tr, file_tr)
-        imsave(path + file_bl, file_bl)
-        imsave(path + file_br, file_br)
+        imsave(path + file_tl, tl)
+        imsave(path + file_tr, tr)
+        imsave(path + file_bl, bl)
+        imsave(path + file_br, br)
 
         im_list = os.listdir(path)
     for file in tqdm(im_list):
