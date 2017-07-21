@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 def make_patches(im, patch_dim=224):
 
-    Assert (im.shape[0] == im.shape[1]), 'Image not square.'
+    assert (im.shape[0] == im.shape[1]), 'Image not square.'
     im_dim = im.shape[0]
     im_delta = im_dim-patch_dim
     tl = im[0:patch_dim, 0:patch_dim]
