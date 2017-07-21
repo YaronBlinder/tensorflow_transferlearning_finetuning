@@ -10,7 +10,7 @@ def make_patches(im, patch_dim=224):
 
     Assert (im.shape[0] == im.shape[1]), 'Image not square.'
     im_dim = im.shape[0]
-    im_delta = im_dim-patch_dim:im_dim
+    im_delta = im_dim-patch_dim
     tl = im[0:patch_dim, 0:patch_dim]
     tr = im[im_delta:im_dim, 0:patch_dim]
     bl = im[0:patch_dim, im_delta:im_dim]
