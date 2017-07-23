@@ -464,9 +464,9 @@ def ft_notop(model, top, group, position):
     print('Model fine-tuned.')
 
 
-def train_from_scratch(group, position):
-    train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
+def train_from_scratch(group, position, size):
+    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
@@ -561,7 +561,7 @@ def main():
     n_epochs = int(args.epochs)
 
     if args.model == 'scratch':
-        train_from_scratch(args.group, args.position)
+        train_from_scratch(args.group, args.position, args.size)
     if args.train_top:
         train_top(args.model, args.top, args.group, args.position, args.size, n_epochs)
     if args.finetune:
