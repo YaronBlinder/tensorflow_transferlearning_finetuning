@@ -309,8 +309,8 @@ def train_top(model, top, group, position, size, n_epochs):
 
 
 def fine_tune(model, top, group, position, size, weights_path):
-    train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
+    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
