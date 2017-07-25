@@ -97,6 +97,8 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
 
 def imagenet_preprocess(x, *args, **kwargs):
     x = np.reshape(x, [1, 224, 224, 3])
+    x = x.astype('float32')
+    x /= 255.*x.max()
 
     # Zero-center by mean pixel
     x[:, :, :, 0] -= 103.939
