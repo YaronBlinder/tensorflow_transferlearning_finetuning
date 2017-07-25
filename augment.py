@@ -19,7 +19,6 @@ def make_patches(im, patch_dim=224):
     return tl, tr, bl, br
 
 
-
 def make_rots(im):
     im_90 = np.rot90(im, 1)
     im_180 = np.rot90(im, 2)
