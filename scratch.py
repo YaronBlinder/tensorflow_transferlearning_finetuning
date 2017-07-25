@@ -536,7 +536,7 @@ def main():
     n_epochs = int(args.epochs)
 
     if args.model == 'scratch':
-        train_from_scratch(args.group, args.position, args.size, n_epochs)
+        train_from_scratch(args.group, args.position, int(args.size), n_epochs)
     # if args.train_top:
     #     train_top(args.model, args.top, args.group, args.position, n_epochs)
     # if args.finetune:
