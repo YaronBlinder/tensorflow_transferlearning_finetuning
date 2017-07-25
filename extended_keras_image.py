@@ -112,7 +112,8 @@ def imagenet_preprocess(x, *args, **kwargs):
 
 def inception_preprocess(x, *args, **kwargs):
     # x /= 255.
-    x /= 1.*x.max()
+    x = x.astype('float32')
+    x /= x.max()
     x -= 0.5
     x *= 2.
     return x
