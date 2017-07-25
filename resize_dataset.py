@@ -16,7 +16,7 @@ for dir in dirs:
         files = os.listdir(relevant_data_path)
         for file in tqdm(files):
             im = imread(file)
-            im = resize(im, (299, 299))
+            im = resize(im, (299, 299, 3))
             with open(relevant_resize_path + file, 'wb') as f:
                 writer = png.Writer(width=im.shape[1], height=im.shape[0], bitdepth=16)
                 im2list = im.reshape(-1, im.shape[1] * im.shape[2]).tolist()
