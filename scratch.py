@@ -38,8 +38,8 @@ def assert_validity(args):
 
 def prep_dir(args):
     group, model, position, size = args.group, args.model, args.position, args.size
-    model_path = 'models/{group}/{position}/{model}/{size}/'.format(group=group, position=position, model=model, size=size)
-    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{size}/'.format(group=group, position=position, model=model, size=size)
+    model_path = 'models/{group}/{position}/{model}/{size}_16/'.format(group=group, position=position, model=model, size=size)
+    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{size}_16/'.format(group=group, position=position, model=model, size=size)
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
     return model_path
@@ -446,8 +446,8 @@ def get_test_datagen(model, size):
 
 
 def train_from_scratch(group, position, size, n_epochs):
-    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
