@@ -514,7 +514,7 @@ def train_from_scratch(group, position, size, n_epochs):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/{size}/finetuned_model.h5'.format(group=group, position=position,
+    weights_path = 'models/{group}/{position}/{model}/{size}_16/finetuned_model.h5'.format(group=group, position=position,
                                                                                  model='scratch', size=size)
     full_model.save_weights(weights_path)
     print('Model trained.')

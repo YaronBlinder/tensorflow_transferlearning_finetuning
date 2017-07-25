@@ -242,8 +242,8 @@ def train_top(model, top, group, position, size, n_epochs):
         # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
         # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
     else:
-        train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
-        test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+        train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
+        test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
 
     # print('Please input top training parameters: \n')
     # batch_size = int(input('Batch size: '))
@@ -465,8 +465,8 @@ def ft_notop(model, top, group, position):
 
 
 def train_from_scratch(group, position, size):
-    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
