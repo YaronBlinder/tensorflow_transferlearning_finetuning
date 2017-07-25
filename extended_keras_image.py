@@ -20,7 +20,7 @@ import types
 from keras import backend as K
 from keras.utils.generic_utils import Progbar
 
-from cv2 import resize
+from cv2 import resize, imread
 
 
 def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
@@ -111,7 +111,8 @@ def imagenet_preprocess(x, *args, **kwargs):
 
 
 def inception_preprocess(x, *args, **kwargs):
-    x /= 255.
+    # x /= 255.
+    x /= 1.*x.max()
     x -= 0.5
     x *= 2.
     return x
@@ -220,6 +221,10 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
     img = load_img(filepath, target_mode=target_mode, target_size=target_size)
     return img_to_array(img, dim_ordering=dim_ordering)
 
+
+def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
+    img = imread(filepath, -1)
+    return img
 
 def standardize(x,
                 dim_ordering='tf',
@@ -800,6 +805,8 @@ class DirectoryIterator(Iterator):
         self.image_reader = image_reader
         if self.image_reader == 'pil':
             self.image_reader = pil_image_reader
+        if self.image_reader == 'cv2':
+            self.image_reader = cv2_image_reader
         self.reader_config = reader_config
         # TODO: move color_mode and target_size to reader_config
         if color_mode == 'rgb':
