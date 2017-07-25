@@ -1,4 +1,4 @@
-cd ~/Radical/data/PA_1024/M_Adult/test
+cd ~/Radical/data/PA_512_16/M_Adult/test
 mkdir other
 mv 2/* other/
 mv 3/* other/
