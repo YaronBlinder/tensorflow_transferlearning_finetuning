@@ -271,6 +271,7 @@ def train_top(model, top, group, position, size, n_epochs):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
@@ -278,6 +279,7 @@ def train_top(model, top, group, position, size, n_epochs):
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
