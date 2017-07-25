@@ -508,6 +508,7 @@ def train_from_scratch(group, position, size):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
@@ -515,6 +516,7 @@ def train_from_scratch(group, position, size):
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
