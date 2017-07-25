@@ -546,15 +546,15 @@ def train_from_scratch(group, position, size):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='resnet50', help='The network eg. resnet50')
+    parser.add_argument('--model', default='vgg16', help='The network eg. resnet50')
     parser.add_argument('--size', default=299, help='Image size')
-    parser.add_argument('--top', default='waya', help='Top classifier')
-    parser.add_argument('--group', default='F_Adult', help='Demographic group')
+    parser.add_argument('--top', default='linear', help='Top classifier')
+    parser.add_argument('--group', default='M_Adult', help='Demographic group')
     parser.add_argument('--position', default='PA', help='patient position')
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init top')
-    parser.add_argument('--epochs', default=50, help='# of epochs for top training')
+    parser.add_argument('--epochs', default=100, help='# of epochs for top training')
 
     args = parser.parse_args()
     assert_validity(args)
