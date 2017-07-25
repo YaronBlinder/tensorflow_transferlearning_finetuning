@@ -3,8 +3,8 @@ import png
 from cv2 import imread, resize
 from tqdm import tqdm
 
-data_path = '~/Radical/data/PA_512_16/M_Adult/'
-resize_path = '~/Radical/data/PA_299_16/M_Adult/'
+data_path = '/data/PA_512_16/M_Adult/'
+resize_path = '/data/PA_299_16/M_Adult/'
 
 dirs = ['train', 'test']
 labels = ['1', '2']
