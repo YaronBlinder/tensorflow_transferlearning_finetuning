@@ -1,8 +1,10 @@
-from cv2 import imread
+import argparse
 import glob
 
-def get_dataset_mean(path):
+from cv2 import imread
 
+
+def get_dataset_mean(path):
     dataset_mean = 0
     count = 0
 
@@ -12,7 +14,6 @@ def get_dataset_mean(path):
         for file in files:
             im = imread(os.path.join(r, file), -1)
             dataset_mean += (1. / count) * im.mean()
-
 
     # labels = ['1', '2']
     # for label in labels:
@@ -30,6 +31,7 @@ def main():
     args = parser.parse_args()
     ds_mean = get_dataset_mean(args.path)
     print(ds_mean)
+
 
 if __name__ == '__main__':
     main()
