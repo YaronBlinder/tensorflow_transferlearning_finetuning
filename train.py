@@ -11,8 +11,8 @@ from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.models import Model, Sequential
 
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
-    inception_preprocess, random_90deg_rotation
+from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, #\
+    # inception_preprocess, random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
 
