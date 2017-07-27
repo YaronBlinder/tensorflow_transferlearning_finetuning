@@ -122,7 +122,7 @@ def inception_preprocess(x, *args, **kwargs):
 
 
 def radical_preprocess(x, *args, **kwargs):
-    ds_mean = 10000 #from
+    ds_mean = 38679.2766871 #calculated
     x = x.astype('float32')
     x -= ds_mean
     x /= 65535
