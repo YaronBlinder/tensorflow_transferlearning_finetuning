@@ -169,31 +169,25 @@ def get_model(model, top, freeze_base=False):
     return full_model
 
 
-def get_train_datagen(model):
-    datagen = ImageDataGenerator(
-        # preprocessing_function=preprocess_input,
-        # rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        # zoom_range=0.2,
-        # rotation_range=20,
-        # fill_mode="constant",
-        # cval=0
-        # vertical_flip=True
-    )
-    if model in ['xception', 'inception_v3']: #, 'scratch']:
-        datagen.config['random_crop_size'] = (299, 299)
-        datagen.set_pipeline([random_crop, inception_preprocess, standardize])
-    elif model == 'scratch':
-        datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, inception_preprocess, standardize])
-    else:
-        datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, imagenet_preprocess, standardize])
+def get_train_datagen(model, size=224):
+    datagen = ImageDataGenerator()
+
+    # if model in ['xception', 'inception_v3']: #, 'scratch']:
+    #     datagen.config['random_crop_size'] = (299, 299)
+    #     datagen.set_pipeline([random_crop, inception_preprocess, standardize])
+    #
+    # else:
+
+    # datagen.config['random_crop_size'] = (size, size)
+    # datagen.set_pipeline([random_crop, radical_preprocess, standardize])
+    if model in ['vgg16', 'vgg19', 'resnet50']:
+        size = 224
+    datagen.config['size'] = size
+    datagen.set_pipeline([radical_preprocess, scale_im, standardize])
     return datagen
 
 
-def get_test_datagen(model):
+def get_test_datagen(model, size):
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
@@ -201,15 +195,19 @@ def get_test_datagen(model):
         # samplewise_std_normalization=True,
     )
     # datagen.config['random_crop_size'] = (224, 224)
-    if model in ['xception', 'inception_v3']: #, 'scratch']:
-        datagen.config['size'] = 299
-        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
-    elif model == 'scratch':
-        datagen.config['size'] = 224
-        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
-    else:
-        datagen.config['size'] = 224
-        datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
+    # if model in ['xception', 'inception_v3']: #, 'scratch']:
+    #     datagen.config['size'] = 299
+    #     datagen.set_pipeline([scale_im, inception_preprocess, standardize])
+    # elif model == 'scratch':
+    #     datagen.config['size'] = 224
+    #     datagen.set_pipeline([scale_im, inception_preprocess, standardize])
+    # else:
+    #     datagen.config['size'] = 224
+    #     datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
+    if model in ['vgg16', 'vgg19', 'resnet50']:
+        size = 224
+    datagen.config['size'] = size
+    datagen.set_pipeline([radical_preprocess, scale_im, standardize])
     return datagen
 
 
@@ -297,8 +295,8 @@ def train_top(model, top, group, position, size, n_epochs):
 
 
 def fine_tune(model, top, group, position, size, weights_path):
-    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
@@ -384,8 +382,8 @@ def fine_tune(model, top, group, position, size, weights_path):
 
 
 def train_from_scratch(group, position, size):
-    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
@@ -412,28 +410,25 @@ def train_from_scratch(group, position, size):
     full_model.compile(
         loss='binary_crossentropy',
         optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
-        # metrics=['accuracy', f1_score, precision_score, recall_score])
         metrics=['accuracy'])
 
     batch_size = 128
     n_epochs = 100
 
-    train_datagen = get_train_datagen('scratch')
-    test_datagen = get_test_datagen('scratch')
+    train_datagen = get_train_datagen('scratch', size)
+    test_datagen = get_test_datagen('scratch', size)
 
-    target_size = (224, 224)
+    target_size = (size, size)
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        # target_size=(224, 224),
-        #image_reader='cv2',
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        # target_size=(224, 224),
-        #image_reader='cv2',
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
