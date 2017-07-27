@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+from tqdm import tqdm
 
 from cv2 import imread
 
@@ -12,7 +13,7 @@ def get_dataset_mean(path):
     for r, dirs, files in os.walk(path):
         for dr in dirs:
             count += len(glob.glob(os.path.join(r, dr + "/*")))
-        for file in files:
+        for file in tqdm(files):
             im = imread(os.path.join(r, file), -1)
             dataset_mean += (1. / count) * im.mean()
 
