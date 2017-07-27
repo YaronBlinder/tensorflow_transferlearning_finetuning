@@ -98,7 +98,7 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
 def imagenet_preprocess(x, *args, **kwargs):
     x = np.reshape(x, [1, 224, 224, 3])
     x = x.astype('float32')
-    x /= 255.*x.max()
+    x /= 255.
 
     # Zero-center by mean pixel
     x[:, :, :, 0] -= 103.939
@@ -118,6 +118,15 @@ def inception_preprocess(x, *args, **kwargs):
     x /= x.max()
     x -= 0.5
     x *= 2.
+    return x
+
+
+def radical_preprocess(x, *args, **kwargs):
+    ds_mean = 10000 #from
+    x = x.astype('float32')
+    x -= ds_mean
+    x /= 65535
+
     return x
 
 
