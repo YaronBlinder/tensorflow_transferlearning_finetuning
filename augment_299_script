@@ -1,0 +1,4 @@
+python3 augment.py --path data/PA_299_16/M_Adult/train/1/
+python3 augment.py --path data/PA_299_16/M_Adult/train/2/
+python3 augment.py --path data/PA_299_16/M_Adult/test/1/
+python3 augment.py --path data/PA_299_16/M_Adult/test/2/
