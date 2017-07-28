@@ -171,17 +171,15 @@ def get_model(model, top, freeze_base=False):
 
 def get_train_datagen(model, size=224):
     datagen = ImageDataGenerator()
-    if model in ['vgg16', 'vgg19', 'resnet50']:
-        size = 224
+    size = 224
     datagen.config['size'] = size
     datagen.set_pipeline([radical_preprocess, scale_im, standardize])
     return datagen
 
 
 def get_test_datagen(model, size=224):
-    datagen = ImageDataGenerator(
-    if model in ['vgg16', 'vgg19', 'resnet50']:
-        size = 224
+    datagen = ImageDataGenerator()
+    size = 224
     datagen.config['size'] = size
     datagen.set_pipeline([radical_preprocess, scale_im, standardize])
     return datagen
@@ -378,7 +376,8 @@ def train_from_scratch(group, position, size):
     train_datagen = get_train_datagen('scratch', size)
     test_datagen = get_test_datagen('scratch', size)
 
-    target_size = (size, size)
+    # target_size = (size, size)
+    target_size = (224, 224)
     train_generator = train_datagen.flow_from_directory(
         train_path,
         image_reader='cv2',
