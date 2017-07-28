@@ -378,7 +378,7 @@ def train_from_scratch(group, position, size):
         optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
         metrics=['accuracy'])
 
-    batch_size = 128
+    batch_size = 32
     n_epochs = 100
 
     train_datagen = get_train_datagen('scratch', size)
