@@ -187,7 +187,7 @@ def get_train_datagen(model, size=224):
     return datagen
 
 
-def get_test_datagen(model, size):
+def get_test_datagen(model, size=224):
     datagen = ImageDataGenerator(
         # preprocessing_function=preprocess_input,
         # rescale=1. / 255,
