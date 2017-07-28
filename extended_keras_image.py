@@ -126,6 +126,7 @@ def radical_preprocess(x, *args, **kwargs):
     x = x.astype('float32')
     x -= ds_mean
     x /= 65535
+    x *= 2
 
     return x
 
