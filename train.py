@@ -11,8 +11,8 @@ from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.models import Model, Sequential
 
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess#, \
-    # inception_preprocess, random_90deg_rotation
+from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
+    imagenet_preprocess, random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -126,8 +126,8 @@ def get_callbacks(model, top, group, position, train_type):
             verbose=1),
         callbacks.ReduceLROnPlateau(
             monitor='val_loss',
-            factor=0.6,
-            patience=2,
+            factor=0.7,
+            patience=5,
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
@@ -173,8 +173,11 @@ def get_train_datagen(model, size=224):
     datagen = ImageDataGenerator()
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-    datagen.config['size'] = size
-    datagen.set_pipeline([radical_preprocess, scale_im, standardize])
+        datagen.config['size'] = size
+        datagen.set_pipeline([imagenet_preprocess, scale_im, random_90deg_rotation, standardize])
+    else:
+        datagen.config['size'] = size
+        datagen.set_pipeline([radical_preprocess, scale_im, random_90deg_rotation, standardize])
     return datagen
 
 
@@ -182,8 +185,11 @@ def get_test_datagen(model, size=224):
     datagen = ImageDataGenerator()
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-    datagen.config['size'] = size
-    datagen.set_pipeline([radical_preprocess, scale_im, standardize])
+        datagen.config['size'] = size
+        datagen.set_pipeline([imagenet_preprocess, scale_im, standardize])
+    else:
+        datagen.config['size'] = size
+        datagen.set_pipeline([radical_preprocess, scale_im, standardize])
     return datagen
 
 
@@ -421,7 +427,7 @@ def train_from_scratch(group, position, size):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', default='vgg16', help='The network eg. resnet50')
-    parser.add_argument('--size', default=299, help='Image size')
+    parser.add_argument('--size', default=512, help='Image size')
     parser.add_argument('--top', default='linear', help='Top classifier')
     parser.add_argument('--group', default='M_Adult', help='Demographic group')
     parser.add_argument('--position', default='PA', help='patient position')
