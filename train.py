@@ -171,15 +171,6 @@ def get_model(model, top, freeze_base=False):
 
 def get_train_datagen(model, size=224):
     datagen = ImageDataGenerator()
-
-    # if model in ['xception', 'inception_v3']: #, 'scratch']:
-    #     datagen.config['random_crop_size'] = (299, 299)
-    #     datagen.set_pipeline([random_crop, inception_preprocess, standardize])
-    #
-    # else:
-
-    # datagen.config['random_crop_size'] = (size, size)
-    # datagen.set_pipeline([random_crop, radical_preprocess, standardize])
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
     datagen.config['size'] = size
@@ -189,21 +180,6 @@ def get_train_datagen(model, size=224):
 
 def get_test_datagen(model, size=224):
     datagen = ImageDataGenerator(
-        # preprocessing_function=preprocess_input,
-        # rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-    )
-    # datagen.config['random_crop_size'] = (224, 224)
-    # if model in ['xception', 'inception_v3']: #, 'scratch']:
-    #     datagen.config['size'] = 299
-    #     datagen.set_pipeline([scale_im, inception_preprocess, standardize])
-    # elif model == 'scratch':
-    #     datagen.config['size'] = 224
-    #     datagen.set_pipeline([scale_im, inception_preprocess, standardize])
-    # else:
-    #     datagen.config['size'] = 224
-    #     datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
     datagen.config['size'] = size
@@ -221,17 +197,9 @@ def train_top(model, top, group, position, size, n_epochs):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    if model in ['xception', 'inception_v3']:
-        pass
-        # train_path = 'data/{position}/train_318/{group}/train/'.format(position=position, group=group)
-        # test_path = 'data/{position}/train_318/{group}/test/'.format(position=position, group=group)
-    else:
-        train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
-        test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
 
-    # print('Please input top training parameters: \n')
-    # batch_size = int(input('Batch size: '))
-    # n_epochs = int(input('Epochs:'))
+    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
 
     batch_size = 32
     n_train_samples = count_files(train_path)
@@ -241,12 +209,6 @@ def train_top(model, top, group, position, size, n_epochs):
     train_datagen = get_train_datagen(model)
     test_datagen = get_test_datagen(model)
 
-    # sample_file_path = train_path + '1/{firstfile}'.format(firstfile=os.listdir(train_path + '1/')[0])
-    # sample = imread(sample_file_path)
-    # sample = np.reshape(sample, [1, 256, 256, 3])
-    # train_datagen.fit(sample)
-    # test_datagen.fit(sample)
-
     if model in ['xception', 'inception_v3']:
         target_size = (299, 299)
     else:
@@ -254,7 +216,6 @@ def train_top(model, top, group, position, size, n_epochs):
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        # target_size=(224, 224),
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
@@ -262,7 +223,6 @@ def train_top(model, top, group, position, size, n_epochs):
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        # target_size=(224, 224),
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
@@ -271,7 +231,6 @@ def train_top(model, top, group, position, size, n_epochs):
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    # class_weight = {0: 1.5, 1: 1}
     class_weight = 'auto'
 
     full_model.fit_generator(

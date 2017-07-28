@@ -13,6 +13,7 @@ for dir in dirs:
     for label in labels:
         relevant_data_path = data_path + dir + '/' + label +'/'
         relevant_resize_path = resize_path + dir + '/' + label + '/'
+        os.makedirs(relevant_resize_path, exist_ok=True)
         files = os.listdir(relevant_data_path)
         for file in tqdm(files):
             im = imread(relevant_data_path + file, -1)
