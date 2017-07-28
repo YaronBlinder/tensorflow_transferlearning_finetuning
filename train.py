@@ -255,7 +255,7 @@ def train_top(model, top, group, position, size, n_epochs):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
-        # image_reader='cv2',
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
@@ -263,7 +263,7 @@ def train_top(model, top, group, position, size, n_epochs):
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
-        # image_reader='cv2',
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
@@ -295,8 +295,8 @@ def train_top(model, top, group, position, size, n_epochs):
 
 
 def fine_tune(model, top, group, position, size, weights_path):
-    train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, group=group)
+    test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
@@ -317,6 +317,7 @@ def fine_tune(model, top, group, position, size, weights_path):
     train_generator = train_datagen.flow_from_directory(
         train_path,
         # target_size=(224, 224),
+
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
@@ -359,7 +360,7 @@ def fine_tune(model, top, group, position, size, weights_path):
     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
 
     # class_weight={0:0.40, 1:0.40, 2:0.20}
-    class_weight = {0: 1.5, 1: 1}
+    class_weight = "auto"
 
     full_model.fit_generator(
         generator=train_generator,
