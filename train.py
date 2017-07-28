@@ -179,7 +179,7 @@ def get_train_datagen(model, size=224):
 
 
 def get_test_datagen(model, size=224):
-    datagen = ImageDataGenerator(
+    datagen = ImageDataGenerator()
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
     datagen.config['size'] = size
