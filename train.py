@@ -434,13 +434,14 @@ def main():
     model_path = prep_dir(args)
     weights_path = model_path + 'top_trained.h5'
     n_epochs = int(args.epochs)
+    size = int(args.size)
 
     if args.model == 'scratch':
-        train_from_scratch(args.group, args.position, args.size)
+        train_from_scratch(args.group, args.position, size)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, args.size, n_epochs)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs)
     if args.finetune:
-        fine_tune(args.model, args.top, args.group, args.position, args.size, weights_path)
+        fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
 
 if __name__ == '__main__':
