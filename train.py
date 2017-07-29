@@ -174,10 +174,10 @@ def get_train_datagen(model, size=224):
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
         datagen.config['size'] = size
-        datagen.set_pipeline([imagenet_preprocess, scale_im, random_90deg_rotation, standardize])
+        datagen.set_pipeline([scale_im, imagenet_preprocess, random_90deg_rotation, standardize])
     else:
         datagen.config['size'] = size
-        datagen.set_pipeline([radical_preprocess, scale_im, random_90deg_rotation, standardize])
+        datagen.set_pipeline([scale_im, radical_preprocess, random_90deg_rotation, standardize])
     return datagen
 
 
@@ -186,10 +186,10 @@ def get_test_datagen(model, size=224):
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
         datagen.config['size'] = size
-        datagen.set_pipeline([imagenet_preprocess, scale_im, standardize])
+        datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
     else:
         datagen.config['size'] = size
-        datagen.set_pipeline([radical_preprocess, scale_im, standardize])
+        datagen.set_pipeline([scale_im, radical_preprocess, standardize])
     return datagen
 
 
