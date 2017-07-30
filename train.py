@@ -38,14 +38,10 @@ def assert_validity(args):
 
 def prep_dir(args):
     group, model, position, top = args.group, args.model, args.position, args.top
-    model_path = 'models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
     TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model,
                                                                          top=top)
-    os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
-    os.makedirs(model_path + 'top', exist_ok=True)
-    os.makedirs(model_path + 'ft', exist_ok=True)
-    os.makedirs(model_path + 'ft_notop', exist_ok=True)
+    os.makedirs('weights', exist_ok=True)
     return model_path
 
 
@@ -169,8 +165,9 @@ def get_model(model, top, freeze_base=False):
     return full_model
 
 
-def get_train_datagen(model, size=224):
+def get_train_datagen(model, position, size):
     datagen = ImageDataGenerator()
+    datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
         datagen.config['size'] = size
@@ -181,8 +178,9 @@ def get_train_datagen(model, size=224):
     return datagen
 
 
-def get_test_datagen(model, size=224):
+def get_test_datagen(model, position, size):
     datagen = ImageDataGenerator()
+    datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
         datagen.config['size'] = size
@@ -212,8 +210,8 @@ def train_top(model, top, group, position, size, n_epochs):
     n_test_samples = count_files(test_path)
 
     print(train_path)
-    train_datagen = get_train_datagen(model)
-    test_datagen = get_test_datagen(model)
+    train_datagen = get_train_datagen(model, position)
+    test_datagen = get_test_datagen(model, position)
 
     if model in ['xception', 'inception_v3']:
         target_size = (299, 299)
@@ -253,7 +251,7 @@ def train_top(model, top, group, position, size, n_epochs):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/{top}/top_trained.h5'.format(position=position, group=group,
+    weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
                                                                                    model=model, top=top)
     full_model.save_weights(weights_path)
     print('Model top trained.')
@@ -271,8 +269,8 @@ def fine_tune(model, top, group, position, size, weights_path):
     batch_size = 32
     n_epochs = 100
 
-    train_datagen = get_train_datagen(model)
-    test_datagen = get_test_datagen(model)
+    train_datagen = get_train_datagen(model, position)
+    test_datagen = get_test_datagen(model, position)
 
     if model in ['xception', 'inception_v3']:
         target_size = (299, 299)
@@ -341,7 +339,7 @@ def fine_tune(model, top, group, position, size, weights_path):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+    weights_path = 'weights/{group}_{position}_{model}_finetuned_model.h5'.format(group=group, position=position,
                                                                                  model=model)
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
@@ -381,8 +379,8 @@ def train_from_scratch(group, position, size):
     batch_size = 32
     n_epochs = 100
 
-    train_datagen = get_train_datagen('scratch', size)
-    test_datagen = get_test_datagen('scratch', size)
+    train_datagen = get_train_datagen('scratch', size, position)
+    test_datagen = get_test_datagen('scratch', size, position)
 
     target_size = (size, size)
     train_generator = train_datagen.flow_from_directory(
@@ -418,7 +416,7 @@ def train_from_scratch(group, position, size):
         pickle_safe=False,
         initial_epoch=0)
 
-    weights_path = 'models/{group}/{position}/{model}/finetuned_model.h5'.format(group=group, position=position,
+    weights_path = 'weights/{group}_{position}_{model}_trained_model.h5'.format(group=group, position=position,
                                                                                  model='scratch')
     full_model.save_weights(weights_path)
     print('Model trained.')

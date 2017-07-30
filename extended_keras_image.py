@@ -95,8 +95,16 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
     return x
 
 
-def imagenet_preprocess(x, *args, **kwargs):
-    ds_mean = 38679.2766871  # calculated
+def imagenet_preprocess(x, position, *args, **kwargs):
+
+    if position == 'PA':
+        ds_mean = 38679.2766871 #calculated
+    elif position == 'LAT':
+        ds_mean = 34024.5927414
+    else:
+        print('You should not be here')
+        break
+
     x = np.reshape(x, [1, 224, 224, 3])
     x = x.astype('float32')
 
@@ -123,12 +131,19 @@ def inception_preprocess(x, *args, **kwargs):
     return x
 
 
-def radical_preprocess(x, *args, **kwargs):
-    ds_mean = 38679.2766871 #calculated
+def radical_preprocess(x, position, *args, **kwargs):
+    if position == 'PA':
+        ds_mean = 38679.2766871 #calculated
+    elif position == 'LAT':
+        ds_mean = 34024.5927414
+    else:
+        print('You should not be here')
+        break
+
     x = x.astype('float32')
     x -= ds_mean
     x /= 65535
-    x *= 2
+    # x *= 2
 
     return x
 
