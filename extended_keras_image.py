@@ -103,7 +103,6 @@ def imagenet_preprocess(x, position, *args, **kwargs):
         ds_mean = 34024.5927414
     else:
         print('You should not be here')
-        break
 
     x = np.reshape(x, [1, 224, 224, 3])
     x = x.astype('float32')
@@ -138,7 +137,6 @@ def radical_preprocess(x, position, *args, **kwargs):
         ds_mean = 34024.5927414
     else:
         print('You should not be here')
-        break
 
     x = x.astype('float32')
     x -= ds_mean
