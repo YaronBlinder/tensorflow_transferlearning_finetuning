@@ -2,12 +2,11 @@ import argparse
 import glob
 import os
 
-import keras.backend as K
 import keras.layers
 import numpy as np
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
-#from keras.initializers import glorot_normal
+# from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 
 # from keras.preprocessing.image import ImageDataGenerator
@@ -42,7 +41,6 @@ def prep_dir(args):
                                                                          top=top)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs('weights', exist_ok=True)
-    return model_path
 
 
 def get_base_model(model):
@@ -201,7 +199,6 @@ def train_top(model, top, group, position, size, n_epochs):
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-
     train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
 
@@ -252,7 +249,7 @@ def train_top(model, top, group, position, size, n_epochs):
         initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
-                                                                                   model=model, top=top)
+                                                                                    model=model, top=top)
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
@@ -340,7 +337,7 @@ def fine_tune(model, top, group, position, size, weights_path):
         initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_finetuned_model.h5'.format(group=group, position=position,
-                                                                                 model=model)
+                                                                                  model=model)
     full_model.save_weights(weights_path)
     print('Model fine-tuned.')
 
@@ -417,7 +414,7 @@ def train_from_scratch(group, position, size):
         initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_trained_model.h5'.format(group=group, position=position,
-                                                                                 model='scratch')
+                                                                                model='scratch')
     full_model.save_weights(weights_path)
     print('Model trained.')
 
@@ -435,8 +432,9 @@ def main():
 
     args = parser.parse_args()
     assert_validity(args)
-    model_path = prep_dir(args)
-    weights_path = model_path + 'top_trained.h5'
+    weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=args.position,
+                                                                                    group=args.group,
+                                                                                    model=args.model, top=args.top)
     n_epochs = int(args.epochs)
     size = int(args.size)
 
