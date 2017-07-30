@@ -163,7 +163,7 @@ def get_model(model, top, freeze_base=False):
     return full_model
 
 
-def get_train_datagen(model, position, size):
+def get_train_datagen(model, size, position):
     datagen = ImageDataGenerator()
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
@@ -176,7 +176,7 @@ def get_train_datagen(model, position, size):
     return datagen
 
 
-def get_test_datagen(model, position, size):
+def get_test_datagen(model, size, position):
     datagen = ImageDataGenerator()
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
@@ -207,8 +207,8 @@ def train_top(model, top, group, position, size, n_epochs):
     n_test_samples = count_files(test_path)
 
     print(train_path)
-    train_datagen = get_train_datagen(model, position)
-    test_datagen = get_test_datagen(model, position)
+    train_datagen = get_train_datagen(model, size, position)
+    test_datagen = get_test_datagen(model, size, position)
 
     if model in ['xception', 'inception_v3']:
         target_size = (299, 299)

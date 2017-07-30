@@ -5,7 +5,7 @@ unrar x PA_512_16.rar
 mv Users/mrbli_000/Desktop/RadicalAI/code/data/PA_512_16/ PA_512_16/
 aws s3 cp s3://big-batch/LAT_512_16.rar LAT_512_16.rar
 unrar x LAT_512_16.rar
-mv Users/mrbli_000/Desktop/RadicalAI/code/data/LAT_512_16/ LAt_512_16/
+mv Users/mrbli_000/Desktop/RadicalAI/code/data/LAT_512_16/ LAT_512_16/
 
 cd ~/Radical/data/PA_512_16/M_Adult/
 rm -r */10 */11 */3
