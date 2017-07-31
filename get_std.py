@@ -10,6 +10,7 @@ from cv2 import imread
 def get_dataset_std(path, ds_mean):
 
     count = 0
+    acc_var = 0
 
     for r, dirs, files in os.walk(path):
         for dr in dirs:
