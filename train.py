@@ -266,8 +266,8 @@ def fine_tune(model, top, group, position, size, weights_path):
     batch_size = 32
     n_epochs = 100
 
-    train_datagen = get_train_datagen(model, position)
-    test_datagen = get_test_datagen(model, position)
+    train_datagen = get_train_datagen(model, size, position)
+    test_datagen = get_test_datagen(model, size, position)
 
     if model in ['xception', 'inception_v3']:
         target_size = (299, 299)
@@ -276,15 +276,14 @@ def fine_tune(model, top, group, position, size, weights_path):
 
     train_generator = train_datagen.flow_from_directory(
         train_path,
-        # target_size=(224, 224),
-
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
-        # target_size=(224, 224),
+        image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size,
         shuffle=True)
