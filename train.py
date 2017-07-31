@@ -432,6 +432,7 @@ def main():
 
     args = parser.parse_args()
     assert_validity(args)
+    prep_dir(args)
     weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=args.position,
                                                                                     group=args.group,
                                                                                     model=args.model, top=args.top)

@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 from tqdm import tqdm
+import numpy as np
 
 from cv2 import imread
 
@@ -27,8 +28,9 @@ def main():
     parse.add_argument('--mean', required=True, help='mean value of dataset')
 
     args = parser.parse_args()
-    dataset_std = get_dataset_std(args.path, args.mean)
-    print(ds_mean)
+    dataset_mean = np.float32(args.mean)
+    dataset_std = get_dataset_std(args.path, dataset_mean)
+    print(dataset_std)
 
 
 if __name__ == '__main__':
