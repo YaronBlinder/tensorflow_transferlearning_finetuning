@@ -25,7 +25,7 @@ def get_dataset_std(path, ds_mean):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', default='data/PA_512_16/M_Adult/train/', help='path to training set')
-    parse.add_argument('--mean', required=True, help='mean value of dataset')
+    parser.add_argument('--mean', required=True, help='mean value of dataset')
 
     args = parser.parse_args()
     dataset_mean = np.float32(args.mean)
