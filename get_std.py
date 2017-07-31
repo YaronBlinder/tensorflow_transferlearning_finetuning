@@ -17,7 +17,7 @@ def get_dataset_std(path, ds_mean):
             count += len(glob.glob(os.path.join(r, dr + "/*")))
         for file in tqdm(files):
             im = imread(os.path.join(r, file), -1)
-            acc_var += (1. / (count-1)) * ((im-ds_mean)**2).sum()
+            acc_var += (1. / ((512**2)*count-1)) * ((im-ds_mean)**2).sum()
 
     dataset_std = np.sqrt(acc_var)
     return dataset_std
