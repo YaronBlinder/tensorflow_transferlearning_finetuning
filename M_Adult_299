@@ -1,0 +1,7 @@
+python3 train.py --size 512 --model inception_v3 --group M_Adult --train_top --top linear --epochs 100
+python3 train.py --size 512 --model inception_v3 --group M_Adult --train_top --top waya --epochs 100
+python3 train.py --size 512 --model inception_v3 --group M_Adult --train_top --top chollet --epochs 100
+
+python3 train.py --size 512 --model xception --group M_Adult --train_top --top linear --epochs 100
+python3 train.py --size 512 --model xception --group M_Adult --train_top --top waya --epochs 100
+python3 train.py --size 512 --model xception --group M_Adult --train_top --top chollet --epochs 100
