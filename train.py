@@ -168,7 +168,7 @@ def get_train_datagen(model, size, position):
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-    elif model in ['inceptionv3', 'xception']:
+    elif model in ['inception_v3', 'xception']:
         size = 299
     else:
         pass
@@ -182,7 +182,7 @@ def get_test_datagen(model, size, position):
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-    elif model in ['inceptionv3', 'xception']:
+    elif model in ['inception_v3', 'xception']:
         size = 299
     else:
         pass
