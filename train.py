@@ -168,11 +168,12 @@ def get_train_datagen(model, size, position):
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-        datagen.config['size'] = size
-        datagen.set_pipeline([scale_im, radical_preprocess, random_90deg_rotation, standardize])
+    elif model in ['inceptionv3', 'xception']:
+        size = 299
     else:
-        datagen.config['size'] = size
-        datagen.set_pipeline([scale_im, radical_preprocess, random_90deg_rotation, standardize])
+        pass
+    datagen.config['size'] = size
+    datagen.set_pipeline([scale_im, radical_preprocess, random_90deg_rotation, standardize])
     return datagen
 
 
@@ -181,11 +182,12 @@ def get_test_datagen(model, size, position):
     datagen.config['position'] = position
     if model in ['vgg16', 'vgg19', 'resnet50']:
         size = 224
-        datagen.config['size'] = size
-        datagen.set_pipeline([scale_im, radical_preprocess, standardize])
+    elif model in ['inceptionv3', 'xception']:
+        size = 299
     else:
-        datagen.config['size'] = size
-        datagen.set_pipeline([scale_im, radical_preprocess, standardize])
+        pass
+    datagen.config['size'] = size
+    datagen.set_pipeline([scale_im, radical_preprocess, standardize])
     return datagen
 
 
