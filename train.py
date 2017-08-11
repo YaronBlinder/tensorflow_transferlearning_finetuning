@@ -13,6 +13,10 @@ from keras.models import Model, Sequential
 from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
     imagenet_preprocess, random_90deg_rotation
 
+from densenet121 import densenet121_model
+from densenet161 import densenet161_model
+from densenet169 import densenet169_model
+
 # from keras.applications.imagenet_utils import preprocess_input
 
 # This version uses the finetuning example from Keras documentation
@@ -22,7 +26,15 @@ N_classes = 2
 
 
 def assert_validity(args):
-    valid_models = ['resnet50', 'vgg16', 'vgg19', 'scratch', 'inception_v3', 'xception']
+    valid_models = ['resnet50',
+                    'vgg16',
+                    'vgg19',
+                    'scratch',
+                    'inception_v3',
+                    'xception',
+                    'densenet121',
+                    'densenet161',
+                    'densenet169']
     valid_groups = [
         'F_Ped', 'M_ped',
         'F_YA', 'M_YA',
@@ -73,6 +85,27 @@ def get_base_model(model):
             weights='imagenet',
             include_top=False,
             input_tensor=keras.layers.Input(shape=(299, 299, 3)))
+
+    elif model == 'densenet121':
+        base_model = densenet121_model(
+            img_rows=224,
+            img_cols=224,
+            color_type=3,
+            num_classes=N_classes)
+
+    elif model == 'densenet161':
+        base_model = densenet161_model(
+            img_rows=224,
+            img_cols=224,
+            color_type=3,
+            num_classes=N_classes)
+
+    elif model == 'densenet169':
+        base_model = densenet169_model(
+            img_rows=224,
+            img_cols=224,
+            color_type=3,
+            num_classes=N_classes)
 
     else:
         assert False, '{} is not an implemented model!'.format(model)
@@ -136,27 +169,36 @@ def get_model(model, top, freeze_base=False):
     assert top in ['chollet', 'waya', 'linear'], 'top selection invalid'
 
     base_model = get_base_model(model)
-    x = base_model.output
-    x = keras.layers.Flatten()(x)
-    if top == 'chollet':
-        x = keras.layers.Dense(1024, activation="relu")(x)
-        x = keras.layers.Dropout(0.5)(x)
-        x = keras.layers.Dense(1024, activation="relu")(x)
-    elif top == 'waya':
-        x = keras.layers.Dense(1024)(x)
-        x = keras.layers.BatchNormalization()(x)
-        x = keras.layers.advanced_activations.LeakyReLU()(x)
-        x = keras.layers.Dropout(0.25)(x)
-    elif top == 'linear':
-        x = keras.layers.Dense(256)(x)
-        x = keras.layers.Dropout(0.5)(x)
+
+    if model in ['densenet121', 'densenet161', 'densenet169']:
+        full_model = base_model
     else:
-        assert False, 'you should not be here'
+        x = base_model.output
+        x = keras.layers.Flatten()(x)
 
-    predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id')(x)
+        if top == 'chollet':
+            x = keras.layers.Dense(1024, activation="relu")(x)
+            x = keras.layers.Dropout(0.5)(x)
+            x = keras.layers.Dense(1024, activation="relu")(x)
+        elif top == 'waya':
+            x = keras.layers.Dense(1024)(x)
+            x = keras.layers.BatchNormalization()(x)
+            x = keras.layers.advanced_activations.LeakyReLU()(x)
+            x = keras.layers.Dropout(0.25)(x)
+        elif top == 'linear':
+            x = keras.layers.Dense(256)(x)
+            x = keras.layers.Dropout(0.5)(x)
+        elif top == 'pooled_linear':
+            x = keras.layers.GlobalAveragePooling2D()(x)
+            x = keras.layers.Dense(256)(x)
+            x = keras.layers.Dropout(0.5)(x)
+        else:
+            assert False, 'you should not be here'
 
-    # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
-    full_model = Model(inputs=base_model.input, outputs=predictions)
+        predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id')(x)
+
+        # predictions = keras.layers.Dense(N_classes, activation='softmax', name='class_id', trainable=True)(x)
+        full_model = Model(inputs=base_model.input, outputs=predictions)
     if freeze_base:
         for layer in base_model.layers:
             layer.trainable = False
