@@ -26,3 +26,12 @@ ls | grep f. -m 256 | xargs rm -fr
 ls | grep ^[^f] -m 256| xargs rm -fr
 
 cd ~/Radical
+
+cd ~/Radical/data/PA_512_16/M_Adult/
+rm -r */10 */11 */2
+cd train/1
+ls | grep f. -m 1762 | xargs rm -fr
+ls | grep ^[^f] -m 1762| xargs rm -fr
+cd ~/Radical/data/PA_512_16/M_Adult/test/1
+ls | grep f. -m 455 | xargs rm -fr
+ls | grep ^[^f] -m 455| xargs rm -fr
