@@ -246,7 +246,10 @@ def train_top(model, top, group, position, size, n_epochs):
     train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
 
-    batch_size = 32
+    if model in ['densenet121', 'densenet161', 'densenet169']:
+        batch_size = 16
+    else:
+        batch_size = 32
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
