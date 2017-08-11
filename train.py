@@ -208,7 +208,7 @@ def get_model(model, top, freeze_base=False):
 def get_train_datagen(model, size, position):
     datagen = ImageDataGenerator()
     datagen.config['position'] = position
-    if model in ['vgg16', 'vgg19', 'resnet50']:
+    if model in ['vgg16', 'vgg19', 'resnet50', 'densenet121', 'densenet161', 'densenet169']:
         size = 224
     elif model in ['inception_v3', 'xception']:
         size = 299
@@ -222,7 +222,7 @@ def get_train_datagen(model, size, position):
 def get_test_datagen(model, size, position):
     datagen = ImageDataGenerator()
     datagen.config['position'] = position
-    if model in ['vgg16', 'vgg19', 'resnet50']:
+    if model in ['vgg16', 'vgg19', 'resnet50', 'densenet121', 'densenet161', 'densenet169']:
         size = 224
     elif model in ['inception_v3', 'xception']:
         size = 299
