@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from keras.optimizers import SGD
 from keras.layers import Input, merge, ZeroPadding2D
 from keras.layers.core import Dense, Dropout, Activation
@@ -13,7 +11,7 @@ from sklearn.metrics import log_loss
 
 from custom_layers.scale_layer import Scale
 
-from load_cifar10 import load_cifar10_data
+# from load_cifar10 import load_cifar10_data
 
 def densenet169_model(img_rows, img_cols, color_type=1, nb_dense_block=4, growth_rate=32, nb_filter=64, reduction=0.5, dropout_rate=0.0, weight_decay=1e-4, num_classes=None):
     '''
