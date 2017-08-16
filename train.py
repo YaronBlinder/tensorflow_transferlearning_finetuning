@@ -166,7 +166,7 @@ def get_callbacks(model, top, group, position, train_type):
 
 
 def get_model(model, top, freeze_base=False):
-    assert top in ['chollet', 'waya', 'linear'], 'top selection invalid'
+    assert top in ['chollet', 'waya', 'linear', 'pooled_linear'], 'top selection invalid'
 
     base_model = get_base_model(model)
 
