@@ -1,3 +1,10 @@
+git clone https://github.com/YaronBlinder/tensorflow_transferlearning_finetuning.git
+mv tensorflow_transferlearning_finetuning/ Radical/
+cd Radical
+
+aws configure
+sudo apt install unrar-free
+
 mkdir data
 cd data
 aws s3 cp s3://big-batch/PA_512_16.rar PA_512_16.rar
@@ -7,7 +14,7 @@ aws s3 cp s3://big-batch/LAT_512_16.rar LAT_512_16.rar
 unrar x LAT_512_16.rar
 mv Users/mrbli_000/Desktop/RadicalAI/code/data/LAT_512_16/ LAT_512_16/
 
-cd ~/Radical/data/PA_512_16/M_Adult/
+cd ~/Radical/data/PA_512_16/M_Adult/vi
 rm -r */10 */11 */3
 cd train/2
 ls | grep f. -m 1042 | xargs rm -fr

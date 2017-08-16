@@ -55,7 +55,7 @@ def prep_dir(args):
     os.makedirs('weights', exist_ok=True)
 
 
-def get_base_model(model):
+def get_base_model(model, pooling=None):
     if model == 'resnet50':
         base_model = ResNet50(
             weights='imagenet',
@@ -66,6 +66,7 @@ def get_base_model(model):
         base_model = VGG16(
             weights='imagenet',
             include_top=False,
+            pooling=pooling,
             input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
     elif model == 'vgg19':
@@ -189,7 +190,9 @@ def get_model(model, top, freeze_base=False):
             x = keras.layers.Dense(256)(x)
             x = keras.layers.Dropout(0.5)(x)
         elif top == 'pooled_linear':
-            x = keras.layers.GlobalAveragePooling2D()(x)
+            base_model = get_base_model(model, pooling='avg')
+            x = base_model.output
+            x = keras.layers.Flatten()(x)
             x = keras.layers.Dense(256)(x)
             x = keras.layers.Dropout(0.5)(x)
         else:
