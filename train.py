@@ -192,9 +192,9 @@ def get_model(model, top, freeze_base=False):
         elif top == 'pooled_linear':
             base_model = get_base_model(model, pooling='max')
             x = base_model.output
-            # x = keras.layers.Flatten()(x)
-            x = keras.layers.Dense(256)(x)
-            x = keras.layers.Dropout(0.5)(x)
+            x = keras.layers.Dense(1024)(x)
+            x = keras.layers.Dense(1024)(x)
+            # x = keras.layers.Dropout(0.5)(x)
         else:
             assert False, 'you should not be here'
 
