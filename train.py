@@ -190,7 +190,7 @@ def get_model(model, top, freeze_base=False):
             x = keras.layers.Dense(256)(x)
             x = keras.layers.Dropout(0.5)(x)
         elif top == 'pooled_linear':
-            base_model = get_base_model(model, pooling='avg')
+            base_model = get_base_model(model, pooling='max')
             x = base_model.output
             # x = keras.layers.Flatten()(x)
             x = keras.layers.Dense(256)(x)
