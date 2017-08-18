@@ -516,7 +516,7 @@ def main():
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position, size)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, dropout)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout)
     if args.finetune:
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
