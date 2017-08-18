@@ -131,17 +131,27 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type):
+def get_callbacks(model, top, group, position, train_type, n_dense, dropout):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    path = 'models/{group}/{position}/{model}/{top}/{train_type}/'.format(
+    if model == 'test':
+        path = 'models/{group}/{position}/{model}/{top}/{n_dense}_dropout_{dropout}/'.format(
         group=group,
         position=position,
         model=model,
         top=top,
-        train_type=train_type)
+        n_dense=n_dense,
+        dropout=dropout
+        )
+    else:
+        path = 'models/{group}/{position}/{model}/{top}/{train_type}/'.format(
+            group=group,
+            position=position,
+            model=model,
+            top=top,
+            train_type=train_type)
     return [
         # callbacks.ModelCheckpoint(
         #     filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
@@ -166,8 +176,8 @@ def get_callbacks(model, top, group, position, train_type):
     ]
 
 
-def get_model(model, top, freeze_base=False):
-    assert top in ['chollet', 'waya', 'linear', 'pooled_linear'], 'top selection invalid'
+def get_model(model, top, freeze_base=False, n_dense=256, dropout=True):
+    assert top in ['chollet', 'waya', 'linear', 'pooled_linear', 'test'], 'top selection invalid'
 
     base_model = get_base_model(model)
 
@@ -195,6 +205,12 @@ def get_model(model, top, freeze_base=False):
             x = keras.layers.Dense(1024)(x)
             x = keras.layers.Dense(1024)(x)
             # x = keras.layers.Dropout(0.5)(x)
+        elif top == 'test':
+            x = keras.layers.Dense(n_dense)(x)
+            x = keras.layers.Dense(n_dense)(x)
+            if dropout:
+                x = keras.layers.Dropout(0.5)(x)
+
         else:
             assert False, 'you should not be here'
 
@@ -236,9 +252,9 @@ def get_test_datagen(model, size, position):
     return datagen
 
 
-def train_top(model, top, group, position, size, n_epochs):
+def train_top(model, top, group, position, size, n_epochs, n_dense, dropout):
     print('Loading model...')
-    full_model = get_model(model, top, freeze_base=True)
+    full_model = get_model(model, top, freeze_base=True, n_dense=n_dense, dropout=dropout)
     full_model.compile(
         optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         # optimizer=optimizers.Adam(lr=1e-4),
@@ -283,13 +299,14 @@ def train_top(model, top, group, position, size, n_epochs):
     print('Training top...')
 
     class_weight = 'auto'
+    train_type = 'top'
 
     full_model.fit_generator(
         generator=train_generator,
         steps_per_epoch=np.ceil(n_train_samples / batch_size),
         epochs=n_epochs,
         verbose=1,
-        callbacks=get_callbacks(model, top, group, position, train_type='top'),
+        callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
@@ -297,6 +314,10 @@ def train_top(model, top, group, position, size, n_epochs):
         workers=4,
         pickle_safe=False,
         initial_epoch=0)
+
+    if top == 'test':
+        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(position=position, group=group,
+                                                                                        model=model, top=top)
 
     weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
                                                                                     model=model, top=top)
@@ -478,6 +499,9 @@ def main():
     parser.add_argument('--train_top', action='store_true', help='train top')
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--epochs', default=100, help='# of epochs for top training')
+    parser.add_argument('--n_dense', default=512, help='size of dense layer')
+    parser.add_argument('--dropout', action='store_true', help='flag for adding a dropout layer')
+
 
     args = parser.parse_args()
     assert_validity(args)
@@ -487,11 +511,12 @@ def main():
                                                                                     model=args.model, top=args.top)
     n_epochs = int(args.epochs)
     size = int(args.size)
+    n_dense = int(args.n_dense)
 
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position, size)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, size, n_epochs)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, dropout)
     if args.finetune:
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
