@@ -1,0 +1,6 @@
+python3 train.py --model vgg16 --top test --n_dense 512 --train_top
+python3 train.py --model vgg16 --top test --n_dense 512 --dropout --train_top
+python3 train.py --model vgg16 --top test --n_dense 1024 --train_top
+python3 train.py --model vgg16 --top test --n_dense 1024 --dropout --train_top
+python3 train.py --model vgg16 --top test --n_dense 2048 --train_top
+python3 train.py --model vgg16 --top test --n_dense 2048 --dropout --train_top
