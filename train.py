@@ -138,13 +138,12 @@ def get_callbacks(model, top, group, position, train_type, n_dense, dropout):
     """
     if model == 'test':
         path = 'models/{group}/{position}/{model}/{top}/{n_dense}_dropout_{dropout}/'.format(
-        group=group,
-        position=position,
-        model=model,
-        top=top,
-        n_dense=n_dense,
-        dropout=dropout
-        )
+            group=group,
+            position=position,
+            model=model,
+            top=top,
+            n_dense=n_dense,
+            dropout=dropout)
     else:
         path = 'models/{group}/{position}/{model}/{top}/{train_type}/'.format(
             group=group,
