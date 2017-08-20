@@ -152,11 +152,11 @@ def get_callbacks(model, top, group, position, train_type, n_dense, dropout):
             top=top,
             train_type=train_type)
     return [
-        # callbacks.ModelCheckpoint(
-        #     filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
-        #     monitor='val_acc',
-        #     verbose=1,
-        #     save_best_only=True),
+        callbacks.ModelCheckpoint(
+            filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
+            monitor='val_acc',
+            verbose=1,
+            save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
             patience=12,
@@ -316,7 +316,7 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout):
 
     if top == 'test':
         weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(position=position, group=group,
-                                                                                        model=model, top=top)
+                                                                                        model=model, top=top, n_dense=n_dense, dropout=dropout)
     else:
         weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
                                                                                     model=model, top=top)
