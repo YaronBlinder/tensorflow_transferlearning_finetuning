@@ -317,8 +317,8 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout):
     if top == 'test':
         weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(position=position, group=group,
                                                                                         model=model, top=top)
-
-    weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
+    else:
+        weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
                                                                                     model=model, top=top)
     full_model.save_weights(weights_path)
     print('Model top trained.')
