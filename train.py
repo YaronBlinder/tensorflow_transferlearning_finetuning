@@ -9,13 +9,12 @@ from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 # from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 
-# from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
-    imagenet_preprocess, random_90deg_rotation
-
 from densenet121 import densenet121_model
 from densenet161 import densenet161_model
 from densenet169 import densenet169_model
+# from keras.preprocessing.image import ImageDataGenerator
+from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
+    random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -131,7 +130,7 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type, n_dense, dropout):
+def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout=None):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
@@ -175,10 +174,10 @@ def get_callbacks(model, top, group, position, train_type, n_dense, dropout):
     ]
 
 
-def get_model(model, top, freeze_base=False, n_dense=256, dropout=True):
+def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling=None):
     assert top in ['chollet', 'waya', 'linear', 'pooled_linear', 'test'], 'top selection invalid'
 
-    base_model = get_base_model(model)
+    base_model = get_base_model(model, pooling=pooling)
 
     if model in ['densenet121', 'densenet161', 'densenet169']:
         full_model = base_model
@@ -187,23 +186,17 @@ def get_model(model, top, freeze_base=False, n_dense=256, dropout=True):
         x = keras.layers.Flatten()(x)
 
         if top == 'chollet':
-            x = keras.layers.Dense(1024, activation="relu")(x)
+            x = keras.layers.Dense(n_dense, activation="relu")(x)
             x = keras.layers.Dropout(0.5)(x)
-            x = keras.layers.Dense(1024, activation="relu")(x)
+            x = keras.layers.Dense(n_dense, activation="relu")(x)
         elif top == 'waya':
-            x = keras.layers.Dense(1024)(x)
+            x = keras.layers.Dense(n_dense)(x)
             x = keras.layers.BatchNormalization()(x)
             x = keras.layers.advanced_activations.LeakyReLU()(x)
             x = keras.layers.Dropout(0.25)(x)
         elif top == 'linear':
-            x = keras.layers.Dense(256)(x)
+            x = keras.layers.Dense(n_dense)(x)
             x = keras.layers.Dropout(0.5)(x)
-        elif top == 'pooled_linear':
-            base_model = get_base_model(model, pooling='max')
-            x = base_model.output
-            x = keras.layers.Dense(1024)(x)
-            x = keras.layers.Dense(1024)(x)
-            # x = keras.layers.Dropout(0.5)(x)
         elif top == 'test':
             x = keras.layers.Dense(n_dense)(x)
             x = keras.layers.Dense(n_dense)(x)
@@ -251,9 +244,9 @@ def get_test_datagen(model, size, position):
     return datagen
 
 
-def train_top(model, top, group, position, size, n_epochs, n_dense, dropout):
+def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, pooling):
     print('Loading model...')
-    full_model = get_model(model, top, freeze_base=True, n_dense=n_dense, dropout=dropout)
+    full_model = get_model(model, top, freeze_base=True, n_dense=n_dense, dropout=dropout, pooling=pooling)
     full_model.compile(
         optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         # optimizer=optimizers.Adam(lr=1e-4),
@@ -315,11 +308,12 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout):
         initial_epoch=0)
 
     if top == 'test':
-        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(position=position, group=group,
-                                                                                        model=model, top=top, n_dense=n_dense, dropout=dropout)
+        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
+            position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
     else:
-        weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=position, group=group,
-                                                                                    model=model, top=top)
+        weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(
+            position=position, group=group, model=model, top=top)
+
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
@@ -500,7 +494,7 @@ def main():
     parser.add_argument('--epochs', default=100, help='# of epochs for top training')
     parser.add_argument('--n_dense', default=512, help='size of dense layer')
     parser.add_argument('--dropout', action='store_true', help='flag for adding a dropout layer')
-
+    parser.add_argument('--pooling', default='avg', help='type of global pooling layer')
 
     args = parser.parse_args()
     assert_validity(args)
@@ -515,7 +509,7 @@ def main():
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position, size)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
     if args.finetune:
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
