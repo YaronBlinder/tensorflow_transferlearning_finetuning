@@ -47,10 +47,23 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    group, model, position, top = args.group, args.model, args.position, args.top
-    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(group=group, position=position, model=model,
-                                                                         top=top)
+    group, model, position, top, n_dense, dropout = \
+        args.group, args.model, args.position, args.top, args.n_dense, args.dropout
+    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(
+        group=group,
+        position=position,
+        model=model,
+        top=top)
+    model_path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}/'.format(
+        position=position,
+        group=group,
+        model=model,
+        top=top,
+        n_dense=n_dense,
+        dropout=dropout)
     os.makedirs(TBlog_path, exist_ok=True)
+    os.makedirs(model_path, exist_ok=True)
+    os.makedirs(model_path+'weights/', exist_ok=True)
     os.makedirs('weights', exist_ok=True)
 
 
@@ -136,7 +149,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
 
     """
 
-    path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
+    path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}/'.format(
         position=position,
         group=group,
         model=model,
@@ -145,7 +158,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
         dropout=dropout)
     return [
         callbacks.ModelCheckpoint(
-            filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
+            filepath=path + 'weights/{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
