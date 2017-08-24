@@ -63,7 +63,7 @@ def prep_dir(args):
         dropout=dropout)
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(model_path, exist_ok=True)
-    os.makedirs(model_path+'weights/', exist_ok=True)
+    os.makedirs(model_path + 'weights/', exist_ok=True)
     os.makedirs('weights', exist_ok=True)
 
 
@@ -297,10 +297,8 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train the model on the new data for a few epochs
     print('Training top...')
     print(
-        "params: model:{model}\ntop:{top}\ngroup:{group}\nposition:{position}\nim_size:{size}\nn_epochs:{"
-        "n_epochs}\nn_dense:{n_dense}\ndropout:{dropout}\npooling:{pooling}".format(model, top, group, position,
-                                                                                    size, n_epochs, n_dense, dropout,
-                                                                                    pooling))
+        'params: model:{model}\ntop:{top}\ngroup:{group}\nposition:{position}\nim_size:{size}\nn_epochs:{n_epochs}\nn_dense:{n_dense}\ndropout:{dropout}\npooling:{pooling}'.format(
+            model, top, group, position, size, n_epochs, n_dense, dropout, pooling))
 
     class_weight = None
     train_type = 'top'
