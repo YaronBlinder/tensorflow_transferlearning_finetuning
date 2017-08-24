@@ -174,7 +174,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
             log_dir='TBlog/' + path,
-            histogram_freq=1,
+            histogram_freq=0,
             write_graph=True,
             write_images=True)
     ]
@@ -310,7 +310,7 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         validation_steps=int(np.ceil(n_test_samples / batch_size)),
         class_weight=class_weight,
         max_queue_size=10,
-        workers=4,
+        workers=1,
         use_multiprocessing=True,
         initial_epoch=0)
 
