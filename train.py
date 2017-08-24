@@ -284,22 +284,36 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train the model on the new data for a few epochs
     print('Training top...')
 
-    class_weight = 'auto'
+    class_weight = None
     train_type = 'top'
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        steps_per_epoch=int(np.ceil(n_train_samples / batch_size)),
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
         validation_data=test_generator,
-        validation_steps=np.ceil(n_test_samples / batch_size),
+        validation_steps=int(np.ceil(n_test_samples / batch_size)),
         class_weight=class_weight,
-        max_q_size=10,
+        max_queue_size=10,
         workers=4,
-        pickle_safe=False,
+        use_multiprocessing=True,
         initial_epoch=0)
+
+    # full_model.fit_generator(
+    #     generator=train_generator,
+    #     steps_per_epoch=np.ceil(n_train_samples / batch_size),
+    #     epochs=n_epochs,
+    #     verbose=1,
+    #     callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
+    #     validation_data=test_generator,
+    #     validation_steps=np.ceil(n_test_samples / batch_size),
+    #     class_weight=class_weight,
+    #     max_q_size=10,
+    #     workers=4,
+    #     pickle_safe=False,
+    #     initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
         position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
