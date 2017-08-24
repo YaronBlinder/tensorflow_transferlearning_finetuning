@@ -297,8 +297,15 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train the model on the new data for a few epochs
     print('Training top...')
     print(
-        'params: model:{model}\ntop:{top}\ngroup:{group}\nposition:{position}\nim_size:{size}\nn_epochs:{n_epochs}\nn_dense:{n_dense}\ndropout:{dropout}\npooling:{pooling}'.format(
-            model, top, group, position, size, n_epochs, n_dense, dropout, pooling))
+        'params: model:{model}\n'.format(model),
+        'top:{top}\n'.format(top),
+        'group:{group}\n'.format(group),
+        'position:{position}\n'.format(position),
+        'im_size:{size}\n'.format(size),
+        'n_epochs:{n_epochs}\n'.format(n_epochs),
+        'n_dense:{n_dense}\n'.format(n_dense),
+        'dropout:{dropout}\n'.format(dropout),
+        'pooling:{pooling}'.format(pooling))
 
     class_weight = None
     train_type = 'top'
