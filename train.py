@@ -135,21 +135,14 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    if model == 'test':
-        path = 'models/{group}/{position}/{model}/{top}/{n_dense}_dropout_{dropout}/'.format(
-            group=group,
-            position=position,
-            model=model,
-            top=top,
-            n_dense=n_dense,
-            dropout=dropout)
-    else:
-        path = 'models/{group}/{position}/{model}/{top}/{train_type}/'.format(
-            group=group,
-            position=position,
-            model=model,
-            top=top,
-            train_type=train_type)
+
+    path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
+        position=position,
+        group=group,
+        model=model,
+        top=top,
+        n_dense=n_dense,
+        dropout=dropout)
     return [
         callbacks.ModelCheckpoint(
             filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
@@ -307,12 +300,8 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         pickle_safe=False,
         initial_epoch=0)
 
-    if top == 'test':
-        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
-            position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
-    else:
-        weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(
-            position=position, group=group, model=model, top=top)
+    weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
+        position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
 
     full_model.save_weights(weights_path)
     print('Model top trained.')
@@ -499,9 +488,7 @@ def main():
     args = parser.parse_args()
     assert_validity(args)
     prep_dir(args)
-    weights_path = 'weights/{group}_{position}_{model}_{top}_top_trained.h5'.format(position=args.position,
-                                                                                    group=args.group,
-                                                                                    model=args.model, top=args.top)
+
     n_epochs = int(args.epochs)
     size = int(args.size)
     n_dense = int(args.n_dense)
@@ -511,6 +498,8 @@ def main():
     if args.train_top:
         train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
     if args.finetune:
+        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
+            position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
 
