@@ -63,8 +63,8 @@ def get_base_model(model, pooling=None):
 
     elif model == 'vgg16':
         base_model = VGG16(
-            weights='imagenet',
             include_top=False,
+            weights='imagenet',
             pooling=pooling,
             input_tensor=keras.layers.Input(shape=(224, 224, 3)))
 
@@ -176,7 +176,8 @@ def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling
         full_model = base_model
     else:
         x = base_model.output
-        x = keras.layers.Flatten()(x)
+        if pooling is None:
+            x = keras.layers.Flatten()(x)
 
         if top == 'chollet':
             x = keras.layers.Dense(n_dense, activation="relu")(x)
