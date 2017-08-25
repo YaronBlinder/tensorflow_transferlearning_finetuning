@@ -143,12 +143,12 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
     """
 
     model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
-        position=args.position,
-        group=args.group,
-        model=args.model,
-        top=args.top,
-        n_dense=args.n_dense,
-        dropout=args.dropout)
+        position=position,
+        group=group,
+        model=model,
+        top=top,
+        n_dense=n_dense,
+        dropout=dropout)
     TBlog_path = 'TBlog/' + model_path
     weights_path = 'weights/' + model_path
     return [
