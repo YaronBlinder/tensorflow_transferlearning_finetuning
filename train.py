@@ -507,7 +507,7 @@ def main():
     parser.add_argument('--epochs', default=100, help='# of epochs for top training')
     parser.add_argument('--n_dense', default=512, help='size of dense layer')
     parser.add_argument('--dropout', action='store_true', help='flag for adding a dropout layer')
-    parser.add_argument('--pooling', default='avg', help='type of global pooling layer')
+    parser.add_argument('--pooling', default=None, help='type of global pooling layer')
 
     args = parser.parse_args()
     assert_validity(args)
