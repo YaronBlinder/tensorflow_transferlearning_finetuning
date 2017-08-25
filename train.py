@@ -174,7 +174,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
             log_dir='TBlog/' + path,
-            histogram_freq=0,
+            histogram_freq=1,
             write_graph=True,
             write_images=True)
     ]
@@ -297,15 +297,15 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train the model on the new data for a few epochs
     print('Training top...')
     print(
-        'params: model:{model}\n'.format(model=model),
-        'top:{top}\n'.format(top=top),
-        'group:{group}\n'.format(group=group),
-        'position:{position}\n'.format(position=position),
-        'im_size:{size}\n'.format(size=size),
-        'n_epochs:{n_epochs}\n'.format(n_epochs=n_epochs),
-        'n_dense:{n_dense}\n'.format(n_dense=n_dense),
-        'dropout:{dropout}\n'.format(dropout=dropout),
-        'pooling:{pooling}'.format(pooling=pooling))
+        'Network:{model}\n'.format(model=model),
+        'Top:{top}\n'.format(top=top),
+        'Group:{group}\n'.format(group=group),
+        'Position:{position}\n'.format(position=position),
+        'Im_size:{size}\n'.format(size=size),
+        'N_epochs:{n_epochs}\n'.format(n_epochs=n_epochs),
+        'N_dense:{n_dense}\n'.format(n_dense=n_dense),
+        'Dropout:{dropout}\n'.format(dropout=dropout),
+        'Pooling:{pooling}'.format(pooling=pooling))
 
     class_weight = None
     train_type = 'top'
@@ -323,20 +323,6 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         workers=1,
         use_multiprocessing=True,
         initial_epoch=0)
-
-    # full_model.fit_generator(
-    #     generator=train_generator,
-    #     steps_per_epoch=np.ceil(n_train_samples / batch_size),
-    #     epochs=n_epochs,
-    #     verbose=1,
-    #     callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
-    #     validation_data=test_generator,
-    #     validation_steps=np.ceil(n_test_samples / batch_size),
-    #     class_weight=class_weight,
-    #     max_q_size=10,
-    #     workers=4,
-    #     pickle_safe=False,
-    #     initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
         position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
