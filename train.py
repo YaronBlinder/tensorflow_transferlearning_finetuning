@@ -149,7 +149,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
 
     """
 
-    path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}/'.format(
+    path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
         position=position,
         group=group,
         model=model,
