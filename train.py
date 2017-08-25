@@ -142,16 +142,18 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
 
     """
 
-    path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
-        position=position,
-        group=group,
-        model=model,
-        top=top,
-        n_dense=n_dense,
-        dropout=dropout)
+    model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
+        position=args.position,
+        group=args.group,
+        model=args.model,
+        top=args.top,
+        n_dense=args.n_dense,
+        dropout=args.dropout)
+    TBlog_path = 'TBlog/' + model_path
+    weights_path = 'weights/' + model_path
     return [
         callbacks.ModelCheckpoint(
-            filepath=path + 'weights/{epoch:02d}-{val_acc:.2f}.hdf5',
+            filepath=weights_path+'/{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
@@ -166,7 +168,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout
             verbose=1),
         # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
         callbacks.TensorBoard(
-            log_dir='TBlog/' + path,
+            log_dir=TBlog_path,
             histogram_freq=1,
             write_graph=True,
             write_images=True)
