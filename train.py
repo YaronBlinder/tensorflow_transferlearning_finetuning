@@ -47,24 +47,17 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    group, model, position, top, n_dense, dropout = \
-        args.group, args.model, args.position, args.top, args.n_dense, args.dropout
-    TBlog_path = 'TBlog/models/{group}/{position}/{model}/{top}/'.format(
-        group=group,
-        position=position,
-        model=model,
-        top=top)
-    model_path = 'models/{group}_{position}_{model}_{top}_{n_dense}_{dropout}/'.format(
-        position=position,
-        group=group,
-        model=model,
-        top=top,
-        n_dense=n_dense,
-        dropout=dropout)
+    model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
+        position=args.position,
+        group=args.group,
+        model=args.model,
+        top=args.top,
+        n_dense=args.n_dense,
+        dropout=args.dropout)
+    TBlog_path = 'TBlog/'+model_path
+    weights_path = 'weights/'+model_path
     os.makedirs(TBlog_path, exist_ok=True)
-    os.makedirs(model_path, exist_ok=True)
-    os.makedirs(model_path + 'weights/', exist_ok=True)
-    os.makedirs('weights', exist_ok=True)
+    os.makedirs(weights_path, exist_ok=True)
 
 
 def get_base_model(model, pooling=None):
@@ -324,8 +317,13 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         use_multiprocessing=True,
         initial_epoch=0)
 
-    weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
-        position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
+    weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/top_trained.h5'.format(
+        position=position,
+        group=group,
+        model=model,
+        top=top,
+        n_dense=n_dense,
+        dropout=dropout)
 
     full_model.save_weights(weights_path)
     print('Model top trained.')
@@ -522,8 +520,13 @@ def main():
     if args.train_top:
         train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
     if args.finetune:
-        weights_path = 'weights/{group}_{position}_{model}_{top}_{n_dense}_{dropout}_top_trained.h5'.format(
-            position=position, group=group, model=model, top=top, n_dense=n_dense, dropout=dropout)
+        weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/top_trained.h5'.format(
+            position=position,
+            group=group,
+            model=model,
+            top=top,
+            n_dense=n_dense,
+            dropout=dropout)
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
 
 
