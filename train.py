@@ -4,7 +4,7 @@ import os
 
 import keras.layers
 import numpy as np
-from keras import optimizers, callbacks
+from keras import optimizers, callbacks, initializers
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 # from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
@@ -418,36 +418,65 @@ def fine_tune(model, top, group, position, size, weights_path):
     print('Model fine-tuned.')
 
 
-def train_from_scratch(group, position, size):
+def train_from_scratch(group, position, size, selu=False):
     train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
-    full_model = Sequential()
-    full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(size, size, 3)))
-    full_model.add(keras.layers.Activation('relu'))
-    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+    if not selu:
+        full_model = Sequential()
+        full_model.add(keras.layers.Conv2D(32, (3, 3), input_shape=(size, size, 3)))
+        full_model.add(keras.layers.Activation('relu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-    full_model.add(keras.layers.Conv2D(32, (3, 3)))
-    full_model.add(keras.layers.Activation('relu'))
-    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        full_model.add(keras.layers.Conv2D(32, (3, 3)))
+        full_model.add(keras.layers.Activation('relu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-    full_model.add(keras.layers.Conv2D(64, (3, 3)))
-    full_model.add(keras.layers.Activation('relu'))
-    full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        full_model.add(keras.layers.Conv2D(64, (3, 3)))
+        full_model.add(keras.layers.Activation('relu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
-    full_model.add(keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
-    full_model.add(keras.layers.Dense(64))
-    full_model.add(keras.layers.Activation('relu'))
-    full_model.add(keras.layers.Dropout(0.5))
-    full_model.add(keras.layers.Dense(N_classes))
-    full_model.add(keras.layers.Activation('softmax'))
+        full_model.add(keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
+        full_model.add(keras.layers.Dense(64))
+        full_model.add(keras.layers.Activation('relu'))
+        full_model.add(keras.layers.Dropout(0.5))
+        full_model.add(keras.layers.Dense(N_classes))
+        full_model.add(keras.layers.Activation('softmax'))
 
-    full_model.compile(
-        loss='binary_crossentropy',
-        optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
-        metrics=['accuracy'])
+        full_model.compile(
+            loss='binary_crossentropy',
+            optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
+            metrics=['accuracy'])
+
+    else:
+        full_model = Sequential()
+        full_model.add(
+            keras.layers.Conv2D(32, (3, 3), input_shape=(size, size, 3),
+                                kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=np.sqrt(1/9))))
+        full_model.add(keras.layers.Activation('selu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        full_model.add(keras.layers.Conv2D(32, (3, 3),
+                                           kernel_initializer=initializers.RandomNormal(mean=0.0,stddev=np.sqrt(1/9))))
+        full_model.add(keras.layers.Activation('selu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+        full_model.add(keras.layers.Conv2D(64, (3, 3),
+                                           kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=np.sqrt(1/9))))
+        full_model.add(keras.layers.Activation('selu'))
+        full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        full_model.add(keras.layers.Flatten())  # this converts our 3D feature maps to 1D feature vectors
+        full_model.add(keras.layers.Dense(64, kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=1)))
+        full_model.add(keras.layers.Activation('selu'))
+        full_model.add(keras.layers.Dropout(0.5))
+        full_model.add(keras.layers.Dense(N_classes))
+        full_model.add(keras.layers.Activation('softmax'))
+
+        full_model.compile(
+            loss='binary_crossentropy',
+            optimizer=optimizers.SGD(lr=1e-2, momentum=0.9),
+            metrics=['accuracy'])
 
     batch_size = 32
     n_epochs = 100
@@ -509,6 +538,7 @@ def main():
     parser.add_argument('--n_dense', default=512, help='size of dense layer')
     parser.add_argument('--dropout', action='store_true', help='flag for adding a dropout layer')
     parser.add_argument('--pooling', default=None, help='type of global pooling layer')
+    parser.add_argument('--selu', action='store_true', help='flag for selu model (from scratch')
 
     args = parser.parse_args()
     assert_validity(args)
@@ -519,7 +549,8 @@ def main():
     n_dense = int(args.n_dense)
 
     if args.model == 'scratch':
-        train_from_scratch(args.group, args.position, size)
+        selu = True if args.selu is not None else False
+        train_from_scratch(args.group, args.position, size, selu)
     if args.train_top:
         train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
     if args.finetune:
