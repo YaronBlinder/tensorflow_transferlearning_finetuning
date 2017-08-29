@@ -477,17 +477,17 @@ def train_from_scratch(group, position, size):
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        steps_per_epoch=int(np.ceil(n_train_samples / batch_size)),
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks('scratch', 'ft_notop', group, position, train_type='ft_notop'),
         # callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
         validation_data=test_generator,
-        validation_steps=np.ceil(n_test_samples / batch_size),
+        validation_steps=int(np.ceil(n_test_samples / batch_size)),
         class_weight=class_weight,
-        max_q_size=10,
-        workers=4,
-        pickle_safe=False,
+        max_queue_size=10,
+        workers=1,
+        use_multiprocessing=True,
         initial_epoch=0)
 
     weights_path = 'weights/{group}_{position}_{model}_trained_model.h5'.format(group=group, position=position,
