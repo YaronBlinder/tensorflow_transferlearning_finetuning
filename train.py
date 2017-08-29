@@ -136,7 +136,7 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type, n_dense=None, dropout=None):
+def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=False):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
@@ -481,6 +481,7 @@ def train_from_scratch(group, position, size):
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks('scratch', 'ft_notop', group, position, train_type='ft_notop'),
+        # callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
