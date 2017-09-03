@@ -14,7 +14,7 @@ from densenet161 import densenet161_model
 from densenet169 import densenet169_model
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
-    random_90deg_rotation
+    random_90deg_rotation, random_crop
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -227,8 +227,9 @@ def get_train_datagen(model, size, position):
         size = 299
     else:
         pass
+    datagen.config['random_crop_ratio'] = 0.9
     datagen.config['size'] = size
-    datagen.set_pipeline([scale_im, radical_preprocess, random_90deg_rotation, standardize])
+    datagen.set_pipeline([random_crop, scale_im, radical_preprocess, random_90deg_rotation, standardize])
     return datagen
 
 
