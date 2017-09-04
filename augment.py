@@ -6,10 +6,11 @@ from scipy.misc import imread, imsave
 from tqdm import tqdm
 
 
-def make_patches(im, patch_dim=224):
+def make_patches(im, patch_ratio=0.9):
 
     assert (im.shape[0] == im.shape[1]), 'Image not square.'
     im_dim = im.shape[0]
+    patch_dim = int(np.round(im_dim*patch_ratio))
     im_delta = im_dim-patch_dim
     tl = im[0:patch_dim, 0:patch_dim]
     tr = im[im_delta:im_dim, 0:patch_dim]
