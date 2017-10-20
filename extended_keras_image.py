@@ -132,11 +132,15 @@ def inception_preprocess(x, *args, **kwargs):
 
 def radical_preprocess(x, position, *args, **kwargs):
     if position == 'PA':
-        ds_mean = 38679.2766871 #calculated
-        ds_std = 26824.8858495
+        # ds_mean = 38679.2766871 #calculated
+        # ds_std = 26824.8858495
+        ds_mean = 134.39976334 #cxr8
+        ds_std = 114.044506656 #cxr8
     elif position == 'LAT':
         ds_mean = 34024.5927414
         ds_std = 33591.1099547
+
+
     else:
         print('You should not be here')
 
