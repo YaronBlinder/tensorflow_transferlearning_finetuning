@@ -18,8 +18,6 @@ from extended_keras_image import ImageDataGenerator, standardize, scale_im, radi
 
 # from keras.applications.imagenet_utils import preprocess_input
 
-# This version uses the finetuning example from Keras documentation
-# instead of the bottleneck feature generation
 
 N_classes = 2
 
@@ -38,7 +36,7 @@ def assert_validity(args):
         'F_Ped', 'M_ped',
         'F_YA', 'M_YA',
         'F_Adult', 'M_Adult',
-        'F_Ger', 'M_Ger']
+        'F_Ger', 'M_Ger', 'all']
     valid_positions = ['PA', 'LAT']
 
     assert args.model in valid_models, '{} not a valid model name'.format(args.model)
@@ -257,8 +255,8 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
 
     if model in ['densenet121', 'densenet161', 'densenet169']:
         batch_size = 16
