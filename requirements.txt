@@ -1,8 +1,8 @@
 numpy
 pandas
-keras=2.1.1
+keras==2.1.1
 argparse
 pillow
 h5py
-tensorflow-gpu=1.2
+tensorflow-gpu==1.2
 opencv-python
