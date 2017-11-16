@@ -9,6 +9,7 @@ from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
+from keras.utils.training_utils import multi_gpu_model
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
@@ -231,9 +232,20 @@ def get_test_datagen(model):
     return datagen
 
 
-def train_top(model, top, group, position, n_epochs):
+def train_top(model, top, group, position, n_epochs, G):
     print('Loading model...')
-    full_model = get_model(model, top, freeze_base=True)
+    print("[INFO] training with {} GPUs...".format(G))
+    if G>1:
+        # we'll store a copy of the model on *every* GPU and then combine
+        # the results from the gradient updates on the CPU
+        with tf.device("/cpu:0"):
+            # initialize the model
+            full_model = get_model(model, top, freeze_base=True)
+        # make the model parallel
+        full_model = multi_gpu_model(full_model, gpus=G)
+    else:
+        full_model = get_model(model, top, freeze_base=True)
+
     full_model.compile(
         optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         # optimizer=optimizers.Adam(lr=1e-4),
@@ -312,7 +324,7 @@ def train_top(model, top, group, position, n_epochs):
     print('Model top trained.')
 
 
-# def fine_tune(model, top, group, position, weights_path):
+# def fine_tune(model, top, group, position, weights_path, G):
 #     train_path = 'data/{position}_256/{group}/train/'.format(position=position, group=group)
 #     test_path = 'data/{position}_256/{group}/test/'.format(position=position, group=group)
 #     n_train_samples = count_files(train_path)
@@ -468,7 +480,7 @@ def train_top(model, top, group, position, n_epochs):
 #     print('Model fine-tuned.')
 
 
-def train_from_scratch(group, position):
+def train_from_scratch(group, position, G):
     train_path = 'data/LAT_PA/train/'
     test_path = 'data/LAT_PA/test/'
     n_train_samples = count_files(train_path)
@@ -554,21 +566,23 @@ def main():
     parser.add_argument('--finetune', action='store_true', help='finetune')
     parser.add_argument('--finetune_notop', action='store_true', help='finetune from random init top')
     parser.add_argument('--epochs', default=50, help='# of epochs for top training')
+    parser.add_argument('--gpus', type=int, default=1, help='# of GPUs to use for training')
 
     args = parser.parse_args()
     assert_validity(args)
     model_path = prep_dir(args)
     weights_path = model_path + 'top_trained.h5'
     n_epochs = int(args.epochs)
+    G = args["gpus"]
 
     if args.model == 'scratch':
-        train_from_scratch(args.group, args.position)
+        train_from_scratch(args.group, args.position, G)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, n_epochs)
+        train_top(args.model, args.top, args.group, args.position, n_epochs, G)
     if args.finetune:
-        fine_tune(args.model, args.top, args.group, args.position, weights_path)
+        fine_tune(args.model, args.top, args.group, args.position, weights_path, G)
     if args.finetune_notop:
-        ft_notop(args.model, args.top, args.group, args.position)
+        ft_notop(args.model, args.top, args.group, args.position, G)
 
 
 if __name__ == '__main__':
