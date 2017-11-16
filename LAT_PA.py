@@ -121,7 +121,7 @@ def get_callbacks(model, top, group, position, train_type):
     weights_path = 'weights/' + model_path
     return [
         callbacks.ModelCheckpoint(
-            filepath=weights_path + '/{epoch:02d}-{val_acc:.2f}.hdf5',
+            filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
