@@ -12,5 +12,5 @@ for i, row in tqdm(info.iterrows(), total=info.shape[0]):
     filename = row['Image Index']
     file_path = path + 'images/' + filename
     label = '1' if row['Finding Labels']=='No Finding' else '2'
-    new_file_path = path + 'images/' + label + '/cxr8_cd' + filename
+    new_file_path = path + 'images/' + label + '/cxr8_' + filename
     move(file_path, new_file_path)

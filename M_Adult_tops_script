@@ -22,3 +22,4 @@ python3 train.py --size 512 --model vgg19 --group M_Adult --position LAT --train
 
 
 
+python3 train.py --size 512 --model vgg16 --group all --train_top --top waya --epochs 100

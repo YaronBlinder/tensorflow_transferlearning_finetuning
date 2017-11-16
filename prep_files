@@ -35,5 +35,8 @@ ls | grep f. -m 374 | xargs rm -fr
 ls | grep ^[^f] -m 374 | xargs rm -fr
 
 
+cd ~/Radical_1/data/PA_512/all/test/2/
+ls | grep f. -m 1333 | xargs rm -fr
+ls | grep ^[^f] -m 1333 | xargs rm -fr
 
 

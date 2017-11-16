@@ -30,7 +30,7 @@ python work_v2.py --model resnet50 --group F_Adult --train_top --top waya --posi
 python work_v2.py --model resnet50 --group F_Adult --train_top --top linear --position LAT --epochs 100
 python work_v2.py --model vgg16 --group F_Adult --train_top --top chollet --position LAT --epochs 100
 python work_v2.py --model vgg16 --group F_Adult --train_top --top waya --position LAT --epochs 100
-python work_v2.py --model vgg16 --group F_Adult --train_top --top linear --position LAT --epochs 100
+python work_v2.py --model vgg16 --group F_Adult --train_top --top linear --position LAT --epochs  100
 python work_v2.py --model vgg19 --group F_Adult --train_top --top chollet --position LAT --epochs 100
 python work_v2.py --model vgg19 --group F_Adult --train_top --top waya --position LAT --epochs 100
 python work_v2.py --model vgg19 --group F_Adult --train_top --top linear --position LAT --epochs 100
