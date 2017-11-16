@@ -46,12 +46,10 @@ def prep_dir(args):
         model_path = 'models/LAT_PA/{model}/{top}/'.format(group=group, position=position, model=model, top=top)
 
     TBlog_path = 'TBlog/' + model_path
-
+    weights_path = 'weights/' + model_path
     os.makedirs(model_path, exist_ok=True)
     os.makedirs(TBlog_path, exist_ok=True)
-    os.makedirs(model_path + 'top', exist_ok=True)
-    os.makedirs(model_path + 'ft', exist_ok=True)
-    os.makedirs(model_path + 'ft_notop', exist_ok=True)
+    os.makedirs(weights_path, exist_ok=True)
     return model_path
 
 
@@ -324,7 +322,6 @@ def train_top(model, top, group, position, n_epochs, G):
         position=position,
         group=group,
         model=model,
-        top=top)
 
     full_model.save_weights(weights_path)
     print('Model top trained.')
