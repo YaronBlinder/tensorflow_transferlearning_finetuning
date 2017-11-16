@@ -281,7 +281,7 @@ def train_top(model, top, group, position, n_epochs, G):
         test_path,
         # target_size=(224, 224),
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
+        batch_size=batch_size*G,
         shuffle=True)
 
     # train the model on the new data for a few epochs
