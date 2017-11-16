@@ -317,7 +317,7 @@ def train_top(model, top, group, position, n_epochs, G):
         shuffle=True,
         initial_epoch=0)
 
-    weights_path = 'weights/models/{group}/{position}/{model}/{top}/top_trained.h5'.format(
+    weights_path = 'weights/models/LAT_PA/{model}/{top}/top_trained.h5'.format(
         position=position,
         group=group,
         model=model,
