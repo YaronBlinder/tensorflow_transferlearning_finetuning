@@ -274,7 +274,7 @@ def train_top(model, top, group, position, n_epochs, G):
         train_path,
         # target_size=(224, 224),
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
+        batch_size=batch_size*G,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
