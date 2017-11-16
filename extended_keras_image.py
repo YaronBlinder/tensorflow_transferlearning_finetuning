@@ -131,7 +131,7 @@ def inception_preprocess(x, *args, **kwargs):
 
 
 def radical_preprocess(x, position, *args, **kwargs):
-    if position == 'PA' or position == None:
+    if position == 'PA':
         # ds_mean = 38679.2766871 #calculated
         # ds_std = 26824.8858495
         # ds_mean = 134.39976334 #cxr8
