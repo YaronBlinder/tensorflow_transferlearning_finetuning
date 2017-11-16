@@ -112,12 +112,11 @@ def get_callbacks(model, top, group, position, train_type):
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    model_path = 'models/LAT_PA/{model}/{top}/{train_type}/'.format(
+    model_path = 'models/LAT_PA/{model}/{top}/'.format(
         group=group,
         position=position,
         model=model,
-        top=top,
-        train_type=train_type)
+        top=top)
     weights_path = 'weights/' + model_path
     return [
         callbacks.ModelCheckpoint(
