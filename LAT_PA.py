@@ -12,7 +12,7 @@ from keras.models import Model, Sequential
 from keras.utils.training_utils import multi_gpu_model
 
 # from keras.preprocessing.image import ImageDataGenerator
-from extended_keras_image import ImageDataGenerator, random_crop, imagenet_preprocess, standardize, scale_im, \
+from extended_keras_image import ImageDataGenerator, random_crop, radical_preprocess, standardize, scale_im, \
     inception_preprocess, random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
@@ -189,46 +189,29 @@ def preprocess_input(im):
 
 
 def get_train_datagen(model):
-    datagen = ImageDataGenerator(
-        # preprocessing_function=preprocess_input,
-        # rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-        # zoom_range=0.2,
-        # rotation_range=20,
-        # fill_mode="constant",
-        # cval=0
-        # vertical_flip=True
-    )
-    if model in ['xception', 'inception_v3']: #, 'scratch']:
-        datagen.config['random_crop_size'] = (299, 299)
-        datagen.set_pipeline([random_crop, inception_preprocess, standardize])
-    elif model == 'scratch':
-        datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, random_90deg_rotation, inception_preprocess, standardize])
+    datagen = ImageDataGenerator()
+    if model in ['vgg16', 'vgg19', 'resnet50', 'densenet121', 'densenet161', 'densenet169']:
+        size = 224
+    elif model in ['inception_v3', 'xception']:
+        size = 299
     else:
-        datagen.config['random_crop_size'] = (224, 224)
-        datagen.set_pipeline([random_crop, random_90deg_rotation, imagenet_preprocess, standardize])
+        pass
+    datagen.config['random_crop_ratio'] = 0.9
+    datagen.config['size'] = 512
+    datagen.set_pipeline([random_crop, scale_im, radical_preprocess, random_90deg_rotation, standardize])
     return datagen
 
 
 def get_test_datagen(model):
-    datagen = ImageDataGenerator(
-        # preprocessing_function=preprocess_input,
-        # rescale=1. / 255,
-        # samplewise_center=True,
-        # samplewise_std_normalization=True,
-    )
-    # datagen.config['random_crop_size'] = (224, 224)
-    if model in ['xception', 'inception_v3']: #, 'scratch']:
-        datagen.config['size'] = 299
-        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
-    elif model == 'scratch':
-        datagen.config['size'] = 224
-        datagen.set_pipeline([scale_im, inception_preprocess, standardize])
+    datagen = ImageDataGenerator()
+    if model in ['vgg16', 'vgg19', 'resnet50', 'densenet121', 'densenet161', 'densenet169']:
+        size = 224
+    elif model in ['inception_v3', 'xception']:
+        size = 299
     else:
-        datagen.config['size'] = 224
-        datagen.set_pipeline([scale_im, imagenet_preprocess, standardize])
+        pass
+    datagen.config['size'] = size
+    datagen.set_pipeline([scale_im, radical_preprocess, standardize])
     return datagen
 
 
