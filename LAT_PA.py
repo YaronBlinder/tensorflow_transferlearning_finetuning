@@ -114,18 +114,19 @@ def get_callbacks(model, top, group, position, train_type):
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
     """
-    path = 'models/LAT_PA/{model}/{top}/{train_type}/'.format(
+    model_path = 'models/LAT_PA/{model}/{top}/{train_type}/'.format(
         group=group,
         position=position,
         model=model,
         top=top,
         train_type=train_type)
+    weights_path = 'weights/' + model_path
     return [
-        # callbacks.ModelCheckpoint(
-        #     filepath=path + 'weights.{epoch:02d}-{val_acc:.2f}.hdf5',
-        #     monitor='val_acc',
-        #     verbose=1,
-        #     save_best_only=True),
+        callbacks.ModelCheckpoint(
+            filepath=weights_path + '/{epoch:02d}-{val_acc:.2f}.hdf5',
+            monitor='val_acc',
+            verbose=1,
+            save_best_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
             patience=7,
@@ -290,22 +291,41 @@ def train_top(model, top, group, position, n_epochs, G):
     # class_weight = {0: 1.5, 1: 1}
     class_weight = 'auto'
 
+    # full_model.fit_generator(
+    #     generator=train_generator,
+    #     steps_per_epoch=np.ceil(n_train_samples / (batch_size*G)),
+    #     epochs=n_epochs,
+    #     verbose=1,
+    #     callbacks=get_callbacks(model, top, group, position, train_type='top'),
+    #     validation_data=test_generator,
+    #     validation_steps=np.ceil(n_test_samples / (batch_size*G)),
+    #     class_weight=class_weight,
+    #     max_q_size=10,
+    #     workers=4,
+    #     pickle_safe=False,
+    #     initial_epoch=0)
+
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(n_train_samples / (batch_size*G)),
+        steps_per_epoch=np.ceil(n_train_samples / (batch_size * G)),
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, top, group, position, train_type='top'),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / (batch_size*G)),
         class_weight=class_weight,
-        max_q_size=10,
+        max_queue_size=10,
         workers=4,
-        pickle_safe=False,
+        use_multiprocessing=False,
+        shuffle=True,
         initial_epoch=0)
 
-    weights_path = 'models/LAT_PA/{model}/{top}/top_trained.h5'.format(position=position, group=group,
-                                                                                   model=model, top=top)
+    weights_path = 'weights/models/{group}/{position}/{model}/{top}/top_trained.h5'.format(
+        position=position,
+        group=group,
+        model=model,
+        top=top)
+
     full_model.save_weights(weights_path)
     print('Model top trained.')
 
