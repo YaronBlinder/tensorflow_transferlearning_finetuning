@@ -292,12 +292,12 @@ def train_top(model, top, group, position, n_epochs, G):
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=np.ceil(n_train_samples / batch_size),
+        steps_per_epoch=np.ceil(n_train_samples / (batch_size*G)),
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, top, group, position, train_type='top'),
         validation_data=test_generator,
-        validation_steps=np.ceil(n_test_samples / batch_size),
+        validation_steps=np.ceil(n_test_samples / (batch_size*G)),
         class_weight=class_weight,
         max_q_size=10,
         workers=4,
