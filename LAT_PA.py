@@ -556,7 +556,7 @@ def main():
     model_path = prep_dir(args)
     weights_path = model_path + 'top_trained.h5'
     n_epochs = int(args.epochs)
-    G = args["gpus"]
+    G = args.gpus
 
     if args.model == 'scratch':
         train_from_scratch(args.group, args.position, G)
