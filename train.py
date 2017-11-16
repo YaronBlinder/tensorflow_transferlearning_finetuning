@@ -418,8 +418,8 @@ def fine_tune(model, top, group, position, size, weights_path):
 
 
 def train_from_scratch(group, position, size, selu=False):
-    train_path = 'data/{position}_{size}_16/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}_16/{group}/test/'.format(position=position, size=size, group=group)
+    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
