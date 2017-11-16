@@ -322,6 +322,7 @@ def train_top(model, top, group, position, n_epochs, G):
         position=position,
         group=group,
         model=model,
+        top=top)
 
     full_model.save_weights(weights_path)
     print('Model top trained.')
