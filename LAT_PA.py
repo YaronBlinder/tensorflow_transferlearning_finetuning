@@ -10,7 +10,7 @@ from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.utils.training_utils import multi_gpu_model
-import tensorflow as tf
+import tensorflow-gpu as tf
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, radical_preprocess, standardize, scale_im, \
