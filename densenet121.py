@@ -56,7 +56,7 @@ def densenet121_model(img_rows, img_cols, color_type=1, nb_dense_block=4, growth
 
     # Initial convolution
     x = ZeroPadding2D((3, 3), name='conv1_zeropadding')(img_input)
-    x = Conv2D(nb_filter, 7, 7, subsample=(2, 2), name='conv1', bias=False)(x)
+    x = Conv2D(nb_filter, (7, 7), subsample=(2, 2), name='conv1', bias=False)(x)
     x = BatchNormalization(epsilon=eps, axis=concat_axis, name='conv1_bn')(x)
     x = Scale(axis=concat_axis, name='conv1_scale')(x)
     x = Activation('relu', name='relu1')(x)
