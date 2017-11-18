@@ -171,7 +171,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
         #     write_graph=True,
         #     write_images=True)
     ]
- weights/models/all/PA/scratch/ft_notop/n_dense_512/dropout_False//00-0.50.hdf5
+
 
 
 def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling=None):
