@@ -197,7 +197,7 @@ def dense_block(x, stage, nb_layers, nb_filter, growth_rate, dropout_rate=None, 
         branch = i+1
         x = conv_block(concat_feat, stage, branch, growth_rate, dropout_rate, weight_decay)
         # concat_feat = merge([concat_feat, x], mode='concat', concat_axis=concat_axis, name='concat_'+str(stage)+'_'+str(branch))
-        concat_feat = concatenate([concat_feat, x], concat_axis=concat_axis, name='concat_'+str(stage)+'_'+str(branch))
+        concat_feat = concatenate([concat_feat, x], axis=concat_axis, name='concat_'+str(stage)+'_'+str(branch))
 
         if grow_nb_filters:
             nb_filter += growth_rate
