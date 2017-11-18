@@ -151,7 +151,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
     weights_path = 'weights/' + model_path
     return [
         callbacks.ModelCheckpoint(
-            filepath=weights_path+'/{epoch:02d}-{val_acc:.2f}.hdf5',
+            filepath=weights_path+'{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
             save_best_only=True),
@@ -171,6 +171,7 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
         #     write_graph=True,
         #     write_images=True)
     ]
+ weights/models/all/PA/scratch/ft_notop/n_dense_512/dropout_False//00-0.50.hdf5
 
 
 def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling=None):
