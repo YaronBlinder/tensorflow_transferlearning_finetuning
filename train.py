@@ -158,7 +158,8 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
             filepath=weights_path+'{epoch:02d}-{val_acc:.2f}.hdf5',
             monitor='val_acc',
             verbose=1,
-            save_best_only=True),
+            save_best_only=True,
+            save_weights_only=True),
         callbacks.EarlyStopping(
             monitor='val_loss',
             patience=12,
