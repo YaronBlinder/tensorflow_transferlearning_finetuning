@@ -17,6 +17,8 @@ from extended_keras_image import ImageDataGenerator, standardize, scale_im, radi
     random_90deg_rotation, random_crop
 
 from keras.utils.training_utils import multi_gpu_model
+import tensorflow as tf
+
 
 # from keras.applications.imagenet_utils import preprocess_input
 
