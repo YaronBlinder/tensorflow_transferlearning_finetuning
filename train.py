@@ -173,7 +173,6 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
     ]
 
 
-
 def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling=None):
     assert top in ['chollet', 'waya', 'linear', 'pooled_linear', 'test'], 'top selection invalid'
 
@@ -422,14 +421,17 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     print('Loading model...')
     full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
     full_model.compile(
-        optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-        # optimizer=optimizers.Adam(lr=1e-4),
+        # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+        optimizer=optimizers.Adam(lr=1e-2),
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         metrics=['accuracy'])
 
-    train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
-    test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+    # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+
+    train_path = '/Radical_data/data/all/16_bit/train/'
+    test_path = '/Radical_data/data/all/16_bit/test/'
 
     if model in ['densenet121', 'densenet161', 'densenet169']:
         batch_size = 16
