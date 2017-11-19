@@ -429,11 +429,11 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         # the results from the gradient updates on the CPU
         with tf.device("/cpu:0"):
             # initialize the model
-            full_model = get_model(model, top, model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+            full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
         # make the model parallel
         full_model = multi_gpu_model(full_model, gpus=G)
     else:
-        full_model = get_model(model, top, model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
 
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
