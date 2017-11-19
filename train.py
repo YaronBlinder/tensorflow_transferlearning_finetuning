@@ -16,6 +16,8 @@ from densenet169 import densenet169_model
 from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
     random_90deg_rotation, random_crop
 
+from keras.utils.training_utils import multi_gpu_model
+
 # from keras.applications.imagenet_utils import preprocess_input
 
 
@@ -245,7 +247,7 @@ def get_test_datagen(model, size, position):
     return datagen
 
 
-def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, pooling):
+def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G):
     print('Loading model...')
     full_model = get_model(model, top, freeze_base=True, n_dense=n_dense, dropout=dropout, pooling=pooling)
     full_model.compile(
@@ -417,9 +419,20 @@ def fine_tune(model, top, group, position, size, weights_path):
     print('Model fine-tuned.')
 
 
-def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, pooling):
+def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G):
     print('Loading model...')
-    full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+    print("[INFO] training with {} GPUs...".format(G))
+    if G > 1:
+        # we'll store a copy of the model on *every* GPU and then combine
+        # the results from the gradient updates on the CPU
+        with tf.device("/cpu:0"):
+            # initialize the model
+            full_model = get_model(model, top, model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        # make the model parallel
+        full_model = multi_gpu_model(full_model, gpus=G)
+    else:
+        full_model = get_model(model, top, model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+
     full_model.compile(
         # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
         optimizer=optimizers.Adam(lr=1e-2),
@@ -453,14 +466,14 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         train_path,
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
+        batch_size=batch_size*G,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
+        batch_size=batch_size*G,
         shuffle=True)
 
     # train the model on the new data for a few epochs
@@ -481,19 +494,19 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
 
     full_model.fit_generator(
         generator=train_generator,
-        steps_per_epoch=int(np.ceil(n_train_samples / batch_size)),
+        steps_per_epoch=int(np.ceil(n_train_samples / (batch_size*G))),
         epochs=n_epochs,
         verbose=1,
         callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
         validation_data=test_generator,
-        validation_steps=int(np.ceil(n_test_samples / batch_size)),
+        validation_steps=int(np.ceil(n_test_samples / (batch_size*G))),
         class_weight=class_weight,
         max_queue_size=10,
         workers=1,
         use_multiprocessing=True,
         initial_epoch=0)
 
-    weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/top_trained.h5'.format(
+    weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
         position=position,
         group=group,
         model=model,
@@ -502,7 +515,7 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         dropout=dropout)
 
     full_model.save_weights(weights_path)
-    print('Model top trained.')
+    print('Model trained.')
 
 
 def train_from_scratch(group, position, size, selu=False):
@@ -627,6 +640,7 @@ def main():
     parser.add_argument('--dropout', action='store_true', help='flag for adding a dropout layer')
     parser.add_argument('--pooling', default=None, help='type of global pooling layer')
     parser.add_argument('--selu', action='store_true', help='flag for selu model (from scratch')
+    parser.add_argument('--gpus', type=int, default=1, help='# of GPUs to use for training')
 
     args = parser.parse_args()
     assert_validity(args)
@@ -635,14 +649,15 @@ def main():
     n_epochs = int(args.epochs)
     size = int(args.size)
     n_dense = int(args.n_dense)
+    G = int(args.gpus)
 
     if args.model == 'scratch':
         selu = True if args.selu is not None else False
         train_from_scratch(args.group, args.position, size, selu)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling, G)
     if args.train_all:
-        train_all(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling)
+        train_all(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling, G)
     if args.finetune:
         weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/top_trained.h5'.format(
             position=position,
