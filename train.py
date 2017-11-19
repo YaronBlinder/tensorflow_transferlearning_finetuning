@@ -457,7 +457,6 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     n_train_samples = count_files(train_path)
     n_test_samples = count_files(test_path)
 
-    print(train_path)
     train_datagen = get_train_datagen(model, size, position)
     test_datagen = get_test_datagen(model, size, position)
 
@@ -507,7 +506,7 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         class_weight=class_weight,
         max_queue_size=10,
         workers=1,
-        use_multiprocessing=True,
+        use_multiprocessing=False,
         initial_epoch=0)
 
     weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
