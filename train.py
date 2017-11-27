@@ -4,22 +4,21 @@ import os
 
 import keras.layers
 import numpy as np
+import tensorflow as tf
 from keras import optimizers, callbacks, initializers
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
 # from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
+from keras.utils.training_utils import multi_gpu_model
 
+import multi_gpu_callbacks
 from densenet121 import densenet121_model
 from densenet161 import densenet161_model
 from densenet169 import densenet169_model
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, standardize, scale_im, radical_preprocess, \
     random_90deg_rotation, random_crop
-
-from keras.utils.training_utils import multi_gpu_model
-import tensorflow as tf
-
-from metrics import mcor, precision, recall, f1
+from metrics import mcor, recall, f1
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -57,8 +56,8 @@ def prep_dir(args):
         top=args.top,
         n_dense=args.n_dense,
         dropout=args.dropout)
-    TBlog_path = 'TBlog/'+model_path
-    weights_path = 'weights/'+model_path
+    TBlog_path = 'TBlog/' + model_path
+    weights_path = 'weights/' + model_path
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(weights_path, exist_ok=True)
 
@@ -139,7 +138,7 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=False):
+def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=False, **kwargs):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
@@ -154,29 +153,57 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
         dropout=dropout)
     TBlog_path = 'TBlog/' + model_path
     weights_path = 'weights/' + model_path
-    return [
-        callbacks.ModelCheckpoint(
-            filepath=weights_path+'{epoch:02d}-{val_acc:.2f}.hdf5',
-            monitor='val_acc',
-            verbose=1,
-            save_best_only=True,
-            save_weights_only=True),
-        callbacks.EarlyStopping(
-            monitor='val_loss',
-            patience=12,
-            verbose=1),
-        callbacks.ReduceLROnPlateau(
-            monitor='val_loss',
-            factor=0.7,
-            patience=5,
-            verbose=1),
-        # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-        # callbacks.TensorBoard(
-        #     log_dir=TBlog_path,
-        #     histogram_freq=1,
-        #     write_graph=True,
-        #     write_images=True)
-    ]
+    G = kwargs.get('G', None)
+    if G > 1:
+        base_model = kwargs.get('base_model', None)
+        return [
+            multi_gpu_callbacks.MultiGPUCheckpointCallback(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                base_model=base_model,
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            # callbacks.TensorBoard(
+            #     log_dir=TBlog_path,
+            #     histogram_freq=1,
+            #     write_graph=True,
+            #     write_images=True)
+        ]
+    else:
+        return [
+            callbacks.ModelCheckpoint(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            # callbacks.TensorBoard(
+            #     log_dir=TBlog_path,
+            #     histogram_freq=1,
+            #     write_graph=True,
+            #     write_images=True)
+        ]
 
 
 def get_model(model, top, freeze_base=False, n_dense=1024, dropout=True, pooling=None):
@@ -260,7 +287,7 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
         # metrics=['accuracy']
-        metrics = [mcor, recall, f1])
+        metrics=[mcor, recall, f1])
 
     train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
@@ -316,7 +343,7 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         steps_per_epoch=int(np.ceil(n_train_samples / batch_size)),
         epochs=n_epochs,
         verbose=1,
-        callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
+        callbacks=get_callbacks(model, top, group, position, train_type, G, n_dense, dropout),
         validation_data=test_generator,
         validation_steps=int(np.ceil(n_test_samples / batch_size)),
         class_weight=class_weight,
@@ -409,7 +436,7 @@ def fine_tune(model, top, group, position, size, weights_path):
         steps_per_epoch=np.ceil(n_train_samples / batch_size),
         epochs=n_epochs,
         verbose=1,
-        callbacks=get_callbacks(model, top, group, position, train_type='ft'),
+        callbacks=get_callbacks(model, top, group, position, train_type='ft', G),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / batch_size),
         class_weight=class_weight,
@@ -427,24 +454,6 @@ def fine_tune(model, top, group, position, size, weights_path):
 def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G):
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(G))
-    if G > 1:
-        # we'll store a copy of the model on *every* GPU and then combine
-        # the results from the gradient updates on the CPU
-        with tf.device("/cpu:0"):
-            # initialize the model
-            full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
-        # make the model parallel
-        full_model = multi_gpu_model(full_model, gpus=G)
-    else:
-        full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
-
-    full_model.compile(
-        # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-        optimizer=optimizers.Adam(lr=1e-2),
-        # optimizer=optimizers.rmsprop(),
-        loss='binary_crossentropy',
-        # metrics=['accuracy']
-        metrics=[mcor, recall, f1])
 
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
@@ -473,14 +482,14 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         train_path,
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size*G,
+        batch_size=batch_size * G,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         image_reader='cv2',
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size*G,
+        batch_size=batch_size * G,
         shuffle=True)
 
     # train the model on the new data for a few epochs
@@ -499,19 +508,59 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     class_weight = None
     train_type = 'top'
 
-    full_model.fit_generator(
-        generator=train_generator,
-        steps_per_epoch=int(np.ceil(n_train_samples / (batch_size*G))),
-        epochs=n_epochs,
-        verbose=1,
-        callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout),
-        validation_data=test_generator,
-        validation_steps=int(np.ceil(n_test_samples / (batch_size*G))),
-        class_weight=class_weight,
-        max_queue_size=10,
-        workers=1,
-        use_multiprocessing=False,
-        initial_epoch=0)
+    if G > 1:
+        # we'll store a copy of the model on *every* GPU and then combine
+        # the results from the gradient updates on the CPU
+        with tf.device("/cpu:0"):
+            # initialize the model
+            full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        # make the model parallel
+        gpu_full_model = multi_gpu_model(full_model, gpus=G)
+        gpu_full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            # metrics=['accuracy']
+            metrics=[mcor, recall, f1])
+
+        gpu_full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
+                                    base_model=full_model),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=1,
+            use_multiprocessing=False,
+            initial_epoch=0)
+    else:
+        full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            # metrics=['accuracy']
+            metrics=[mcor, recall, f1]) \
+ \
+                full_model.fit_generator(
+                    generator=train_generator,
+                    steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+                    epochs=n_epochs,
+                    verbose=1,
+                    callbacks=get_callbacks(model, top, group, position, train_type, G, n_dense, dropout),
+                    validation_data=test_generator,
+                    validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+                    class_weight=class_weight,
+                    max_queue_size=10,
+                    workers=1,
+                    use_multiprocessing=False,
+                    initial_epoch=0)
 
     weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
         position=position,
@@ -561,15 +610,17 @@ def train_from_scratch(group, position, size, selu=False):
         full_model = Sequential()
         full_model.add(
             keras.layers.Conv2D(32, (3, 3), input_shape=(size, size, 3),
-                                kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=np.sqrt(1/9))))
+                                kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=np.sqrt(1 / 9))))
         full_model.add(keras.layers.Activation('selu'))
         full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
         full_model.add(keras.layers.Conv2D(32, (3, 3),
-                                           kernel_initializer=initializers.RandomNormal(mean=0.0,stddev=np.sqrt(1/9))))
+                                           kernel_initializer=initializers.RandomNormal(mean=0.0,
+                                                                                        stddev=np.sqrt(1 / 9))))
         full_model.add(keras.layers.Activation('selu'))
         full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
         full_model.add(keras.layers.Conv2D(64, (3, 3),
-                                           kernel_initializer=initializers.RandomNormal(mean=0.0, stddev=np.sqrt(1/9))))
+                                           kernel_initializer=initializers.RandomNormal(mean=0.0,
+                                                                                        stddev=np.sqrt(1 / 9))))
         full_model.add(keras.layers.Activation('selu'))
         full_model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
 
@@ -662,9 +713,11 @@ def main():
         selu = True if args.selu is not None else False
         train_from_scratch(args.group, args.position, size, selu)
     if args.train_top:
-        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling, G)
+        train_top(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling,
+                  G)
     if args.train_all:
-        train_all(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling, G)
+        train_all(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling,
+                  G)
     if args.finetune:
         weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/top_trained.h5'.format(
             position=position,
