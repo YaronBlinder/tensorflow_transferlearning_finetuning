@@ -19,6 +19,7 @@ from extended_keras_image import ImageDataGenerator, standardize, scale_im, radi
 from keras.utils.training_utils import multi_gpu_model
 import tensorflow as tf
 
+from metrics import mcor, precision, recall, f1
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -258,7 +259,8 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         # optimizer=optimizers.Adam(lr=1e-4),
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
-        metrics=['accuracy'])
+        # metrics=['accuracy']
+        metrics = [mcor, recall, f1])
 
     train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
@@ -441,7 +443,8 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
         optimizer=optimizers.Adam(lr=1e-2),
         # optimizer=optimizers.rmsprop(),
         loss='binary_crossentropy',
-        metrics=['accuracy'])
+        # metrics=['accuracy']
+        metrics=[mcor, recall, f1])
 
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
