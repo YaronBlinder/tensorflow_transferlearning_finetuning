@@ -546,21 +546,20 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
             # optimizer=optimizers.rmsprop(),
             loss='binary_crossentropy',
             # metrics=['accuracy']
-            metrics=[mcor, recall, f1]) \
- \
-                full_model.fit_generator(
-                    generator=train_generator,
-                    steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
-                    epochs=n_epochs,
-                    verbose=1,
-                    callbacks=get_callbacks(model, top, group, position, train_type, G, n_dense, dropout),
-                    validation_data=test_generator,
-                    validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
-                    class_weight=class_weight,
-                    max_queue_size=10,
-                    workers=1,
-                    use_multiprocessing=False,
-                    initial_epoch=0)
+            metrics=[mcor, recall, f1])
+        full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, G, n_dense, dropout),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=1,
+            use_multiprocessing=False,
+            initial_epoch=0)
 
     weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
         position=position,
