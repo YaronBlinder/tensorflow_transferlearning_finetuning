@@ -364,92 +364,92 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     print('Model top trained.')
 
 
-def fine_tune(model, top, group, position, size, weights_path):
-    train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, group=group)
-    test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, group=group)
-    n_train_samples = count_files(train_path)
-    n_test_samples = count_files(test_path)
-
-    print('Please input top training parameters: \n')
-    # batch_size = int(input('Batch size: '))
-    # n_epochs = int(input('Epochs:'))
-    batch_size = 32
-    n_epochs = 100
-
-    train_datagen = get_train_datagen(model, size, position)
-    test_datagen = get_test_datagen(model, size, position)
-
-    if model in ['xception', 'inception_v3']:
-        target_size = (299, 299)
-    else:
-        target_size = (224, 224)
-
-    train_generator = train_datagen.flow_from_directory(
-        train_path,
-        image_reader='cv2',
-        reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
-        shuffle=True)
-
-    test_generator = test_datagen.flow_from_directory(
-        test_path,
-        image_reader='cv2',
-        reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size,
-        shuffle=True)
-
-    print('Loading model...')
-    full_model = get_model(model, top)
-    full_model.load_weights(weights_path)
-    print('model weights loaded.')
-
-    for i, layer in enumerate(full_model.layers):
-        print(i, layer.name)
-
-    # N_layers_to_finetune = int(input('# of last layers to finetune:'))
-    if model == 'resnet50':
-        N_layers_to_finetune = 17
-    elif model == 'vgg16':
-        N_layers_to_finetune = 10
-    elif model == 'vgg19':
-        N_layers_to_finetune = 11
-    else:
-        assert False, 'you should not be here'
-    for layer in full_model.layers[-N_layers_to_finetune:]:
-        layer.trainable = True
-    for layer in full_model.layers[:-N_layers_to_finetune]:
-        layer.trainable = False
-
-    full_model.compile(
-        optimizer=optimizers.Adam(lr=1e-5),
-        loss='binary_crossentropy',
-        # metrics=['accuracy', f1_score, precision_score, recall_score])
-        metrics=['accuracy'])
-
-    print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
-
-    # class_weight={0:0.40, 1:0.40, 2:0.20}
-    class_weight = "auto"
-
-    full_model.fit_generator(
-        generator=train_generator,
-        steps_per_epoch=np.ceil(n_train_samples / batch_size),
-        epochs=n_epochs,
-        verbose=1,
-        callbacks=get_callbacks(model, top, group, position, train_type='ft', G),
-        validation_data=test_generator,
-        validation_steps=np.ceil(n_test_samples / batch_size),
-        class_weight=class_weight,
-        max_q_size=10,
-        workers=4,
-        pickle_safe=False,
-        initial_epoch=0)
-
-    weights_path = 'weights/{group}_{position}_{model}_finetuned_model.h5'.format(group=group, position=position,
-                                                                                  model=model)
-    full_model.save_weights(weights_path)
-    print('Model fine-tuned.')
-
+# def fine_tune(model, top, group, position, size, weights_path):
+#     train_path = 'data/{position}_512_16/{group}/train/'.format(position=position, group=group)
+#     test_path = 'data/{position}_512_16/{group}/test/'.format(position=position, group=group)
+#     n_train_samples = count_files(train_path)
+#     n_test_samples = count_files(test_path)
+#
+#     print('Please input top training parameters: \n')
+#     # batch_size = int(input('Batch size: '))
+#     # n_epochs = int(input('Epochs:'))
+#     batch_size = 32
+#     n_epochs = 100
+#
+#     train_datagen = get_train_datagen(model, size, position)
+#     test_datagen = get_test_datagen(model, size, position)
+#
+#     if model in ['xception', 'inception_v3']:
+#         target_size = (299, 299)
+#     else:
+#         target_size = (224, 224)
+#
+#     train_generator = train_datagen.flow_from_directory(
+#         train_path,
+#         image_reader='cv2',
+#         reader_config={'target_mode': 'RGB', 'target_size': target_size},
+#         batch_size=batch_size,
+#         shuffle=True)
+#
+#     test_generator = test_datagen.flow_from_directory(
+#         test_path,
+#         image_reader='cv2',
+#         reader_config={'target_mode': 'RGB', 'target_size': target_size},
+#         batch_size=batch_size,
+#         shuffle=True)
+#
+#     print('Loading model...')
+#     full_model = get_model(model, top)
+#     full_model.load_weights(weights_path)
+#     print('model weights loaded.')
+#
+#     for i, layer in enumerate(full_model.layers):
+#         print(i, layer.name)
+#
+#     # N_layers_to_finetune = int(input('# of last layers to finetune:'))
+#     if model == 'resnet50':
+#         N_layers_to_finetune = 17
+#     elif model == 'vgg16':
+#         N_layers_to_finetune = 10
+#     elif model == 'vgg19':
+#         N_layers_to_finetune = 11
+#     else:
+#         assert False, 'you should not be here'
+#     for layer in full_model.layers[-N_layers_to_finetune:]:
+#         layer.trainable = True
+#     for layer in full_model.layers[:-N_layers_to_finetune]:
+#         layer.trainable = False
+#
+#     full_model.compile(
+#         optimizer=optimizers.Adam(lr=1e-5),
+#         loss='binary_crossentropy',
+#         # metrics=['accuracy', f1_score, precision_score, recall_score])
+#         metrics=['accuracy'])
+#
+#     print('Fine-tuning last {} layers...'.format(N_layers_to_finetune))
+#
+#     # class_weight={0:0.40, 1:0.40, 2:0.20}
+#     class_weight = "auto"
+#
+#     full_model.fit_generator(
+#         generator=train_generator,
+#         steps_per_epoch=np.ceil(n_train_samples / batch_size),
+#         epochs=n_epochs,
+#         verbose=1,
+#         callbacks=get_callbacks(model, top, group, position, 'ft', G=G),
+#         validation_data=test_generator,
+#         validation_steps=np.ceil(n_test_samples / batch_size),
+#         class_weight=class_weight,
+#         max_q_size=10,
+#         workers=4,
+#         pickle_safe=False,
+#         initial_epoch=0)
+#
+#     weights_path = 'weights/{group}_{position}_{model}_finetuned_model.h5'.format(group=group, position=position,
+#                                                                                   model=model)
+#     full_model.save_weights(weights_path)
+#     print('Model fine-tuned.')
+#
 
 def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G):
     print('Loading model...')
