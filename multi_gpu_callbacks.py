@@ -1,11 +1,17 @@
-from keras.callbacks import  Callback
+from __future__ import absolute_import
+from __future__ import print_function
+
+import numpy as np
+import warnings
+from keras.callbacks import Callback
+
 
 class MultiGPUCheckpointCallback(Callback):
 
     def __init__(self, filepath, base_model, monitor='val_loss', verbose=0,
                  save_best_only=False, save_weights_only=False,
                  mode='auto', period=1):
-        super(MultiGPU_Checkpoint_Callback, self).__init__()
+        super(MultiGPUCheckpointCallback, self).__init__()
         self.base_model = base_model
         self.monitor = monitor
         self.verbose = verbose
