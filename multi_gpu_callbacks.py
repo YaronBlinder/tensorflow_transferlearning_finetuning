@@ -1,3 +1,5 @@
+from keras.callbacks import  Callback
+
 class MultiGPUCheckpointCallback(Callback):
 
     def __init__(self, filepath, base_model, monitor='val_loss', verbose=0,
