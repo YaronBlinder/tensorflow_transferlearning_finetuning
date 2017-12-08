@@ -521,8 +521,8 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
             optimizer=optimizers.Adam(lr=1e-2),
             # optimizer=optimizers.rmsprop(),
             loss='binary_crossentropy',
-            # metrics=['accuracy']
-            metrics=[mcor, recall, f1])
+            metrics=['accuracy'])
+            # metrics=[mcor, recall, f1])
 
         gpu_full_model.fit_generator(
             generator=train_generator,
@@ -545,8 +545,8 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
             optimizer=optimizers.Adam(lr=1e-2),
             # optimizer=optimizers.rmsprop(),
             loss='binary_crossentropy',
-            # metrics=['accuracy']
-            metrics=[mcor, recall, f1])
+            metrics=['accuracy'])
+            # metrics=[mcor, recall, f1])
         full_model.fit_generator(
             generator=train_generator,
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
