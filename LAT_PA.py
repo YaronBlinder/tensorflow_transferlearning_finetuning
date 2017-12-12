@@ -315,11 +315,10 @@ def train_top(model, top, group, position, n_epochs, G):
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
             epochs=n_epochs,
             verbose=1,
-            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
-                                    base_model=full_model),
+            callbacks=get_callbacks(model, top, group, position, train_type, G=G, base_model=full_model),
             validation_data=test_generator,
             validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
-            class_weight=class_weight,
+            class_weight='auto',
             max_queue_size=10,
             workers=1,
             use_multiprocessing=False,
@@ -340,7 +339,7 @@ def train_top(model, top, group, position, n_epochs, G):
     print('Training top...')
 
     # class_weight = {0: 1.5, 1: 1}
-    class_weight = 'auto'
+
 
     # full_model.fit_generator(
     #     generator=train_generator,
@@ -364,7 +363,7 @@ def train_top(model, top, group, position, n_epochs, G):
         callbacks=get_callbacks(model, top, group, position, train_type='top'),
         validation_data=test_generator,
         validation_steps=np.ceil(n_test_samples / (batch_size * G)),
-        class_weight=class_weight,
+        class_weight='auto',
         max_queue_size=10,
         workers=4,
         use_multiprocessing=False,
