@@ -16,7 +16,15 @@ def flatten(path, flat_path):
             with open(new_file_path, 'wb') as f:
                 # writer = png.Writer(width=flat_im.shape[0], height=flat_im.shape[1], grayscale=True, bitdepth=16)
                 # im_16_2list = flat_im.flatten()
-                png.from_array(flat_im, 'L').save(f)
+                png.from_array(
+                    flat_im,
+                    mode='L',
+                    info={
+                        width:flat_im.shape[0],
+                        height:flat_im.shape[1],
+                        grayscale:True,
+                        bitdepth:16}
+                ).save(f)
                 # writer.write(f, im_16_2list)
 
 
