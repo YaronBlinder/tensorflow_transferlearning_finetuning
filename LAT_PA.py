@@ -247,45 +247,6 @@ def get_test_datagen(model):
 def train_top(model, top, group, position, n_epochs, G):
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(G))
-    if G > 1:
-        # we'll store a copy of the model on *every* GPU and then combine
-        # the results from the gradient updates on the CPU
-        with tf.device("/cpu:0"):
-            # initialize the model
-            full_model = get_model(model, top, freeze_base=True)
-        # make the model parallel
-        gpu_full_model = multi_gpu_model(full_model, gpus=G)
-        gpu_full_model.compile(
-            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-            optimizer=optimizers.Adam(lr=1e-2),
-            # optimizer=optimizers.rmsprop(),
-            loss='binary_crossentropy',
-            metrics=['accuracy'])
-        # metrics=[mcor, recall, f1])
-
-        gpu_full_model.fit_generator(
-            generator=train_generator,
-            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
-            epochs=n_epochs,
-            verbose=1,
-            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
-                                    base_model=full_model),
-            validation_data=test_generator,
-            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
-            class_weight=class_weight,
-            max_queue_size=10,
-            workers=1,
-            use_multiprocessing=False,
-            initial_epoch=0)
-    else:
-        full_model = get_model(model, top, freeze_base=True)
-
-        full_model.compile(
-            optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-            # optimizer=optimizers.Adam(lr=1e-4),
-            # optimizer=optimizers.rmsprop(),
-            loss='binary_crossentropy',
-            metrics=['accuracy'])
 
     if model in ['xception', 'inception_v3']:
         pass
@@ -331,6 +292,48 @@ def train_top(model, top, group, position, n_epochs, G):
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
         batch_size=batch_size * G,
         shuffle=True)
+
+    if G > 1:
+        # we'll store a copy of the model on *every* GPU and then combine
+        # the results from the gradient updates on the CPU
+        with tf.device("/cpu:0"):
+            # initialize the model
+            full_model = get_model(model, top, freeze_base=True)
+        # make the model parallel
+        gpu_full_model = multi_gpu_model(full_model, gpus=G)
+        gpu_full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
+        # metrics=[mcor, recall, f1])
+
+        gpu_full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
+                                    base_model=full_model),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=1,
+            use_multiprocessing=False,
+            initial_epoch=0)
+    else:
+        full_model = get_model(model, top, freeze_base=True)
+
+        full_model.compile(
+            optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            # optimizer=optimizers.Adam(lr=1e-4),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
+
+
 
     # train the model on the new data for a few epochs
     print('Training top...')
