@@ -451,6 +451,7 @@ def train_top(model, top, group, position, size, n_epochs, n_dense, dropout, poo
 #     print('Model fine-tuned.')
 #
 
+
 def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G):
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(G))

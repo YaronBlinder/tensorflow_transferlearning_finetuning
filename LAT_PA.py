@@ -2,19 +2,18 @@ import argparse
 import glob
 import os
 
-import keras.backend as K
 import keras.layers
 import numpy as np
+import tensorflow as tf
+import multi_gpu_callbacks
 from keras import optimizers, callbacks
 from keras.applications import ResNet50, VGG16, VGG19, Xception, InceptionV3
-from keras.initializers import glorot_normal
 from keras.models import Model, Sequential
 from keras.utils.training_utils import multi_gpu_model
-import tensorflow as tf
 
 # from keras.preprocessing.image import ImageDataGenerator
 from extended_keras_image import ImageDataGenerator, random_crop, radical_preprocess, standardize, scale_im, \
-    inception_preprocess, random_90deg_rotation
+    random_90deg_rotation
 
 # from keras.applications.imagenet_utils import preprocess_input
 
@@ -107,7 +106,7 @@ def count_files(directory):
         return cnt
 
 
-def get_callbacks(model, top, group, position, train_type):
+def get_callbacks(model, top, group, position, train_type, **kwargs):
     """
     :return: A list of `keras.callbacks.Callback` instances to apply during training.
 
@@ -118,28 +117,57 @@ def get_callbacks(model, top, group, position, train_type):
         model=model,
         top=top)
     weights_path = 'weights/' + model_path
-    return [
-        # callbacks.ModelCheckpoint(
-        #     filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
-        #     monitor='val_acc',
-        #     verbose=1,
-        #     save_best_only=True),
-        callbacks.EarlyStopping(
-            monitor='val_loss',
-            patience=7,
-            verbose=1),
-        callbacks.ReduceLROnPlateau(
-            monitor='val_loss',
-            factor=0.75,
-            patience=5,
-            verbose=1),
-        # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-        # callbacks.TensorBoard(
-        #     log_dir='TBlog/' + path,
-        #     histogram_freq=1,
-        #     write_graph=True,
-        #     write_images=True)
-    ]
+    G = kwargs.get('G', None)
+    if G > 1:
+        base_model = kwargs.get('base_model', None)
+        return [
+            multi_gpu_callbacks.MultiGPUCheckpointCallback(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                base_model=base_model,
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            # callbacks.TensorBoard(
+            #     log_dir=TBlog_path,
+            #     histogram_freq=1,
+            #     write_graph=True,
+            #     write_images=True)
+        ]
+    else:
+        return [
+            callbacks.ModelCheckpoint(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            # callbacks.TensorBoard(
+            #     log_dir=TBlog_path,
+            #     histogram_freq=1,
+            #     write_graph=True,
+            #     write_images=True)
+        ]
 
 
 def get_model(model, top, freeze_base=False):
@@ -219,14 +247,36 @@ def get_test_datagen(model):
 def train_top(model, top, group, position, n_epochs, G):
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(G))
-    if G>1:
+    if G > 1:
         # we'll store a copy of the model on *every* GPU and then combine
         # the results from the gradient updates on the CPU
         with tf.device("/cpu:0"):
             # initialize the model
             full_model = get_model(model, top, freeze_base=True)
         # make the model parallel
-        full_model = multi_gpu_model(full_model, gpus=G)
+        gpu_full_model = multi_gpu_model(full_model, gpus=G)
+        gpu_full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
+        # metrics=[mcor, recall, f1])
+
+        gpu_full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
+                                    base_model=full_model),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=1,
+            use_multiprocessing=False,
+            initial_epoch=0)
     else:
         full_model = get_model(model, top, freeze_base=True)
 
@@ -272,14 +322,14 @@ def train_top(model, top, group, position, n_epochs, G):
         train_path,
         # target_size=(224, 224),
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size*G,
+        batch_size=batch_size * G,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         # target_size=(224, 224),
         reader_config={'target_mode': 'RGB', 'target_size': target_size},
-        batch_size=batch_size*G,
+        batch_size=batch_size * G,
         shuffle=True)
 
     # train the model on the new data for a few epochs
@@ -309,7 +359,7 @@ def train_top(model, top, group, position, n_epochs, G):
         verbose=1,
         callbacks=get_callbacks(model, top, group, position, train_type='top'),
         validation_data=test_generator,
-        validation_steps=np.ceil(n_test_samples / (batch_size*G)),
+        validation_steps=np.ceil(n_test_samples / (batch_size * G)),
         class_weight=class_weight,
         max_queue_size=10,
         workers=4,
