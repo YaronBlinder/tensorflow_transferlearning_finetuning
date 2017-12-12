@@ -303,8 +303,8 @@ def train_top(model, top, group, position, n_epochs, G):
         # make the model parallel
         gpu_full_model = multi_gpu_model(full_model, gpus=G)
         gpu_full_model.compile(
-            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-            optimizer=optimizers.Adam(lr=1e-2),
+            optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            # optimizer=optimizers.Adam(lr=1e-2),
             # optimizer=optimizers.rmsprop(),
             loss='binary_crossentropy',
             metrics=['accuracy'])
