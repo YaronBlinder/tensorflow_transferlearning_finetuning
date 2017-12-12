@@ -223,7 +223,7 @@ def get_train_datagen(model):
         size = 299
     else:
         pass
-    datagen.config['position'] = 'PA'
+    datagen.config['position'] = 'LAT_PA'
     datagen.config['random_crop_ratio'] = 0.9
     datagen.config['size'] = size
     datagen.set_pipeline([random_crop, scale_im, radical_preprocess, random_90deg_rotation, standardize])
@@ -238,7 +238,7 @@ def get_test_datagen(model):
         size = 299
     else:
         pass
-    datagen.config['position'] = 'PA'
+    datagen.config['position'] = 'LAT_PA'
     datagen.config['size'] = size
     datagen.set_pipeline([scale_im, radical_preprocess, standardize])
     return datagen

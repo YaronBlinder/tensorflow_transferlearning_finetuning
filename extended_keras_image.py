@@ -141,6 +141,9 @@ def radical_preprocess(x, position, *args, **kwargs):
     elif position == 'LAT':
         ds_mean = 34024.5927414
         ds_std = 33591.1099547
+    elif position == 'LAT_PA':
+        ds_mean = 36159.9187931
+        ds_std = 30677.1948082
 
 
     else:
