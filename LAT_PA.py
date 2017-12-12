@@ -262,15 +262,30 @@ def train_top(model, top, group, position, n_epochs, G):
             loss='binary_crossentropy',
             metrics=['accuracy'])
         # metrics=[mcor, recall, f1])
+
+        gpu_full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
+                                    base_model=full_model),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=1,
+            use_multiprocessing=False,
+            initial_epoch=0)
     else:
         full_model = get_model(model, top, freeze_base=True)
 
-    full_model.compile(
-        optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
-        # optimizer=optimizers.Adam(lr=1e-4),
-        # optimizer=optimizers.rmsprop(),
-        loss='binary_crossentropy',
-        metrics=['accuracy'])
+        full_model.compile(
+            optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            # optimizer=optimizers.Adam(lr=1e-4),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
 
     if model in ['xception', 'inception_v3']:
         pass
