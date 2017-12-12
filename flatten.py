@@ -27,7 +27,7 @@ def main():
 
     args = parser.parse_args()
     path = args.path
-    flat_path = args.flat_args
+    flat_path = args.flat_path
 
     flatten(path, flat_path)
 
