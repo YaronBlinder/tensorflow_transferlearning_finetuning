@@ -14,7 +14,7 @@ def flatten(path, flat_path):
             im = cv2.imread(file_path, -1)
             flat_im = im[:,:,0]
             with open(new_file_path, 'wb') as f:
-                writer = png.Writer(width=flat_im.shape[0], height=flat_im.shape[1], grayscale=True, bitdepth=16)
+                writer = png.Writer(width=flat_im.shape[0], height=flat_im.shape[1], greyscale=True, bitdepth=16)
                 # im_16_2list = flat_im.flatten()
                 # png.from_array(
                 #     flat_im,
