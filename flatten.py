@@ -2,6 +2,7 @@ import cv2
 from tqdm import tqdm
 import os
 import png
+import argparse
 
 
 def flatten(path, flat_path):
@@ -17,3 +18,19 @@ def flatten(path, flat_path):
                 im_16_2list = im_16.reshape(-1, flat_im.shape[1]).tolist()
                 writer.write(f, im_16_2list)
 
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--path', required=True, help='Path to RGB images')
+    parser.add_argument('--flat_path', required=True, help='Path to save grayscale images')
+
+    args = parser.parse_args()
+    path = args.path
+    flat_path = args.flat_args
+
+    flatten(path, flat_path)
+
+
+if __name__ == '__main__':
+    main()
