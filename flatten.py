@@ -20,10 +20,10 @@ def flatten(path, flat_path):
                     flat_im,
                     mode='L',
                     info={
-                        width:flat_im.shape[0],
-                        height:flat_im.shape[1],
-                        grayscale:True,
-                        bitdepth:16}
+                        'width':flat_im.shape[0],
+                        'height':flat_im.shape[1],
+                        'grayscale':True,
+                        'bitdepth':16}
                 ).save(f)
                 # writer.write(f, im_16_2list)
 
