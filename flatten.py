@@ -9,7 +9,7 @@ def flatten(path, flat_path):
     for root, dirs, files in os.walk(path):
         for name in tqdm(files):
             file_path = os.path.join(root, name)
-            flat_root = flat_path + '/'.join(root.split('/')[-2:])
+            flat_root = flat_path + '/'.join(root.split('/')[-3:])
             new_file_path = os.path.join(flat_root, name)
             im = cv2.imread(file_path, -1)
             flat_im = im[:,:,0]
