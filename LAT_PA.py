@@ -245,6 +245,7 @@ def get_test_datagen(model):
 
 
 def train_top(model, top, group, position, n_epochs, G):
+    train_type='top'
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(G))
 
