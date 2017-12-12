@@ -1,8 +1,10 @@
-import cv2
-from tqdm import tqdm
-import os
-import png
 import argparse
+import os
+
+import cv2
+import numpy as np
+import png
+from tqdm import tqdm
 
 
 def flatten(path, flat_path):
@@ -12,7 +14,7 @@ def flatten(path, flat_path):
             flat_root = flat_path + '/'.join(root.split('/')[-3:])
             new_file_path = os.path.join(flat_root, name)
             im = cv2.imread(file_path, -1)
-            flat_im = im[:,:,0]
+            flat_im = im[:, :, 0]
             with open(new_file_path, 'wb') as f:
                 writer = png.Writer(width=flat_im.shape[0], height=flat_im.shape[1], greyscale=True, bitdepth=16)
                 # im_16_2list = flat_im.flatten()
@@ -27,7 +29,6 @@ def flatten(path, flat_path):
                 # ).save(f)
                 # writer.write(f, im_16_2list)
                 writer.write(f, np.reshape(flat_im, (-1, flat_im.shape[1])))
-
 
 
 def main():
