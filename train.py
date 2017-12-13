@@ -98,7 +98,7 @@ def get_base_model(model, pooling=None):
         base_model = densenet121_model(
             img_rows=224,
             img_cols=224,
-            color_type=3,
+            color_type=1,
             num_classes=N_classes)
 
     elif model == 'densenet161':
@@ -459,8 +459,8 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
 
-    train_path = '/Radical_data/data/all/16_bit/train/'
-    test_path = '/Radical_data/data/all/16_bit/test/'
+    train_path = '/Radical_data/data/all/flat/16_bit/train/'
+    test_path = '/Radical_data/data/all/flat/16_bit/test/'
     # train_path = '/Radical_data/data/all/trial/train/'
     # test_path = '/Radical_data/data/all/trial/test/'
 
