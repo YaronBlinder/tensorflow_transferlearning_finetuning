@@ -482,14 +482,14 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     train_generator = train_datagen.flow_from_directory(
         train_path,
         image_reader='cv2',
-        reader_config={'target_mode': 'RGB', 'target_size': target_size},
+        reader_config={'target_mode': 'L', 'target_size': target_size},
         batch_size=batch_size * G,
         shuffle=True)
 
     test_generator = test_datagen.flow_from_directory(
         test_path,
         image_reader='cv2',
-        reader_config={'target_mode': 'RGB', 'target_size': target_size},
+        reader_config={'target_mode': 'L', 'target_size': target_size},
         batch_size=batch_size * G,
         shuffle=True)
 
