@@ -159,7 +159,7 @@ def scale_im(x, size, *args, **kwargs):
     print(x.shape)
     x = x[0,:,:]
     resized = resize(x, (size, size))
-    resized = resized.reshape((1, size, size))
+    resized = resized.reshape((1, size, size, 1))
     print(resized.shape)
     return resized
 
