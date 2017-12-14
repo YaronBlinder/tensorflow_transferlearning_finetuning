@@ -381,7 +381,7 @@ def center_crop(x, center_crop_size, **kwargs):
 
 
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
-    print('random_crop x shape: {}'.format(x.shape)
+    print('random_crop x shape: {}'.format(x.shape))
     np.random.seed(sync_seed)
     w, h = x.shape[0], x.shape[1]
     random_crop_size = [int(np.round(w*random_crop_ratio)), int(np.round(h*random_crop_ratio))]
