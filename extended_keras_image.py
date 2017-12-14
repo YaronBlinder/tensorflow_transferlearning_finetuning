@@ -153,7 +153,6 @@ def radical_preprocess(x, position, *args, **kwargs):
 
 
 def scale_im(x, size, *args, **kwargs):
-    print('scale_im shape: {}'.format(x.shape))
     resized = resize(x, (size, size))
     return resized
 
@@ -183,7 +182,6 @@ def transform_matrix_offset_center(matrix, x, y):
 
 
 def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', cval=0.):
-    print(x.shape)
     if len(x.shape) > 2: #non-grayscale on TF
         x = np.rollaxis(x, channel_index, 0)
         final_affine_matrix = transform_matrix[:2, :2]
@@ -390,7 +388,6 @@ def center_crop(x, center_crop_size, **kwargs):
 
 
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
-    print('random_crop x shape: {}'.format(x.shape))
     np.random.seed(sync_seed)
     w, h = x.shape[0], x.shape[1]
     random_crop_size = [int(np.round(w * random_crop_ratio)), int(np.round(h * random_crop_ratio))]
@@ -400,7 +397,6 @@ def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
     cropped = x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1], :]
-    print('cropped shape: {}'.format(cropped.shape))
     return cropped
 
 
