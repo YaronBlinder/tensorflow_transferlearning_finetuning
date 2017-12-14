@@ -156,7 +156,10 @@ def radical_preprocess(x, position, *args, **kwargs):
 
 
 def scale_im(x, size, *args, **kwargs):
-    return resize(x, (size, size))
+    print(x.shape)
+    resized = resize(x, (size, size))
+    print(resized.shape)
+    return resized
 
 
 def random_barrel_transform(x, intensity):
