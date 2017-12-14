@@ -553,7 +553,7 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
             epochs=n_epochs,
             verbose=1,
-            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G),
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G),
             validation_data=test_generator,
             validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
             class_weight=class_weight,
