@@ -46,7 +46,7 @@ def densenet121_model(img_rows, img_cols, color_type=1, nb_dense_block=4, growth
     global concat_axis
     if K.image_dim_ordering() == 'tf':
       concat_axis = 3
-      img_input = Input(shape=(img_rows, img_cols, color_type), name='data')
+      img_input = Input(shape=(1, img_rows, img_cols, color_type), name='data')
     else:
       concat_axis = 1
       img_input = Input(shape=(color_type, img_rows, img_cols), name='data')
