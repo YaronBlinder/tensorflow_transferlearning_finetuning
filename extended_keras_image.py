@@ -157,7 +157,9 @@ def radical_preprocess(x, position, *args, **kwargs):
 
 def scale_im(x, size, *args, **kwargs):
     print(x.shape)
-    resized = resize(x, (1, size, size))
+    x = x[0,:,:]
+    resized = resize(x, (size, size))
+    resized = reshape(resized, (1, size, size))
     print(resized.shape)
     return resized
 
