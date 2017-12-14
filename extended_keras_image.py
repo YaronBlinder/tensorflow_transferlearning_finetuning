@@ -184,7 +184,7 @@ def transform_matrix_offset_center(matrix, x, y):
 
 def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', cval=0.):
     print(x.shape)
-    if x.shape[-1] > 1: #for grayscale on TF
+    if len(x.shape) > 1: #non-grayscale on TF
         x = np.rollaxis(x, channel_index, 0)
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
