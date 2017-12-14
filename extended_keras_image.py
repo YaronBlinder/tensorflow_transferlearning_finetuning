@@ -184,8 +184,6 @@ def transform_matrix_offset_center(matrix, x, y):
 
 
 def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', cval=0.):
-    print('preshape: {}'.format(x.shape))
-
     x = np.rollaxis(x, channel_index, 0)
     final_affine_matrix = transform_matrix[:2, :2]
     final_offset = transform_matrix[:2, 2]
@@ -194,7 +192,6 @@ def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', c
                                            cval=cval) for x_channel in x]
     x = np.stack(channel_images, axis=0)
     x = np.rollaxis(x, 0, channel_index + 1)
-    print('shape: {}'.format(x.shape))
     return x
 
 
@@ -385,6 +382,7 @@ def center_crop(x, center_crop_size, **kwargs):
 
 
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
+    print('shape: {}'.format(x.shape))
     np.random.seed(sync_seed)
     w, h = x.shape[0], x.shape[1]
     random_crop_size = [int(np.round(w * random_crop_ratio)), int(np.round(h * random_crop_ratio))]
@@ -394,7 +392,9 @@ def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
     # return x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1], :]
-    return x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
+    cropped = x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
+    print('cropped shape: {}'.format(cropped.shape))
+    return cropped
 
 
 def random_transform(x,
