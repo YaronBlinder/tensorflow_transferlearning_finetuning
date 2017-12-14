@@ -459,13 +459,13 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
 
-    train_path = '/Radical_data/data/all/flat/16_bit/train/'
-    test_path = '/Radical_data/data/all/flat/16_bit/test/'
+    train_path = '/Radicaldata/data/all/flat/16_bit/train/'
+    test_path = '/Radicaldata/data/all/flat/16_bit/test/'
     # train_path = '/Radical_data/data/all/trial/train/'
     # test_path = '/Radical_data/data/all/trial/test/'
 
     if model in ['densenet121', 'densenet161', 'densenet169']:
-        batch_size = 16
+        batch_size = 32
     else:
         batch_size = 32
     n_train_samples = count_files(train_path)
