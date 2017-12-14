@@ -5,22 +5,21 @@ new process methods, etc...
 from __future__ import absolute_import
 from __future__ import print_function
 
-import numpy as np
-import re
-from scipy import linalg
-import scipy.ndimage as ndi
-from six.moves import range
-import os
-import sys
-import threading
 import copy
 import inspect
+import os
+import re
+import sys
+import threading
 import types
 
+import numpy as np
+import scipy.ndimage as ndi
+from cv2 import resize, imread
 from keras import backend as K
 from keras.utils.generic_utils import Progbar
-
-from cv2 import resize, imread
+from scipy import linalg
+from six.moves import range
 
 
 def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
@@ -35,9 +34,10 @@ def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
     x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
     return x
 
+
 def random_90deg_rotation(x, row_index=0, col_index=1, channel_index=0,
-                    fill_mode='nearest', cval=0., *args, **kwargs):
-    theta = np.pi / 180 * 90* np.random.randint(0, 4)
+                          fill_mode='nearest', cval=0., *args, **kwargs):
+    theta = np.pi / 180 * 90 * np.random.randint(0, 4)
     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
                                 [np.sin(theta), np.cos(theta), 0],
                                 [0, 0, 1]])
@@ -96,9 +96,8 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
 
 
 def imagenet_preprocess(x, position, *args, **kwargs):
-
     if position == 'PA':
-        ds_mean = 38679.2766871 #calculated
+        ds_mean = 38679.2766871  # calculated
     elif position == 'LAT':
         ds_mean = 34024.5927414
     else:
@@ -136,8 +135,8 @@ def radical_preprocess(x, position, *args, **kwargs):
         # ds_std = 26824.8858495
         # ds_mean = 134.39976334 #cxr8
         # ds_std = 114.044506656 #cxr8
-        ds_mean = 34996.7451362 #cxr8 + big_batch_all
-        ds_std = 29177.7923993 #cxr8 + big_batch_all
+        ds_mean = 34996.7451362  # cxr8 + big_batch_all
+        ds_std = 29177.7923993  # cxr8 + big_batch_all
     elif position == 'LAT':
         ds_mean = 34024.5927414
         ds_std = 33591.1099547
@@ -188,11 +187,12 @@ def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', c
     x = np.rollaxis(x, channel_index, 0)
     final_affine_matrix = transform_matrix[:2, :2]
     final_offset = transform_matrix[:2, 2]
-    channel_images = [ndi.interpolation.affine_transform(x_channel, final_affine_matrix,
-                                                         final_offset, order=0, mode=fill_mode, cval=cval) for x_channel
-                      in x]
+    channel_images = [
+        ndi.interpolation.affine_transform(x_channel, final_affine_matrix, final_offset, order=0, mode=fill_mode,
+                                           cval=cval) for x_channel in x]
     x = np.stack(channel_images, axis=0)
     x = np.rollaxis(x, 0, channel_index + 1)
+    print('shape: {}'.format(x.shape))
     return x
 
 
@@ -263,6 +263,7 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
 def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
     img = imread(filepath, -1)
     return img
+
 
 def standardize(x,
                 dim_ordering='tf',
@@ -357,7 +358,7 @@ def standardize(x,
 
     if verbose:
         if (featurewise_center and mean is None) or (featurewise_std_normalization and std is None) or (
-            zca_whitening and principal_components is None):
+                    zca_whitening and principal_components is None):
             print('WARNING: feature-wise standardization and zca whitening will be disabled, please run "fit" first.')
 
     if featurewise_center:
@@ -384,7 +385,7 @@ def center_crop(x, center_crop_size, **kwargs):
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     np.random.seed(sync_seed)
     w, h = x.shape[0], x.shape[1]
-    random_crop_size = [int(np.round(w*random_crop_ratio)), int(np.round(h*random_crop_ratio))]
+    random_crop_size = [int(np.round(w * random_crop_ratio)), int(np.round(h * random_crop_ratio))]
     rangew = (w - random_crop_size[0]) // 2
     rangeh = (h - random_crop_size[1]) // 2
     # print([w,h])
@@ -392,7 +393,6 @@ def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
     # return x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1], :]
     return x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
-
 
 
 def random_transform(x,
