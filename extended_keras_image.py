@@ -197,6 +197,7 @@ def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', c
         final_affine_matrix = transform_matrix[:2, :2]
         final_offset = transform_matrix[:2, 2]
         x = ndi.interpolation.affine_transform(x, final_affine_matrix, final_offset, order=0, mode=fill_mode,  cval=cval)
+        x = x.reshape((x.shape[0], x.shape[1], 1))
     return x
 
 
