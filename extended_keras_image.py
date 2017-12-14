@@ -386,6 +386,7 @@ def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     np.random.seed(sync_seed)
     w, h = x.shape[0], x.shape[1]
     random_crop_size = [int(np.round(w * random_crop_ratio)), int(np.round(h * random_crop_ratio))]
+    print(random_crop_size)
     rangew = (w - random_crop_size[0])
     rangeh = (h - random_crop_size[1])
     # print([w,h])
