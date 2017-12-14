@@ -391,7 +391,6 @@ def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
     cropped = x[:, offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
-    print('cropped shape: {}'.format(cropped.shape))
     return cropped
 
 
