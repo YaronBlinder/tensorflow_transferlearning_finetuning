@@ -5,22 +5,21 @@ new process methods, etc...
 from __future__ import absolute_import
 from __future__ import print_function
 
-import numpy as np
-import re
-from scipy import linalg
-import scipy.ndimage as ndi
-from six.moves import range
-import os
-import sys
-import threading
 import copy
 import inspect
+import os
+import re
+import sys
+import threading
 import types
 
+import numpy as np
+import scipy.ndimage as ndi
+from cv2 import resize, imread
 from keras import backend as K
 from keras.utils.generic_utils import Progbar
-
-from cv2 import resize, imread
+from scipy import linalg
+from six.moves import range
 
 
 def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
@@ -35,9 +34,10 @@ def random_rotation(x, rg, row_index=1, col_index=2, channel_index=0,
     x = apply_transform(x, transform_matrix, channel_index, fill_mode, cval)
     return x
 
+
 def random_90deg_rotation(x, row_index=0, col_index=1, channel_index=0,
-                    fill_mode='nearest', cval=0., *args, **kwargs):
-    theta = np.pi / 180 * 90* np.random.randint(0, 4)
+                          fill_mode='nearest', cval=0., *args, **kwargs):
+    theta = np.pi / 180 * 90 * np.random.randint(0, 4)
     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
                                 [np.sin(theta), np.cos(theta), 0],
                                 [0, 0, 1]])
@@ -96,9 +96,8 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
 
 
 def imagenet_preprocess(x, position, *args, **kwargs):
-
     if position == 'PA':
-        ds_mean = 38679.2766871 #calculated
+        ds_mean = 38679.2766871  # calculated
     elif position == 'LAT':
         ds_mean = 34024.5927414
     else:
@@ -136,11 +135,14 @@ def radical_preprocess(x, position, *args, **kwargs):
         # ds_std = 26824.8858495
         # ds_mean = 134.39976334 #cxr8
         # ds_std = 114.044506656 #cxr8
-        ds_mean = 24705.6761615 #cxr8 + big_batch_all
-        ds_std = 36862.05965 #cxr8 + big_batch_all
+        ds_mean = 34996.7451362  # cxr8 + big_batch_all
+        ds_std = 29177.7923993  # cxr8 + big_batch_all
     elif position == 'LAT':
         ds_mean = 34024.5927414
         ds_std = 33591.1099547
+    elif position == 'LAT_PA':
+        ds_mean = 36159.9187931
+        ds_std = 30677.1948082
 
 
     else:
@@ -154,8 +156,11 @@ def radical_preprocess(x, position, *args, **kwargs):
 
 
 def scale_im(x, size, *args, **kwargs):
-    print('scale_im shape: {}'.format(x.shape))
+    print(x.shape)
+    # x = x[0,:,:]
     resized = resize(x, (size, size))
+    # resized = resized.reshape((1, size, size))
+    print(resized.shape)
     return resized
 
 
@@ -187,9 +192,9 @@ def apply_transform(x, transform_matrix, channel_index=0, fill_mode='nearest', c
     x = np.rollaxis(x, channel_index, 0)
     final_affine_matrix = transform_matrix[:2, :2]
     final_offset = transform_matrix[:2, 2]
-    channel_images = [ndi.interpolation.affine_transform(x_channel, final_affine_matrix,
-                                                         final_offset, order=0, mode=fill_mode, cval=cval) for x_channel
-                      in x]
+    channel_images = [
+        ndi.interpolation.affine_transform(x_channel, final_affine_matrix, final_offset, order=0, mode=fill_mode,
+                                           cval=cval) for x_channel in x]
     x = np.stack(channel_images, axis=0)
     x = np.rollaxis(x, 0, channel_index + 1)
     return x
@@ -262,6 +267,7 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
 def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
     img = imread(filepath, -1)
     return img
+
 
 def standardize(x,
                 dim_ordering='tf',
@@ -356,7 +362,7 @@ def standardize(x,
 
     if verbose:
         if (featurewise_center and mean is None) or (featurewise_std_normalization and std is None) or (
-            zca_whitening and principal_components is None):
+                    zca_whitening and principal_components is None):
             print('WARNING: feature-wise standardization and zca whitening will be disabled, please run "fit" first.')
 
     if featurewise_center:
@@ -381,17 +387,16 @@ def center_crop(x, center_crop_size, **kwargs):
 
 
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
-    print('random_crop x shape: {}'.format(x.shape)
     np.random.seed(sync_seed)
-    w, h = x.shape[0], x.shape[1]
-    random_crop_size = [int(np.round(w*random_crop_ratio)), int(np.round(h*random_crop_ratio))]
-    rangew = (w - random_crop_size[0]) // 2
-    rangeh = (h - random_crop_size[1]) // 2
+    w, h = x.shape[1], x.shape[2]
+    random_crop_size = [int(np.round(w * random_crop_ratio)), int(np.round(h * random_crop_ratio))]
+    rangew = (w - random_crop_size[0])
+    rangeh = (h - random_crop_size[1])
     # print([w,h])
     offsetw = 0 if rangew == 0 else np.random.randint(rangew)
     offseth = 0 if rangeh == 0 else np.random.randint(rangeh)
-    cropped = x[offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1], :]
-    print('cropped shape: {}'.format(cropped.shape))
+    cropped = x[:, offsetw:offsetw + random_crop_size[0], offseth:offseth + random_crop_size[1]]
+    cropped = cropped.reshape((1, random_crop_size[0], random_crop_size[1], 1))
     return cropped
 
 
@@ -575,20 +580,19 @@ class ImageDataGenerator(object):
                  dim_ordering=K.image_dim_ordering(),
                  seed=None,
                  verbose=1):
-
         self.config = copy.deepcopy(locals())
         self.config['config'] = self.config
         self.config['mean'] = None
         self.config['std'] = None
         self.config['principal_components'] = None
         self.config['rescale'] = rescale
-        self.config['seed'] == seed
 
+        if dim_ordering not in {'tf', 'th'}:
+            raise Exception('dim_ordering should be "tf" (channel after row and '
+                            'column) or "th" (channel before row and column). '
+                            'Received arg: ', dim_ordering)
 
-
-        print(self.config['seed'])
-
-        self.__sync_seed = self.config['seed'] or np.random.randint(0, 2**15-1)
+        self.__sync_seed = self.config['seed'] or np.random.randint(0, 4294967295)
 
         self.default_pipeline = []
         self.default_pipeline.append(random_transform)
@@ -597,11 +601,6 @@ class ImageDataGenerator(object):
 
         self.__fitting = False
         self.fit_lock = threading.Lock()
-
-        if dim_ordering not in {'tf', 'th'}:
-            raise Exception('dim_ordering should be "tf" (channel after row and '
-                            'column) or "th" (channel before row and column). '
-                            'Received arg: ', dim_ordering)
 
     @property
     def sync_seed(self):
@@ -638,7 +637,7 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self, directory,
                             color_mode=None, target_size=None,
-                            image_reader='pil', reader_config={'target_mode': 'RGB', 'target_size': (299, 299)},
+                            image_reader='cv2', reader_config={'target_mode': 'L', 'target_size': (224, 224)},
                             read_formats={'png', 'jpg', 'jpeg', 'bmp'},
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
@@ -677,7 +676,7 @@ class ImageDataGenerator(object):
     def process(self, x):
         # get next sync_seed
         np.random.seed(self.__sync_seed)
-        self.__sync_seed = np.random.randint(0, 2**15-1)
+        self.__sync_seed = np.random.randint(0, 4294967295)
         self.config['fitting'] = self.__fitting
         self.config['sync_seed'] = self.__sync_seed
         for p in self.__pipeline:
@@ -759,7 +758,7 @@ class Iterator(object):
         assert self.N == it.N
         assert self.batch_size == it.batch_size
         assert self.shuffle == it.shuffle
-        seed = self.seed or np.random.randint(0, 2**15-1)
+        seed = self.seed or np.random.randint(0, 4294967295)
         it.total_batches_seen = self.total_batches_seen
         self.index_generator = self._flow_index(self.N, self.batch_size, self.shuffle, seed)
         it.index_generator = it._flow_index(it.N, it.batch_size, it.shuffle, seed)
