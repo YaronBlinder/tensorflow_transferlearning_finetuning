@@ -379,6 +379,7 @@ def standardize(x,
             flatx = np.reshape(x, (x.size))
             whitex = np.dot(flatx, principal_components)
             x = np.reshape(whitex, (x.shape[0], x.shape[1], x.shape[2]))
+    print(x.shape)
     return x
 
 
