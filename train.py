@@ -458,8 +458,8 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
 
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
-    train_path = '/Radicaldata/data/all/flat/16_bit/train/'
-    test_path = '/Radicaldata/data/all/flat/16_bit/test/'
+    train_path = '/Radical_data/data/all/flat/16_bit/train/'
+    test_path = '/Radical_data/data/all/flat/16_bit/test/'
     # train_path = '/Radical_data/data/all/flat/testset/16_bit/train/'
     # test_path = '/Radical_data/data/all/flat/testset/16_bit/test/'
     # train_path = '/Radical_data/data/all/trial/train/'
