@@ -266,7 +266,8 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
 def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
     img = imread(filepath, -1)
     if len(img.shape) == 2:
-        img = img.reshape((img.shape[0], img.shape[1], 1))
+        # img = img.reshape((img.shape[0], img.shape[1], 1))
+        img = np.expand_dims(img, axis=2)
     return img
 
 
