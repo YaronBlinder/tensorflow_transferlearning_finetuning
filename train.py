@@ -198,11 +198,11 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
                 patience=5,
                 verbose=1),
             # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
-            # callbacks.TensorBoard(
-            #     log_dir=TBlog_path,
-            #     histogram_freq=1,
-            #     write_graph=True,
-            #     write_images=True)
+            callbacks.TensorBoard(
+                log_dir=TBlog_path,
+                histogram_freq=0,
+                write_graph=True,
+                write_images=False)
         ]
 
 
