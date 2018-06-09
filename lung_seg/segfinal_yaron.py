@@ -7,6 +7,25 @@ import numpy as np
 import scipy.misc
 from skimage import color
 from sklearn.cluster import KMeans
+from numba import vectorize
+
+RblackHatKernel=177
+RmaxCorners=2300
+RCradius=6
+Rthreshold=35
+RmedianKernel=5
+RextraCut=9
+clipLimit=2.0
+tileGridSize=(8, 8)
+RframeWidth=25
+LblackHatKernel=133
+LmaxCorners=1840
+LCradius=6
+Lthreshold=35
+LmedianKernel=1
+LextraCut=14
+LframeWidth=20
+Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
 
 
 def get_cmask(img, maxCorners=1900, qualityLevel=0.001, minDistance=1, Cradius=6):
@@ -111,20 +130,14 @@ def segRight(img_cluster, Nmask, blackHatKernel=169, threshold=45, medianKernel=
     return frame.astype('uint8')
 
 
-def clusterSeg(filename):
-    im1 = cv2.imread(filename, 0)
-
+def clusterSeg(im1):
+    # im1 = cv2.imread(filename, 0)
     im = cv2.cvtColor(im1, cv2.COLOR_GRAY2RGB)  # gray to rgb
-
     im_lab = color.rgb2lab(im)  # rgb to lab
-
     data = np.array([im_lab[..., 1].ravel(), im_lab[..., 2].ravel()])
-
     kmeans = KMeans(n_clusters=3, random_state=0).fit(data.T)  # kmeans to our image
     segmentation = kmeans.labels_.reshape(im.shape[:-1])  # fit kmeans to our data
-
     color_mean = color.label2rgb(segmentation, im, kind='gray')
-
     lower_gray = np.array([110, 110, 110])  # range of gray in the lungs
     upper_gray = np.array([190, 190, 190])
 
@@ -160,20 +173,19 @@ def segfinal(input_dir, output_dir):
         # img = cv2.imread(filename, 0)
         # img_lungs = img * mask
 
-        img_lungs = seg_image(filename)
+        im = cv2.imread(filename, 0)
+        img_lungs = seg_image(im)
 
-        # saving the images    
+        # saving the images
         outpath = output_dir + basename
         scipy.misc.imsave(outpath, img_lungs)
     print('Program runtime:', '%.2f' % (time.clock() - time_start), 'seconds')
 
 
-def seg_image(filename, Nmask_path='Nmask.png', RblackHatKernel=177, RmaxCorners=2300, RCradius=6,
-              Rthreshold=35, RmedianKernel=5, RextraCut=9,
-              clipLimit=2.0, tileGridSize=(8, 8), RframeWidth=25, LblackHatKernel=133,
-              LmaxCorners=1840, LCradius=6, Lthreshold=35, LmedianKernel=1, LextraCut=14, LframeWidth=20):
-    Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
-    cluster_img = clusterSeg(filename)
+@vectorize(['uint8[:,:](uint8[:,:])'], target='cuda')
+def seg_image(image):
+    # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
+    cluster_img = clusterSeg(image)
     Rmask = segRight(cluster_img, Nmask, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius,
                      clipLimit,
                      tileGridSize, RextraCut, RframeWidth)
