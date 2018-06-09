@@ -183,7 +183,8 @@ def segfinal(input_dir, output_dir):
     print('Program runtime:', '%.2f' % (time.clock() - time_start), 'seconds')
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
 def seg_image(image, Nmask):
     # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
     cluster_img = clusterSeg(image)
