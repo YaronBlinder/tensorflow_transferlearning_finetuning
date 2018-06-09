@@ -5,9 +5,9 @@ import time
 import cv2
 import numpy as np
 import scipy.misc
+from numba import guvectorize
 from skimage import color
 from sklearn.cluster import KMeans
-from numba import guvectorize
 
 RblackHatKernel=177
 RmaxCorners=2300
@@ -28,7 +28,7 @@ LframeWidth=20
 # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8, float64, uint8, uint8)'], '(n,n),(),(),(),()->(n,n)', target='cuda')
+@guvectorize(['uint8[:,:](uint8[:,:], uint8, float64, uint8, uint8)'], '(n,n),(),(),(),()->(n,n)', target='cuda', nopython=False)
 def get_cmask(img, maxCorners=1900, qualityLevel=0.001, minDistance=1, Cradius=6):
     corners = cv2.goodFeaturesToTrack(img, maxCorners, qualityLevel, minDistance)
     corners = np.int0(corners)
