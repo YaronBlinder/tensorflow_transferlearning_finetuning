@@ -39,7 +39,8 @@ def get_cmask(img, maxCorners=1900, qualityLevel=0.001, minDistance=1, Cradius=6
         cv2.circle(cmask, (x, y), Cradius, 1, -1)
     return cmask
 
-@guvectorize(['uint8[:,:](uint8[:,:])'], '(n,n)->(n,n)', target='cuda')
+# @guvectorize(['uint8[:,:](uint8[:,:])'], '(n,n)->(n,n)', target='cuda')
+@vectorize
 def contourMask(image):
     im2, contours, hierc = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     area = np.zeros(len(contours))
@@ -51,7 +52,8 @@ def contourMask(image):
     contours.clear()
     return mask
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8, uint8)'], '(n,n),(),()->(n,n)', target='cuda')
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8, uint8)'], '(n,n),(),()->(n,n)', target='cuda')
+@vectorize
 def eraseMax(img, eraseLineCenter=0, eraseLineWidth=30):
     sumpix0 = np.sum(img, 0)
     max_r2 = np.int_(len(sumpix0) / 3) + np.argmax(sumpix0[np.int_(len(sumpix0) / 3):np.int_(len(sumpix0) * 2 / 3)])
@@ -59,7 +61,8 @@ def eraseMax(img, eraseLineCenter=0, eraseLineWidth=30):
     return img
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
 def eraseLeft(img, extraCut=0):
     sumpix0 = np.sum(img, 0)
     max_r2 = np.int_(len(sumpix0) / 3) + np.argmax(sumpix0[np.int_(len(sumpix0) / 3):np.int_(len(sumpix0) * 2 / 3)])
@@ -67,7 +70,8 @@ def eraseLeft(img, extraCut=0):
     return img
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
 def eraseRight(img, extraCut=0):
     sumpix0 = np.sum(img, 0)
     max_r2 = np.int_(len(sumpix0) / 3) + np.argmax(sumpix0[np.int_(len(sumpix0) / 3):np.int_(len(sumpix0) * 2 / 3)])
@@ -75,7 +79,8 @@ def eraseRight(img, extraCut=0):
     return img
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8)'], '(n,n),()->(n,n)', target='cuda')
 def eraseFrame(img, width=1):
     img[0:width, :] = 0
     img[511 - width:511, :] = 0
@@ -84,7 +89,8 @@ def eraseFrame(img, width=1):
     return img
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
 def segLeft(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=1900, Cradius=6,clipLimit=2.0, tileGridSize=(8, 8), extraCut=0, frameWidth=1):
     img = np.copy(img_cluster)
     # rows, cols = img.shape
@@ -103,7 +109,8 @@ def segLeft(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKern
     return frame.astype('uint8')
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], '(n,n),(n,n)->(n,n)', target='cuda')
 def segRight(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=3800, Cradius=6, clipLimit=2.0, tileGridSize=(8, 8), extraCut=0, frameWidth=28):
     img = np.copy(img_cluster)
     # rows, cols = img.shape
@@ -122,7 +129,8 @@ def segRight(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKer
     return frame.astype('uint8')
 
 
-@guvectorize(['uint8[:,:](uint8[:,:])'], '(n,n)->(n,n)',target='cuda')
+@vectorize
+# @guvectorize(['uint8[:,:](uint8[:,:])'], '(n,n)->(n,n)',target='cuda')
 def clusterSeg(im1):
     # im1 = cv2.imread(filename, 0)
     im = cv2.cvtColor(im1, cv2.COLOR_GRAY2RGB)  # gray to rgb
