@@ -28,7 +28,7 @@ LframeWidth=20
 # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
 
 
-@guvectorize(['uint8[:,:](uint8[:,:], uint8, float64, uint8, uint8)'], '(n,n),(),(),(),()->(n,n)', target='cuda', nopython=True)
+@guvectorize(['uint8[:,:](uint8[:,:], uint8, float64, uint8, uint8)'], '(n,n),(),(),(),()->(n,n)')
 def get_cmask(img, maxCorners=1900, qualityLevel=0.001, minDistance=1, Cradius=6):
     corners = cv2.goodFeaturesToTrack(img, maxCorners, qualityLevel, minDistance)
     corners = np.int0(corners)
