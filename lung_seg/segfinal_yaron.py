@@ -25,7 +25,7 @@ Lthreshold=35
 LmedianKernel=1
 LextraCut=14
 LframeWidth=20
-Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
+# Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
 
 
 def get_cmask(img, maxCorners=1900, qualityLevel=0.001, minDistance=1, Cradius=6):
@@ -174,7 +174,7 @@ def segfinal(input_dir, output_dir):
         # img_lungs = img * mask
 
         im = cv2.imread(filename, 0)
-        img_lungs = seg_image(im)
+        img_lungs = seg_image(im, Nmask)
 
         # saving the images
         outpath = output_dir + basename
@@ -182,8 +182,8 @@ def segfinal(input_dir, output_dir):
     print('Program runtime:', '%.2f' % (time.clock() - time_start), 'seconds')
 
 
-@vectorize(['uint8[:,:](uint8[:,:])'], target='cuda')
-def seg_image(image):
+@vectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], target='cuda')
+def seg_image(image, Nmask):
     # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
     cluster_img = clusterSeg(image)
     Rmask = segRight(cluster_img, Nmask, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius,
