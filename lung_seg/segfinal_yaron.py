@@ -7,7 +7,7 @@ import numpy as np
 import scipy.misc
 from skimage import color
 from sklearn.cluster import KMeans
-from numba import vectorize
+from numba import guvectorize
 
 RblackHatKernel=177
 RmaxCorners=2300
