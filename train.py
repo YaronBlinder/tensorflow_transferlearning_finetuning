@@ -582,11 +582,11 @@ def pneumo(model, top, group, position, size, n_epochs, n_dense, dropout, poolin
     # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
     if seg:
-        train_path = '/Radical_data/data/CXR8/all/lung_seq/train/'
-        test_path = '/Radical_data/data/cxr8/all/lung_seq/test/'
+        train_path = '/Radical_data/data/CXR8/all/lung_seg/train/'
+        test_path = '/Radical_data/data/cxr8/all/lung_seg/test/'
     else:
-        train_path = '/Radical_data/data/CXR8/all/not_seq/train/'
-        test_path = '/Radical_data/data/cxr8/all/not_seq/test/'
+        train_path = '/Radical_data/data/CXR8/all/not_seg/train/'
+        test_path = '/Radical_data/data/cxr8/all/not_seg/test/'
     # train_path = '/Radical_data/data/all/flat/testset/16_bit/train/'
     # test_path = '/Radical_data/data/all/flat/testset/16_bit/test/'
     # train_path = '/Radical_data/data/all/trial/train/'
