@@ -79,57 +79,45 @@ def eraseFrame(img, width=1):
     return img
 
 
-def segLeft(img_cluster, Nmask, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=1900, Cradius=6,
-            clipLimit=2.0,
-            tileGridSize=(8, 8), extraCut=0, frameWidth=1):
+@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], target='cuda')
+def segLeft(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=1900, Cradius=6,clipLimit=2.0, tileGridSize=(8, 8), extraCut=0, frameWidth=1):
     img = np.copy(img_cluster)
-    rows, cols = img.shape
-    img = eraseRight(img, extraCut)
+    # rows, cols = img.shape
+    img = eraseRight(img, LextraCut)
     clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
     img = clahe.apply(img)
-    ker = blackHatKernel
+    ker = LblackHatKernel
     kernel = np.ones((ker, ker), np.uint8)
     blackhat = cv2.morphologyEx(img, cv2.MORPH_BLACKHAT, kernel)
-    ret, thresh = cv2.threshold(blackhat, threshold, 255, 0)
-    cmask = get_cmask(img, maxCorners, Cradius=Cradius)
+    ret, thresh = cv2.threshold(blackhat, Lthreshold, 255, 0)
+    cmask = get_cmask(img, LmaxCorners, Cradius=LCradius)
     mask = np.multiply(cmask, thresh).astype('uint8')
-    median = cv2.medianBlur(mask, medianKernel)
+    median = cv2.medianBlur(mask, LmedianKernel)
     contour_mask = contourMask(median)
-    frame = eraseFrame(contour_mask, frameWidth) * Nmask
+    frame = eraseFrame(contour_mask, LframeWidth) * Nmask
     return frame.astype('uint8')
 
 
-def segRight(img_cluster, Nmask, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=3800, Cradius=6,
-             clipLimit=2.0,
-             tileGridSize=(8, 8), extraCut=0, frameWidth=28):
+@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], target='cuda')
+def segRight(img_cluster, Nmask): #, blackHatKernel=169, threshold=45, medianKernel=23, maxCorners=3800, Cradius=6, clipLimit=2.0, tileGridSize=(8, 8), extraCut=0, frameWidth=28):
     img = np.copy(img_cluster)
-
-    rows, cols = img.shape
-
-    img = eraseLeft(img, extraCut)
-
+    # rows, cols = img.shape
+    img = eraseLeft(img, RextraCut)
     clahe = cv2.createCLAHE(clipLimit=clipLimit, tileGridSize=tileGridSize)
     img = clahe.apply(img)
-
-    ker = blackHatKernel
+    ker = RblackHatKernel
     kernel = np.ones((ker, ker), np.uint8)
     blackhat = cv2.morphologyEx(img, cv2.MORPH_BLACKHAT, kernel)
-
-    ret, thresh = cv2.threshold(blackhat, threshold, 255, 0)
-
-    cmask = get_cmask(img, maxCorners, Cradius=Cradius)
-
+    ret, thresh = cv2.threshold(blackhat, Rthreshold, 255, 0)
+    cmask = get_cmask(img, RmaxCorners, Cradius=RCradius)
     mask = np.multiply(cmask, thresh).astype('uint8')
-
-    median = cv2.medianBlur(mask, medianKernel)
-
+    median = cv2.medianBlur(mask, RmedianKernel)
     contour_mask = contourMask(median)
-
-    frame = eraseFrame(contour_mask, frameWidth) * Nmask
-
+    frame = eraseFrame(contour_mask, RframeWidth) * Nmask
     return frame.astype('uint8')
 
 
+@guvectorize(uint8[:,:](uint8[:,:]), target='cuda')
 def clusterSeg(im1):
     # im1 = cv2.imread(filename, 0)
     im = cv2.cvtColor(im1, cv2.COLOR_GRAY2RGB)  # gray to rgb
@@ -182,16 +170,12 @@ def segfinal(input_dir, output_dir):
     print('Program runtime:', '%.2f' % (time.clock() - time_start), 'seconds')
 
 
-@vectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], target='cuda')
+@guvectorize(['uint8[:,:](uint8[:,:], uint8[:,:])'], target='cuda')
 def seg_image(image, Nmask):
     # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
     cluster_img = clusterSeg(image)
-    Rmask = segRight(cluster_img, Nmask, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius,
-                     clipLimit,
-                     tileGridSize, RextraCut, RframeWidth)
-    Lmask = segLeft(cluster_img, Nmask, LblackHatKernel, Lthreshold, LmedianKernel, LmaxCorners, LCradius,
-                    clipLimit,
-                    tileGridSize, LextraCut, LframeWidth)
+    Rmask = segRight(cluster_img, Nmask)#, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius, clipLimit,tileGridSize, RextraCut, RframeWidth)
+    Lmask = segLeft(cluster_img, Nmask) #, LblackHatKernel, Lthreshold, LmedianKernel, LmaxCorners, LCradius, clipLimit, tileGridSize, LextraCut, LframeWidth)
     mask = ((Rmask + Lmask) / 255).astype('uint8')
     img = cv2.imread(filename, 0)
     img_lungs = img * mask
