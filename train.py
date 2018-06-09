@@ -575,6 +575,133 @@ def train_all(model, top, group, position, size, n_epochs, n_dense, dropout, poo
     print('Model trained.')
 
 
+def pneumo(model, top, group, position, size, n_epochs, n_dense, dropout, pooling, G, seg):
+    print('Loading model...')
+    print("[INFO] training with {} GPUs...".format(G))
+
+    # train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
+    # test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
+    if seg:
+        train_path = '/Radical_data/data/CXR8/all/lung_seq/train/'
+        test_path = '/Radical_data/data/cxr8/all/lung_seq/test/'
+    else:
+        train_path = '/Radical_data/data/CXR8/all/not_seq/train/'
+        test_path = '/Radical_data/data/cxr8/all/not_seq/test/'
+    # train_path = '/Radical_data/data/all/flat/testset/16_bit/train/'
+    # test_path = '/Radical_data/data/all/flat/testset/16_bit/test/'
+    # train_path = '/Radical_data/data/all/trial/train/'
+    # test_path = '/Radical_data/data/all/trial/test/'
+
+    if model in ['densenet121', 'densenet161', 'densenet169']:
+        batch_size = 32
+    else:
+        batch_size = 32
+    n_train_samples = count_files(train_path)
+    n_test_samples = count_files(test_path)
+
+    train_datagen = get_train_datagen(model, size, position)
+    test_datagen = get_test_datagen(model, size, position)
+
+    if model in ['xception', 'inception_v3']:
+        target_size = (299, 299)
+    else:
+        target_size = (224, 224)
+
+    train_generator = train_datagen.flow_from_directory(
+        train_path,
+        image_reader='cv2',
+        reader_config={'target_mode': 'L', 'target_size': target_size},
+        batch_size=batch_size * G,
+        shuffle=True)
+
+    test_generator = test_datagen.flow_from_directory(
+        test_path,
+        image_reader='cv2',
+        reader_config={'target_mode': 'L', 'target_size': target_size},
+        batch_size=batch_size * G,
+        shuffle=True)
+
+    # train the model on the new data for a few epochs
+    print('Training top...')
+    print(
+        'Network:{model}\n'.format(model=model),
+        'Top:{top}\n'.format(top=top),
+        'Group:{group}\n'.format(group=group),
+        'Position:{position}\n'.format(position=position),
+        'Im_size:{size}\n'.format(size=size),
+        'N_epochs:{n_epochs}\n'.format(n_epochs=n_epochs),
+        'N_dense:{n_dense}\n'.format(n_dense=n_dense),
+        'Dropout:{dropout}\n'.format(dropout=dropout),
+        'Pooling:{pooling}'.format(pooling=pooling))
+
+    class_weight = None
+    train_type = 'top'
+
+    if G > 1:
+        # we'll store a copy of the model on *every* GPU and then combine
+        # the results from the gradient updates on the CPU
+        with tf.device("/cpu:0"):
+            # initialize the model
+            full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        # make the model parallel
+        gpu_full_model = multi_gpu_model(full_model, gpus=G)
+        gpu_full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
+            # metrics=[mcor, recall, f1])
+
+        gpu_full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G,
+                                    base_model=full_model),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=4,
+            use_multiprocessing=False,
+            initial_epoch=0)
+    else:
+        full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
+        full_model.compile(
+            # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
+            optimizer=optimizers.Adam(lr=1e-2),
+            # optimizer=optimizers.rmsprop(),
+            loss='binary_crossentropy',
+            metrics=['accuracy'])
+            # metrics=[mcor, recall, f1])
+        full_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * G))),
+            epochs=n_epochs,
+            verbose=1,
+            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=G),
+            validation_data=test_generator,
+            validation_steps=int(np.ceil(n_test_samples / (batch_size * G))),
+            class_weight=class_weight,
+            max_queue_size=10,
+            workers=4,
+            use_multiprocessing=False,
+            initial_epoch=0)
+
+    weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
+        position=position,
+        group=group,
+        model=model,
+        top=top,
+        n_dense=n_dense,
+        dropout=dropout)
+
+    full_model.save_weights(weights_path)
+    print('Model trained.')
+
+
 def train_from_scratch(group, position, size, selu=False):
     train_path = 'data/{position}_{size}/{group}/train/'.format(position=position, size=size, group=group)
     test_path = 'data/{position}_{size}/{group}/test/'.format(position=position, size=size, group=group)
@@ -700,6 +827,9 @@ def main():
     parser.add_argument('--pooling', default=None, help='type of global pooling layer')
     parser.add_argument('--selu', action='store_true', help='flag for selu model (from scratch')
     parser.add_argument('--gpus', type=int, default=1, help='# of GPUs to use for training')
+    parser.add_argument('--pneumo', action='store_true', help='flag for training cxr8 peumonia classifier')
+    parser.add_argument('--segmented', action='store_true', help='flag for training cxr8 peumonia classifier')
+
 
     args = parser.parse_args()
     assert_validity(args)
@@ -728,6 +858,9 @@ def main():
             n_dense=n_dense,
             dropout=dropout)
         fine_tune(args.model, args.top, args.group, args.position, size, weights_path)
+    if args.pneumo:
+        pneumo(args.model, args.top, args.group, args.position, size, n_epochs, n_dense, args.dropout, args.pooling,
+                  G, args.segmented)
 
 
 if __name__ == '__main__':
