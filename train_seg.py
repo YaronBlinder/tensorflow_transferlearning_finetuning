@@ -49,15 +49,20 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
-        position=args.position,
-        group=args.group,
-        model=args.model,
-        top=args.top,
-        n_dense=args.n_dense,
-        dropout=args.dropout)
-    TBlog_path = 'TBlog/' + model_path
-    weights_path = 'weights/' + model_path
+    if args.seg:
+        weights_path = 'weights/lung_seg/seg/'
+        TBlog_path = 'TBlog/seg/'
+        os.makedirs('weights/lung_seg/not_seg/', exist_ok=True)
+    else:
+        model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
+            position=args.position,
+            group=args.group,
+            model=args.model,
+            top=args.top,
+            n_dense=args.n_dense,
+            dropout=args.dropout)
+        TBlog_path = 'TBlog/' + model_path
+        weights_path = 'weights/' + model_path
     os.makedirs(TBlog_path, exist_ok=True)
     os.makedirs(weights_path, exist_ok=True)
 
