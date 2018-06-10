@@ -6,7 +6,7 @@ from cv2 import imread
 
 
 Nmask = (imread('lung_seg/nmask.png', 0)/255).astype('uint8')
-data_folder = '/Radical_data/data/CXR8/all/'
+data_folder = '/Radical_data/data/CXR8/all/test/'
 
 normal_files = glob(data_folder+'1/*')
 abnormal_files = glob(data_folder+'2/*')
