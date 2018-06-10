@@ -151,6 +151,8 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
         top=top,
         n_dense=n_dense,
         dropout=dropout)
+
+
     TBlog_path = 'TBlog/' + model_path
     weights_path = 'weights/' + model_path
     G = kwargs.get('G', None)
@@ -200,9 +202,9 @@ def get_callbacks(model, top, group, position, train_type, n_dense=512, dropout=
             # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
             callbacks.TensorBoard(
                 log_dir=TBlog_path,
-                histogram_freq=0,
+                histogram_freq=1,
                 write_graph=True,
-                write_images=False)
+                write_images=True)
         ]
 
 
@@ -587,10 +589,6 @@ def pneumo(model, top, group, position, size, n_epochs, n_dense, dropout, poolin
     else:
         train_path = '/Radical_data/data/cxr8/all/not_seg/train/'
         test_path = '/Radical_data/data/cxr8/all/not_seg/test/'
-    # train_path = '/Radical_data/data/all/flat/testset/16_bit/train/'
-    # test_path = '/Radical_data/data/all/flat/testset/16_bit/test/'
-    # train_path = '/Radical_data/data/all/trial/train/'
-    # test_path = '/Radical_data/data/all/trial/test/'
 
     if model in ['densenet121', 'densenet161', 'densenet169']:
         batch_size = 32
@@ -690,13 +688,19 @@ def pneumo(model, top, group, position, size, n_epochs, n_dense, dropout, poolin
             use_multiprocessing=False,
             initial_epoch=0)
 
-    weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
-        position=position,
-        group=group,
-        model=model,
-        top=top,
-        n_dense=n_dense,
-        dropout=dropout)
+    # weights_path = 'weights/models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/fully_trained.h5'.format(
+    #     position=position,
+    #     group=group,
+    #     model=model,
+    #     top=top,
+    #     n_dense=n_dense,
+    #     dropout=dropout)
+    if seg:
+        weights_dir = 'weights/lung_seg/seg/'
+    else:
+        weights_dir = 'weights/lung_seg/not_seg/'
+    os.makedirs(weights_dir, exist_ok=True)
+    weights_path = weights_dir+'fully_trained.h5'
 
     full_model.save_weights(weights_path)
     print('Model trained.')
