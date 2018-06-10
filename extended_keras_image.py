@@ -95,30 +95,30 @@ def random_zoom(x, zoom_range, row_index=1, col_index=2, channel_index=0,
     return x
 
 
-def imagenet_preprocess(x, position, *args, **kwargs):
-    if position == 'PA':
-        ds_mean = 38679.2766871  # calculated
-    elif position == 'LAT':
-        ds_mean = 34024.5927414
-    else:
-        print('You should not be here')
-
-    x = np.reshape(x, [1, 224, 224, 3])
-    x = x.astype('float32')
-
-    # Zero-center by mean pixel
-    x[:, :, :, 0] -= ds_mean
-    x[:, :, :, 1] -= ds_mean
-    x[:, :, :, 2] -= ds_mean
-
-    # Scale to 255
-    x *= 255. / 65535
-
-    # RGB->BGR
-    x = x[:, :, :, ::-1]
-
-    x = np.reshape(x, [224, 224, 3])
-    return x
+# def imagenet_preprocess(x, position, *args, **kwargs):
+#     if position == 'PA':
+#         ds_mean = 38679.2766871  # calculated
+#     elif position == 'LAT':
+#         ds_mean = 34024.5927414
+#     else:
+#         print('You should not be here')
+#
+#     x = np.reshape(x, [1, 224, 224, 3])
+#     x = x.astype('float32')
+#
+#     # Zero-center by mean pixel
+#     x[:, :, :, 0] -= ds_mean
+#     x[:, :, :, 1] -= ds_mean
+#     x[:, :, :, 2] -= ds_mean
+#
+#     # Scale to 255
+#     x *= 255. / 65535
+#
+#     # RGB->BGR
+#     x = x[:, :, :, ::-1]
+#
+#     x = np.reshape(x, [224, 224, 3])
+#     return x
 
 
 def inception_preprocess(x, *args, **kwargs):
@@ -264,7 +264,7 @@ def pil_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
 
 
 def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=K.image_dim_ordering(), **kwargs):
-    img = imread(filepath, -1)
+    img = imread(filepath, 0)
     if len(img.shape) == 2:
         # img = img.reshape((img.shape[0], img.shape[1], 1))
         img = np.expand_dims(img, axis=2)
