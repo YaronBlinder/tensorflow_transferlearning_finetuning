@@ -9,23 +9,42 @@ from numba import guvectorize
 from skimage import color
 from sklearn.cluster import KMeans
 
-RblackHatKernel=177
-RmaxCorners=2300
+# Params with clusterSeg:
+# RblackHatKernel=177
+# RmaxCorners=2300
+# RCradius=6
+# Rthreshold=35
+# RmedianKernel=5
+# RextraCut=9
+# clipLimit=2.0
+# tileGridSize=(8, 8)
+# RframeWidth=25
+# LblackHatKernel=133
+# LmaxCorners=1840
+# LCradius=6
+# Lthreshold=35
+# LmedianKernel=1
+# LextraCut=14
+# LframeWidth=20
+# # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
+
+# Params for faster segmentation (no clusterSeg):
+RblackHatKernel=185
+RmaxCorners=2280
 RCradius=6
-Rthreshold=35
-RmedianKernel=5
-RextraCut=9
+Rthreshold=42
+RmedianKernel=21
+RextraCut=6
 clipLimit=2.0
-tileGridSize=(8, 8)
-RframeWidth=25
-LblackHatKernel=133
-LmaxCorners=1840
+tileGridSize=(8,8)
+RframeWidth=28
+LblackHatKernel=149
+LmaxCorners=1720
 LCradius=6
-Lthreshold=35
-LmedianKernel=1
-LextraCut=14
-LframeWidth=20
-# Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
+Lthreshold=43
+LmedianKernel=19
+LextraCut=12
+LframeWidth=21
 
 
 
@@ -181,6 +200,16 @@ def seg_image(image, Nmask):
     cluster_img = clusterSeg(image)
     Rmask = segRight(cluster_img, Nmask)#, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius, clipLimit,tileGridSize, RextraCut, RframeWidth)
     Lmask = segLeft(cluster_img, Nmask) #, LblackHatKernel, Lthreshold, LmedianKernel, LmaxCorners, LCradius, clipLimit, tileGridSize, LextraCut, LframeWidth)
+    mask = ((Rmask + Lmask) / 255).astype('uint8')
+    # img = cv2.imread(filename, 0)
+    img_lungs = image * mask
+    return img_lungs
+
+def faster_seg_image(image, Nmask):
+    # Nmask = (cv2.imread(Nmask_path, 0) / 255).astype('uint8')
+    # cluster_img = clusterSeg(image)
+    Rmask = segRight(image, Nmask)#, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius, clipLimit,tileGridSize, RextraCut, RframeWidth)
+    Lmask = segLeft(image, Nmask) #, LblackHatKernel, Lthreshold, LmedianKernel, LmaxCorners, LCradius, clipLimit, tileGridSize, LextraCut, LframeWidth)
     mask = ((Rmask + Lmask) / 255).astype('uint8')
     # img = cv2.imread(filename, 0)
     img_lungs = image * mask
