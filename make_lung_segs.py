@@ -25,7 +25,7 @@ for i in tqdm(range(10)):
     abnormal_filename = abnormal_path.split('/')[-1]
     print(abnormal_path)
     abnormal_image = cv2.imread(abnormal_path, 0)
-    seg_abnorm_im = seg_image(abnormal_path, Nmask)
+    seg_abnorm_im = seg_image(abnormal_image, Nmask)
     segmented_abnormal_path = data_folder + 'lung_seg/2/' + abnormal_filename
     # segmented_abnormal_path = 'images/segmented/abnormal/{}'.format(abnormal_images[i])
     imageio.imwrite(segmented_abnormal_path, seg_abnorm_im)
