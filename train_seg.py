@@ -643,7 +643,7 @@ def pneumo(model, top, group, position, size, n_epochs, n_dense, dropout, poolin
 
     trained_weights_path = 'weights/PA.hdf5'
     full_model = get_model(model, top, freeze_base=False, n_dense=n_dense, dropout=dropout, pooling=pooling)
-    full_model.load_weights(trained_weights_path)
+    # full_model.load_weights(trained_weights_path)
 
     if G > 1:
         # we'll store a copy of the model on *every* GPU and then combine
@@ -829,7 +829,7 @@ def train_from_scratch(group, position, size, selu=False):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', default='vgg16', help='The network eg. resnet50')
+    parser.add_argument('--model', default='densenet121', help='The network eg. resnet50')
     parser.add_argument('--size', default=512, help='Image size')
     parser.add_argument('--top', default='linear', help='Top classifier')
     parser.add_argument('--group', default='M_Adult', help='Demographic group')
