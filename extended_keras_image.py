@@ -267,8 +267,8 @@ def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
     img = imread(filepath, -1)
     if len(img.shape) == 2:
         # img = img.reshape((img.shape[0], img.shape[1], 1))
-        # img = np.expand_dims(img, axis=2)
-        img = imread(filepath) #added for pneumo, loads 512x512 as 512x512x3
+        img = np.expand_dims(img, axis=2)
+        # img = imread(filepath) #added for pneumo, loads 512x512 as 512x512x3
     return img
 
 
@@ -646,7 +646,7 @@ class ImageDataGenerator(object):
 
     def flow_from_directory(self, directory,
                             color_mode=None, target_size=None,
-                            image_reader='pil', reader_config={'target_mode': 'RGB', 'target_size': (299, 299)},
+                            image_reader='pil', reader_config={'target_mode': 'L', 'target_size': (224, 224)},
                             read_formats={'png', 'jpg', 'jpeg', 'bmp'},
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
