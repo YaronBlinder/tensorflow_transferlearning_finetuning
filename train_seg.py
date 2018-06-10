@@ -49,10 +49,12 @@ def assert_validity(args):
 
 
 def prep_dir(args):
-    if args.seg:
-        weights_path = 'weights/lung_seg/seg/'
+    if args.pneumo:
         TBlog_path = 'TBlog/seg/'
-        os.makedirs('weights/lung_seg/not_seg/', exist_ok=True)
+        if args.segmented:
+            weights_path = 'weights/lung_seg/seg/'
+        else:
+            weights_path = 'weights/lung_seg/not_seg/'
     else:
         model_path = 'models/{group}/{position}/{model}/{top}/n_dense_{n_dense}/dropout_{dropout}/'.format(
             position=args.position,
