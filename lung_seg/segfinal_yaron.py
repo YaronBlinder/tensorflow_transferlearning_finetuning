@@ -182,6 +182,6 @@ def seg_image(image, Nmask):
     Rmask = segRight(cluster_img, Nmask)#, RblackHatKernel, Rthreshold, RmedianKernel, RmaxCorners, RCradius, clipLimit,tileGridSize, RextraCut, RframeWidth)
     Lmask = segLeft(cluster_img, Nmask) #, LblackHatKernel, Lthreshold, LmedianKernel, LmaxCorners, LCradius, clipLimit, tileGridSize, LextraCut, LframeWidth)
     mask = ((Rmask + Lmask) / 255).astype('uint8')
-    img = cv2.imread(filename, 0)
-    img_lungs = img * mask
+    # img = cv2.imread(filename, 0)
+    img_lungs = image * mask
     return img_lungs
