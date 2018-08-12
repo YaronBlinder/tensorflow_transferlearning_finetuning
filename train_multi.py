@@ -114,7 +114,7 @@ def get_base_model():
     return base_model
 
 
-def get_model():
+def get_model(weight_path):
     base_model = get_base_model()
     base_model.load_weights(weights_path)
     base_model.layers.pop()
