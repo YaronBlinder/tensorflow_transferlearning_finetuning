@@ -90,7 +90,6 @@ def preprocess_train(imfile, target_size=224, crop_ratio=0.9):
     im = scale_im(im, target_size)
     im = radical_preprocess(im)
     im = random_90deg_rotation(im)
-    print(imfile, im.shape)
     return(im)
 
 
@@ -236,10 +235,11 @@ def generator_from_df(df, batch_size, target_size, datapath, train=False):
                     X = np.array([preprocess_test(f, target_size) for f in sub.filepath])
 
                 Y_label2 = sub.label_2.values
-                Y_agegroup = sub.ohe_P_YA_A_G.values
+                Y_agegroup = [np.fromstring(val[1:-1], dtype=int, sep=' ') for val in sub.ohe_P_YA_A_G.values]
                 Y_genderM = sub.gender_M.values
 
                 mini_batches_completed += 1
+
                 yield X, [Y_label2, Y_agegroup, Y_genderM]
 
 
