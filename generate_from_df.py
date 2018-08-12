@@ -90,6 +90,7 @@ def preprocess_train(imfile, target_size=224, crop_ratio=0.9):
     im = scale_im(im, target_size)
     im = radical_preprocess(im)
     im = random_90deg_rotation(im)
+    print(imfile, im.shape)
     return(im)
 
 
