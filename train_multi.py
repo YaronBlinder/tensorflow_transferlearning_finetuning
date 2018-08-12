@@ -211,8 +211,8 @@ def main():
     parser.add_argument('--batch_size', default=32, help='Image size')
     parser.add_argument('--epochs', default=100, help='# of epochs for top training')
     parser.add_argument('--gpus', type=int, default=1, help='# of GPUs to use for training')
-    parser.add_argument('--df', type='str', required=True, help='Path to dataframe with filepaths and labels')
-    parser.add_argument('--datapath', type='str', required=True, help='Path to image data')
+    parser.add_argument('--df', type=str, default='multitask.csv', help='Path to dataframe with filepaths and labels')
+    parser.add_argument('--datapath', type=str, required=True, help='Path to image data')
 
     args = parser.parse_args()
     prep_dir()
