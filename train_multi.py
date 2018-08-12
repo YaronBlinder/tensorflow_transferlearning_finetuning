@@ -138,8 +138,8 @@ def train(batch_size, n_epochs, gpus, df, datapath):
 
     target_size = 224
 
-    train_datagen = get_train_datagen(train_df, datapath, batch_size=batch_size*gpus, target_size=target_size)
-    test_datagen = get_test_datagen(test_df, datapath, batch_size=batch_size*gpus, target_size=target_size)
+    train_datagen = get_train_datagen(df_train, datapath, batch_size=batch_size*gpus, target_size=target_size)
+    test_datagen = get_test_datagen(df_test, datapath, batch_size=batch_size*gpus, target_size=target_size)
 
 
     pretrained_weights_path = 'weights/PA.hdf5'
