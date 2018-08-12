@@ -1,21 +1,17 @@
 import argparse
-import glob
-import os
-
+import clfs
 import keras.layers
+import multi_gpu_callbacks
 import numpy as np
+import os
 import pandas as pd
 import tensorflow as tf
-from keras import optimizers, callbacks, initializers
-from keras.models import Model, Sequential
+from generate_from_df import generator_from_df
+from keras import optimizers, callbacks
 from keras.utils.training_utils import multi_gpu_model
-import multi_gpu_callbacks
 from sklearn.model_selection import train_test_split
 
-
-from densenet121 import densenet121_model
-from generate_from_df import generator_from_df
-import clfs
+num_age_groups = 4
 
 
 def get_callbacks(gpus):
@@ -103,7 +99,6 @@ def get_test_datagen(test_df, datapath, batch_size, target_size=224):
 
 
 def get_base_model():
-
     # base_model = densenet121_model(
     #     img_rows=224,
     #     img_cols=224,
@@ -140,9 +135,8 @@ def train(batch_size, n_epochs, gpus, df, datapath):
 
     target_size = 224
 
-    train_datagen = get_train_datagen(df_train, datapath, batch_size=batch_size*gpus, target_size=target_size)
-    test_datagen = get_test_datagen(df_test, datapath, batch_size=batch_size*gpus, target_size=target_size)
-
+    train_datagen = get_train_datagen(df_train, datapath, batch_size=batch_size * gpus, target_size=target_size)
+    test_datagen = get_test_datagen(df_test, datapath, batch_size=batch_size * gpus, target_size=target_size)
 
     pretrained_weights_path = 'weights/PA.hdf5'
 
@@ -150,7 +144,6 @@ def train(batch_size, n_epochs, gpus, df, datapath):
     print('Training top...')
 
     class_weight = None
-
 
     if gpus > 1:
         # we'll store a copy of the model on *every* GPU and then combine
@@ -233,4 +226,4 @@ def main():
 
 
 if __name__ == '__main__':
-        main()
+    main()
