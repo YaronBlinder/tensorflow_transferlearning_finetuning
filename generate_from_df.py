@@ -186,7 +186,7 @@ def generator_from_df(df, batch_size, target_size, datapath, train=False):
     count = 1
     epoch = 0
 
-    df.filepath.apply(lambda filepath : datapath+filepath)
+    df['filepath'] = df.filepath.apply(lambda filepath : datapath+filepath)
     # New epoch.
     while 1:
 
