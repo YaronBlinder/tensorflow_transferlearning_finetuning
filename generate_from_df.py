@@ -84,6 +84,8 @@ def preprocess_train(imfile, target_size=224, crop_ratio=0.9):
     im = imread(imfile, 0)
     if len(im.shape) == 2:
         im = np.expand_dims(im, axis=2)
+    elif im.shape[2] == 1:
+        im = np.repeat(im[:, :, np.newaxis], 3, axis=2)
     im = random_crop(im, crop_ratio)
     im = scale_im(im, target_size)
     im = radical_preprocess(im)
@@ -95,6 +97,8 @@ def preprocess_test(imfile, target_size=224):
     im = imread(imfile, 0)
     if len(im.shape) == 2:
         im = np.expand_dims(im, axis=2)
+    elif im.shape[2] == 1:
+        im = np.repeat(im[:, :, np.newaxis], 3, axis=2)
     im = scale_im(im, target_size)
     im = radical_preprocess(im)
     return(im)
