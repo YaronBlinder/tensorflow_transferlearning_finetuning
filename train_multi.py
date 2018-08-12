@@ -83,7 +83,7 @@ def prep_dir():
     os.makedirs(weights_path, exist_ok=True)
 
 
-def get_train_datagen(train_df, batch_size, datapath, target_size=224):
+def get_train_datagen(train_df, datapath, batch_size, target_size=224):
     datagen = generator_from_df(df=train_df,
                                 batch_size=batch_size,
                                 target_size=target_size,
@@ -92,7 +92,7 @@ def get_train_datagen(train_df, batch_size, datapath, target_size=224):
     return datagen
 
 
-def get_test_datagen(test_df, batch_size, datapath, target_size=224):
+def get_test_datagen(test_df, datapath, batch_size, target_size=224):
     datagen = generator_from_df(df=test_df,
                                 batch_size=batch_size,
                                 target_size=target_size,
@@ -138,8 +138,8 @@ def train(batch_size, n_epochs, gpus, df, datapath):
 
     target_size = 224
 
-    train_datagen = get_train_datagen(train_df, batch_size=batch_size*gpus, datapath, target_size)
-    test_datagen = get_test_datagen(test_df, batch_size=batch_size*gpus, datapath, target_size)
+    train_datagen = get_train_datagen(train_df, datapath, batch_size=batch_size*gpus, target_size=target_size)
+    test_datagen = get_test_datagen(test_df, datapath, batch_size=batch_size*gpus, target_size=target_size)
 
 
     pretrained_weights_path = 'weights/PA.hdf5'
