@@ -18,7 +18,7 @@ def scale_im(x, size, *args, **kwargs):
     return resized
 
 
-def radical_preprocess(x, position=PA, *args, **kwargs):
+def radical_preprocess(x, position='PA', *args, **kwargs):
     if position == 'PA':
         # ds_mean = 38679.2766871 #calculated
         # ds_std = 26824.8858495
