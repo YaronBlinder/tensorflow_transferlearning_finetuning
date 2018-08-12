@@ -17,6 +17,65 @@ from densenet121 import densenet121_model
 from generate_from_df import generator_from_df
 
 
+def get_callbacks(gpus):
+    """
+    :return: A list of `keras.callbacks.Callback` instances to apply during training.
+
+    """
+    TBlog_path = 'TBlog/'
+    weights_path = 'weights/'
+    if gpus > 1:
+        base_model = kwargs.get('base_model', None)
+        return [
+            multi_gpu_callbacks.MultiGPUCheckpointCallback(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                base_model=base_model,
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            # callbacks.TensorBoard(
+            #     log_dir=TBlog_path,
+            #     histogram_freq=1,
+            #     write_graph=True,
+            #     write_images=True)
+        ]
+    else:
+        return [
+            callbacks.ModelCheckpoint(
+                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                monitor='val_acc',
+                verbose=1,
+                save_best_only=True,
+                save_weights_only=True),
+            callbacks.EarlyStopping(
+                monitor='val_loss',
+                patience=12,
+                verbose=1),
+            callbacks.ReduceLROnPlateau(
+                monitor='val_loss',
+                factor=0.7,
+                patience=5,
+                verbose=1),
+            # callbacks.LambdaCallback(on_epoch_end=on_epoch_end),
+            callbacks.TensorBoard(
+                log_dir=TBlog_path,
+                histogram_freq=0,
+                write_graph=True,
+                write_images=True)
+        ]
+
+
 def prep_dir():
     TBlog_path = 'TBlog/'
     weights_path = 'weights/'
@@ -83,7 +142,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
     test_datagen = get_test_datagen(test_df, batch_size=batch_size*gpus, target_size, datapath)
 
 
-    pretrained_weights_path = 'weights/pretrained/PA.hdf5'
+    pretrained_weights_path = 'weights/PA.hdf5'
 
     # train the model on the new data for a few epochs
     print('Training top...')
@@ -111,8 +170,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * gpus))),
             epochs=n_epochs,
             verbose=1,
-            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=gpus,
-                                    base_model=full_model),
+            callbacks=get_callbacks(gpus),
             validation_data=test_generator,
             validation_steps=int(np.ceil(n_test_samples / (batch_size * gpus))),
             class_weight=class_weight,
@@ -129,12 +187,12 @@ def train(batch_size, n_epochs, gpus, df, datapath):
             loss=['binary_crossentropy', 'categorical_crossentropy', 'binary_crossentropy'],
             metrics=['accuracy', 'accuracy', 'accuracy'])
         full_model.fit_generator(
-            generator=train_generator,
+            generator=train_datagen,
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * gpus))),
             epochs=n_epochs,
             verbose=1,
-            callbacks=get_callbacks(model, top, group, position, train_type, n_dense, dropout, G=gpus),
-            validation_data=test_generator,
+            callbacks=get_callbacks(gpus),
+            validation_data=test_datagen,
             validation_steps=int(np.ceil(n_test_samples / (batch_size * gpus))),
             class_weight=class_weight,
             max_queue_size=10,

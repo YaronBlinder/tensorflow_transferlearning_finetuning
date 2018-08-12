@@ -267,6 +267,9 @@ def cv2_image_reader(filepath, target_mode=None, target_size=None, dim_ordering=
     img = imread(filepath, 0)
     if len(img.shape) == 2:
         # img = img.reshape((img.shape[0], img.shape[1], 1))
+        img = np.expand_dims(img, axis=2)img = imread(filepath, 0)
+    if len(img.shape) == 2:
+        # img = img.reshape((img.shape[0], img.shape[1], 1))
         img = np.expand_dims(img, axis=2)
         # img = imread(filepath) #added for pneumo, loads 512x512 as 512x512x3
     return img
