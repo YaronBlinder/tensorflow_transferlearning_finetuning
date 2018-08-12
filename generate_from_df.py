@@ -234,9 +234,9 @@ def generator_from_df(df, batch_size, target_size, datapath, train=False):
                 else:
                     X = np.array([preprocess_test(f, target_size) for f in sub.filepath])
 
-                Y_label2 = sub.label_2.values
-                Y_agegroup = [np.fromstring(val[1:-1], dtype=int, sep=' ') for val in sub.ohe_P_YA_A_G.values]
-                Y_genderM = sub.gender_M.values
+                Y_label2 = np.array(sub.label_2.values)
+                Y_agegroup = np.array([np.fromstring(val[1:-1], dtype=int, sep=' ') for val in sub.ohe_P_YA_A_G.values])
+                Y_genderM = np.array(sub.gender_M.values)
 
                 mini_batches_completed += 1
 
