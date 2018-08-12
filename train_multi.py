@@ -15,6 +15,7 @@ from sklearn.model_selection import train_test_split
 
 from densenet121 import densenet121_model
 from generate_from_df import generator_from_df
+import clfs
 
 
 def get_callbacks(gpus):
@@ -103,16 +104,17 @@ def get_test_datagen(test_df, datapath, batch_size, target_size=224):
 
 def get_base_model():
 
-    base_model = densenet121_model(
-        img_rows=224,
-        img_cols=224,
-        color_type=1,
-        num_classes=2)
+    # base_model = densenet121_model(
+    #     img_rows=224,
+    #     img_cols=224,
+    #     color_type=1,
+    #     num_classes=2)
+    base_model = clfs.get_model(model='densenet121', top='linear')
 
     return base_model
 
 
-def get_model(weights_path):
+def get_model():
     base_model = get_base_model()
     base_model.load_weights(weights_path)
     base_model.layers.pop()
