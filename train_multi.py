@@ -129,7 +129,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
     print('Loading model...')
     print("[INFO] training with {} GPUs...".format(gpus))
 
-    X_train, X_test, y_train, y_test = train_test_split(df.filepath, df_all.drop('filepath', axis=1), test_size=0.1)
+    X_train, X_test, y_train, y_test = train_test_split(df.filepath, df.drop('filepath', axis=1), test_size=0.1)
     df_test = y_test.join(X_test)
     df_train = y_train.join(X_train)
 
@@ -223,7 +223,11 @@ def main():
     df = args.df
     datapath = args.datapath
 
-    train(batch_size, n_epochs, gpus, df, datapath)
+    train(batch_size=batch_size,
+          n_epochs=n_epochs,
+          gpus=gpus,
+          df=df,
+          datapath=datapath)
 
 
 if __name__ == '__main__':
