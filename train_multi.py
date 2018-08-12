@@ -107,7 +107,7 @@ def get_base_model():
         img_rows=224,
         img_cols=224,
         color_type=1,
-        num_classes=N_classes)
+        num_classes=2)
 
     return base_model
 
