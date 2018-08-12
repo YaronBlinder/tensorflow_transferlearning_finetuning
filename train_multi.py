@@ -200,7 +200,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
             use_multiprocessing=False,
             initial_epoch=0)
 
-    weights_path = 'weights/multi_trained.h5')
+    weights_path = 'weights/multi_trained.h5'
 
     full_model.save_weights(weights_path)
     print('Model trained.')
