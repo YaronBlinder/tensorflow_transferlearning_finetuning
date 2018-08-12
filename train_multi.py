@@ -117,7 +117,7 @@ def get_model(weights_path):
     gender_prediction = keras.layers.Dense(1, activation='sigmoid', name='gender')(x)
     agegroup_prediction = keras.layers.Dense(num_age_groups, activation='softmax', name='age')(x)
     triage_prediction = keras.layers.Dense(1, activation='sigmoid', name='triage')(x)
-    full_model = keras.Model(model.input, [triage_prediction, agegroup_prediction, gender_prediction])
+    full_model = keras.Model(base_model.input, [triage_prediction, agegroup_prediction, gender_prediction])
 
     return full_model
 
