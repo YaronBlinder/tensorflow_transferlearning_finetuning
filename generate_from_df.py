@@ -1,5 +1,6 @@
 from cv2 import resize, imread
 import numpy as np
+import scipy.ndimage as ndi
 
 def random_crop(x, random_crop_ratio, sync_seed=None, **kwargs):
     np.random.seed(sync_seed)
