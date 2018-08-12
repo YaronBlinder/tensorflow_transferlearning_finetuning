@@ -141,7 +141,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
     pretrained_weights_path = 'weights/PA.hdf5'
 
     # train the model on the new data for a few epochs
-    print('Training top...')
+    print('Loading model...')
 
     class_weight = None
 
@@ -175,12 +175,14 @@ def train(batch_size, n_epochs, gpus, df, datapath):
             initial_epoch=0)
     else:
         full_model = get_model(pretrained_weights_path)
+        print('Model loaded')
         full_model.compile(
             # optimizer=optimizers.SGD(lr=1e-4, momentum=0.5),
             optimizer=optimizers.Adam(lr=1e-2),
             # optimizer=optimizers.rmsprop(),
             loss=['binary_crossentropy', 'categorical_crossentropy', 'binary_crossentropy'],
             metrics=['accuracy', 'accuracy', 'accuracy'])
+        print('Model compiled')
         full_model.fit_generator(
             generator=train_datagen,
             steps_per_epoch=int(np.ceil(n_train_samples / (batch_size * gpus))),
