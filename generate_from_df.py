@@ -41,6 +41,15 @@ def radical_preprocess(x, position='PA', *args, **kwargs):
     return x
 
 
+def transform_matrix_offset_center(matrix, x, y):
+    o_x = float(x) / 2 + 0.5
+    o_y = float(y) / 2 + 0.5
+    offset_matrix = np.array([[1, 0, o_x], [0, 1, o_y], [0, 0, 1]])
+    reset_matrix = np.array([[1, 0, -o_x], [0, 1, -o_y], [0, 0, 1]])
+    transform_matrix = np.dot(np.dot(offset_matrix, matrix), reset_matrix)
+    return transform_matrix
+
+
 def random_90deg_rotation(x, row_index=0, col_index=1, channel_index=0, fill_mode='nearest', cval=0.):
     theta = np.pi / 180 * 90 * np.random.randint(0, 4)
     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
