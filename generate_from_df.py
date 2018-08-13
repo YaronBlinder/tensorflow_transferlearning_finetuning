@@ -96,8 +96,8 @@ def preprocess_train(imfile, target_size=224, crop_ratio=0.9):
 def preprocess_test(imfile, target_size=224):
     im = imread(imfile, 0)
     if len(im.shape) == 2:
-        im = np.expand_dims(im, axis=2)
-    elif im.shape[2] == 1:
+        # im = np.expand_dims(im, axis=2)
+        # elif im.shape[2] == 1:
         im = np.repeat(im[:, :, np.newaxis], 3, axis=2)
     im = scale_im(im, target_size)
     im = radical_preprocess(im)
@@ -141,7 +141,7 @@ def get_callbacks(gpus):
     else:
         return [
             callbacks.ModelCheckpoint(
-                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
+                filepath=weights_path + 'multitask_{epoch:02d}-{val_acc:.2f}.hdf5',
                 monitor='val_acc',
                 verbose=1,
                 save_best_only=True,
