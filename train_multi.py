@@ -50,8 +50,8 @@ def get_callbacks(gpus):
     else:
         return [
             callbacks.ModelCheckpoint(
-                filepath=weights_path + '{epoch:02d}-{val_acc:.2f}.hdf5',
-                monitor='val_acc',
+                filepath=weights_path + '{epoch:02d}-{val_triage_acc:.2f}.hdf5',
+                monitor='val_triage_acc',
                 verbose=1,
                 save_best_only=True,
                 save_weights_only=True),
@@ -181,7 +181,7 @@ def train(batch_size, n_epochs, gpus, df, datapath):
             optimizer=optimizers.Adam(lr=1e-2),
             # optimizer=optimizers.rmsprop(),
             loss=['binary_crossentropy', 'categorical_crossentropy', 'binary_crossentropy'],
-            metrics=['accuracy', 'accuracy', 'accuracy'])
+            metrics=['accuracy'])
         print('Model compiled')
         full_model.fit_generator(
             generator=train_datagen,
